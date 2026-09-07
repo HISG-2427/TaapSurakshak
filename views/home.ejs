@@ -1,0 +1,145 @@
+<% layout("layouts/boilerplate.ejs") %>
+    <style>
+        body {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.9)), url('https://images.indianexpress.com/2026/03/heat.jpg?w=640');
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+
+        h1 {
+            font-size: 100px;
+            text-align: center;
+            background: linear-gradient(to right, #c09a13, #ff0000);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            overflow: hidden;
+            border-right: .05em solid orange;
+            white-space: nowrap;
+            margin: 0 auto;
+            letter-spacing: .15em;
+            animation:
+                typing 2.5s steps(14,end),
+                blink-caret .75s step-end infinite;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        nav {
+            background: transparent;
+        }
+
+        .nav-link {
+            color: white;
+        }
+
+        footer {
+            visibility: hidden;
+        }
+
+        button {
+            font-size: 50px;
+        }
+
+        .scaleUp {
+            animation: scaleUp linear 1s forwards;
+        }
+
+        .fadeInUp {
+            animation: fadeInUp 1.5s ease-out both;
+        }
+
+        .fadeInUp:nth-child(1) {
+            animation-delay: 1s;
+        }
+
+        .fadeInUp:nth-child(2) {
+            animation-delay: 1.5s;
+        }
+
+        .fadeInUp:nth-child(3) {
+            animation-delay: 2s;
+        }
+
+        .fadeInUp:nth-child(4) {
+            animation-delay: 2.5s;
+        }
+
+        @keyframes scaleUp {
+            from {
+                opacity: 0;
+                scale: 0;
+            }
+
+            to {
+                opacity: 1;
+                scale: 1;
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(100px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* The typing effect */
+        @keyframes typing {
+            from {
+                width: 0
+            }
+
+            to {
+                width: 100%
+            }
+        }
+
+        /* The typewriter cursor effect */
+        @keyframes blink-caret {
+
+            from,to{
+                border-color: transparent
+            }
+
+            50% {
+                border-color: orange;
+            }
+            100%{
+                border: none;
+            }
+        }
+    </style>
+    <h1 class="fw-bolder text-white typing blink-caret">TaapSurakshak</h1>
+    <h2 class="text-secondary fadeInUp">"Predict Heat, Protect Lives"</h2>
+    <div class="container invisible">
+        <div class="row">
+            <a href="/login" class="d-inline text-decoration-none col-6">
+                <button type="button" class=" p-3 btn btn-outline-info btn-lg d-block mx-auto mt-5 fadeInUp">Municipal
+                Officer</button>
+            </a>
+            <a href="/login" class="d-inline text-decoration-none col-6">
+                <button type="button" class="  p-3 btn btn-outline-info btn-lg d-block mx-auto mt-5 fadeInUp">Citizen</button>
+            </a>
+        </div>
+    </div>
+    <div class="container">
+        <p class="text-center text-white m-5 fadeInUp fs-5">
+            **TaapSurakshak** is a smart heat-risk monitoring and response
+            platform designed to help cities prevent heat-related illness and deaths.
+            It combines temperature and mortality-risk analysis with hospital-capacity
+            monitoring, predictive alerts, regional heatmaps, and emergency broadcast tools.
+            By identifying high-risk areas and forecasting critical conditions, the platform
+            helps authorities and healthcare teams respond early, allocate resources efficiently,
+            and protect vulnerable communities.
+        </p>
+    </div>

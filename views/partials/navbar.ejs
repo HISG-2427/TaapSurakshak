@@ -1,0 +1,298 @@
+<style>
+    /* Sidebar */
+    #mainNavbar {
+        width: 250px;
+        min-height: 100vh;
+        background-color: #d3c9c9;
+        border-right: 1px solid #e5e7eb;
+        padding: 25px 16px;
+        position: fixed;    
+        top: 0;
+        left: 0;
+        z-index: 1030;
+        transition: width 0.3s ease, padding 0.3s ease;
+    }
+
+    /* Project name */
+    #mainNavbar .navbar-brand {
+        display: block;
+        color: #071b3a;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 40px;
+        text-decoration: none;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+
+    /* Navigation links */
+    #mainNavbar .nav-link {
+        display: block;
+        color: #071b3a;
+        font-size: 1.1rem;
+        padding: 12px 15px;
+        margin-bottom: 8px;
+        border-radius: 8px;
+        text-decoration: none;
+        white-space: nowrap;
+        overflow: hidden;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    #mainNavbar .nav-link:hover,
+    #mainNavbar .nav-link.active {
+        background-color: #fd0000;
+        color: #ffffff !important;
+    }
+
+    /* User section */
+    #mainNavbar .user-section {
+        border-top: 1px solid #e5e7eb;
+        margin-top: 35px;
+        padding-top: 20px;
+    }
+
+    #mainNavbar .navbar-text {
+        display: block;
+        color: #071b3a;
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+
+    #mainNavbar .logout-link {
+        color: #d7354d;
+        font-weight: 600;
+    }
+
+    #mainNavbar .logout-link:hover {
+        background-color: #bb394a;
+        color: #e1dbdc !important;
+    }
+
+    /* Toggle button */
+    #sidebarToggle {
+        position: absolute;
+        top: 20px;
+        right: -18px;
+        width: 36px;
+        height: 36px;
+        border: 1px solid #e5e7eb;
+        border-radius: 50%;
+        background-color: #ffffff;
+        color: #071b3a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+        z-index: 1040;
+    }
+
+    #sidebarToggle:hover {
+        background-color: #de4343;
+        color: #ebe5e5;
+    }
+
+    /* Collapsed sidebar */
+    #mainNavbar.collapsed {
+        width: 85px;
+        padding: 25px 10px;
+    }
+
+    #mainNavbar.collapsed .navbar-brand {
+        font-size: 0;
+        text-align: center;
+    }
+
+    #mainNavbar.collapsed .navbar-brand::before {
+        content: "☀";
+        font-size: 20px;
+    }
+
+    #mainNavbar.collapsed .nav-link {
+        text-align: center;
+        font-size: 0;
+        padding: 12px 5px;
+    }
+
+    #mainNavbar.collapsed .nav-link::first-letter {
+        font-size: 1.1rem;
+    }
+
+    #mainNavbar.collapsed .navbar-text {
+        display: none;
+    }
+
+    #mainNavbar.collapsed .user-section {
+        border-top: none;
+    }
+
+    #mainNavbar.collapsed .logout-link {
+        font-size: 0;
+    }
+
+    #mainNavbar.collapsed .logout-link::before {
+        content: "⭘";
+        font-size: 1.2rem;
+    }
+
+    /* Main content */
+    .main-content {
+        margin-left: 250px;
+        transition: margin-left 0.3s ease;
+    }
+
+    .main-content.sidebar-collapsed {
+        margin-left: 75px;
+    }
+
+    /* Mobile layout */
+    @media (max-width: 991px) {
+        #mainNavbar {
+            width: 100%;
+            min-height: auto;
+            position: relative;
+            border-right: none;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        #mainNavbar.collapsed {
+            width: 100%;
+            padding: 25px 16px;
+        }
+
+        #mainNavbar.collapsed .navbar-brand {
+            font-size: 1.5rem;
+            text-align: left;
+        }
+
+        #mainNavbar.collapsed .navbar-brand::before {
+            content: none;
+        }
+
+        #mainNavbar.collapsed .nav-link {
+            text-align: left;
+            font-size: 1.1rem;
+            padding: 12px 15px;
+        }
+
+        #mainNavbar.collapsed .navbar-text {
+            display: block;
+        }
+
+        #mainNavbar.collapsed .logout-link {
+            font-size: 1.1rem;
+        }
+
+        #mainNavbar.collapsed .logout-link::before {
+            content: none;
+        }
+
+        .main-content,
+        .main-content.sidebar-collapsed {
+            margin-left: 0;
+        }
+
+        #sidebarToggle {
+            right: 20px;
+        }
+    }
+</style>
+
+<nav id="mainNavbar" class="navbar">
+    <div class="container-fluid d-block">
+
+        <!-- Toggle button -->
+        <button
+            id="sidebarToggle"
+            type="button"
+            aria-label="Toggle sidebar"
+            aria-expanded="true"
+        >
+            <span id="toggleIcon" class="text-center fs-6">☰</span>
+        </button>
+
+        <!-- Project name -->
+        <a class="navbar-brand" href="/">
+            TaapSurakshak
+        </a>
+
+        <!-- Navigation links -->
+        <div class="navbar-nav">
+
+            <% if (currentUser) { %>
+                <a class="nav-link" href="/risk">
+                    Risk
+                </a>
+
+                <a class="nav-link" href="/predict">
+                    Predict
+                </a>
+
+                <a class="nav-link" href="/alerts">
+                    Alerts
+                </a>
+            <% } %>
+
+        </div>
+
+        <!-- User section -->
+        <div class="user-section">
+
+            <% if (currentUser) { %>
+                <span class="navbar-text">
+                    Welcome, <%= currentUser %>
+                </span>
+
+                <a href="/logout" class="nav-link logout-link">
+                    Logout
+                </a>
+            <% } else { %>
+                <a href="/login" class="nav-link">
+                    Login
+                </a>
+
+                <a href="/signup" class="nav-link">
+                    Sign Up
+                </a>
+            <% } %>
+
+        </div>
+    </div>
+</nav>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const sidebar = document.getElementById("mainNavbar");
+        const toggleButton = document.getElementById("sidebarToggle");
+        const mainContent = document.querySelector(".main-content");
+        const toggleIcon = document.getElementById("toggleIcon");
+
+        if (!sidebar || !toggleButton) {
+            console.error("Sidebar or toggle button not found");
+            return;
+        }
+
+        toggleButton.addEventListener("click", function () {
+            sidebar.classList.toggle("collapsed");
+
+            if (mainContent) {
+                mainContent.classList.toggle("sidebar-collapsed");
+            }
+
+            const collapsed = sidebar.classList.contains("collapsed");
+
+            toggleButton.setAttribute(
+                "aria-expanded",
+                collapsed ? "false" : "true"
+            );
+
+            if (toggleIcon) {
+                toggleIcon.textContent = "☰";
+            }
+        });
+    });
+</script>
