@@ -6,7 +6,7 @@
         background-color: #d3c9c9;
         border-right: 1px solid #e5e7eb;
         padding: 25px 16px;
-        position: fixed;    
+        position: fixed;
         top: 0;
         left: 0;
         z-index: 1030;
@@ -206,17 +206,12 @@
     <div class="container-fluid d-block">
 
         <!-- Toggle button -->
-        <button
-            id="sidebarToggle"
-            type="button"
-            aria-label="Toggle sidebar"
-            aria-expanded="true"
-        >
+        <button id="sidebarToggle" type="button" aria-label="Toggle sidebar" aria-expanded="true">
             <span id="toggleIcon" class="text-center fs-6">☰</span>
         </button>
 
         <!-- Project name -->
-        <a class="navbar-brand" href="/">
+        <a class="navbar-brand text-danger" href="/">
             TaapSurakshak
         </a>
 
@@ -235,7 +230,7 @@
                 <a class="nav-link" href="/alerts">
                     Alerts
                 </a>
-            <% } %>
+                <% } %>
 
         </div>
 
@@ -250,15 +245,15 @@
                 <a href="/logout" class="nav-link logout-link">
                     Logout
                 </a>
-            <% } else { %>
-                <a href="/login" class="nav-link">
-                    Login
-                </a>
+                <% } else { %>
+                    <a href="/login" class="nav-link">
+                        Login
+                    </a>
 
-                <a href="/signup" class="nav-link">
-                    Sign Up
-                </a>
-            <% } %>
+                    <a href="/signup" class="nav-link invisible">
+                        Sign Up
+                    </a>
+                    <% } %>
 
         </div>
     </div>
@@ -270,6 +265,8 @@
         const toggleButton = document.getElementById("sidebarToggle");
         const mainContent = document.querySelector(".main-content");
         const toggleIcon = document.getElementById("toggleIcon");
+        const navlinks = document.querySelectorAll("#mainNavbar .nav-link");
+        const currentUrl = window.location.href;
 
         if (!sidebar || !toggleButton) {
             console.error("Sidebar or toggle button not found");
@@ -294,5 +291,12 @@
                 toggleIcon.textContent = "☰";
             }
         });
+        if (currentUrl == navlinks[0].href) {
+            navlinks[0].classList.add("active");
+        } else if (currentUrl == navlinks[1].href) {
+            navlinks[1].classList.add("active");
+        } else if (currentUrl == navlinks[2].href) {
+            navlinks[2].classList.add("active");
+        }
     });
 </script>
