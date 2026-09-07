@@ -1,0 +1,36 @@
+<% layout("layouts/boilerplate") %>
+    <style>
+        nav {
+            visibility: hidden;
+        }
+    </style>
+    <div class="row">
+        <h1 class="text-center text-danger">User Login</h1>
+        <div class="col-6 offset-3">
+            <form action="/signup" method="post">
+                <div class="mb-3">
+                    <label class="form-label" for="name">Name</label>
+                    <input class="form-control" type="text" id="name" name="name">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="location">Location</label>
+                    <input class="form-control" type="text" id="location" name="location">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="password">Password</label>
+                    <input class="form-control" type="password" id="password" name="password">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="age">Age</label>
+                    <input class="form-control" type="number" id="age" name="age">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="phonenumber">Phone Number</label>
+                    <input class="form-control" type="text" id="phonenumber" name="phonenumber">
+                </div>
+                <button type="submit" class="btn btn-outline-success d-inline m-2">Add User</button>
+                <a href="/" class="btn btn-outline-success btn-md mx-auto m-5">Back to Home</a>
+        </div>
+        </form>
+    </div>
+    </div>

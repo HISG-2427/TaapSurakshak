@@ -1,0 +1,82 @@
+<% layout("layouts/boilerplate.ejs") %>
+
+    <style>
+        #mumbaiHeatmap {
+            height: 98vh;
+            width: 100%;
+            border-radius: 5px;
+        }
+    </style>
+
+    <!-- MORTALITY RISK HEADER -->
+    <div class="card bg-danger text-white mb-3">
+        <div class="card-body m-3">
+            <div class="row">
+                <div class="col-3">
+                    <h3 class="card-title">Current Mortality Risk: LEVEL 4</h3>
+                    <p class="text-white mb-0">Immediate Intervention Required</p>
+                </div>
+                <div class="col-3"></div>
+                <div class="col-3"></div>
+                <div class="col-3">
+                    <img src="/HeatSentinelIcon.svg" alt="TaapSurakshak Logo" width="100" height="94"
+                        class="d-inline-block  flex-end rounded-circle">
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+    <div class="container-fluid px-0">
+        <div class="row g-4">
+
+            <!-- LEFT COLUMN -->
+            <div class="col-12 col-lg-4 h-100">
+
+                <!-- WBGT CARD -->
+                <div class="card bg-danger-subtle border border-danger text-danger mb-3">
+                    <div class="card-body m-3">
+                        <p class="card-title">Human Thermal Stress Index (WBGT)</p>
+                        <h1 class="fw-bolder" style="font-size: 60px;">32.5°C</h1>
+
+                    </div>
+                </div>
+
+                <!-- TEMPERATURE CARD -->
+                <div class="card bg-warning-subtle border border-warning mb-3">
+                    <div class="card-body m-3">
+                        <p class="card-title text-warning">Peak Ambient Temperature</p>
+                        <h1 class="fw-bold" style="font-size: 40px;" id="ambientTemp"></h1>
+                    </div>
+                </div>
+
+                <!-- ACTIVE PLANS CARD -->
+                <div class="card border mb-3">
+                    <div class="card-body m-3">
+                        <h1 class="card-title" style="font-size: 35px;">📋 Active Plans</h1>
+
+                        <ul class="list-group p-2">
+                            <li class="list-group-item mt-4">Plan 1</li>
+                            <li class="list-group-item mt-4">Plan 2</li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN: MUMBAI HEATMAP -->
+            <div class="col-12 col-lg-8">
+
+                <div class="card mb-3">
+                    <div>
+
+                        <div id="mumbaiHeatmap"></div>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>

@@ -1,0 +1,539 @@
+<% layout("layouts/boilerplate.ejs") %>
+
+<style>
+  body {
+    background: #f9f9ff;
+  }
+
+  .alerts-page {
+    color: #071b3a;
+  }
+
+  .page-header {
+    border-bottom: 1px solid #eadede;
+    padding-bottom: 16px;
+    margin-bottom: 22px;
+  }
+
+  .page-header h1 {
+    font-size: 1.55rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .page-header p {
+    color: #704040;
+    font-size: 0.85rem;
+    margin-bottom: 0;
+  }
+
+  .manual-btn {
+    background: #bd001b;
+    border: none;
+    border-radius: 2px;
+    color: white;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 14px 24px;
+  }
+
+  .manual-btn:hover {
+    background: #990016;
+    color: white;
+  }
+
+  .section-card {
+    background: #ffffff;
+    border: 1px solid #efdada;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .section-card .card-body {
+    padding: 18px;
+  }
+
+  .section-title {
+    border-bottom: 1px solid #eadede;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+
+  .section-title .icon {
+    color: #bd001b;
+    margin-right: 8px;
+  }
+
+  .active-badge {
+    background: #e62932;
+    border-radius: 20px;
+    color: white;
+    font-size: 0.68rem;
+    padding: 4px 9px;
+  }
+
+  .broadcast-item {
+    border: 1px solid #f1a2a2;
+    border-left: 4px solid #bd001b;
+    background: #fffafa;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+  }
+
+  .broadcast-item.cooling {
+    border-color: #ffc15c;
+    border-left-color: #ffad00;
+    background: #fffdf8;
+  }
+
+  .broadcast-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 7px;
+  }
+
+  .broadcast-label {
+    background: #bd001b;
+    color: white;
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 5px 7px;
+  }
+
+  .broadcast-label.cooling-label {
+    background: #ffad00;
+    color: #542b00;
+  }
+
+  .broadcast-id {
+    color: #704040;
+    font-family: monospace;
+    font-size: 0.65rem;
+    margin-left: 6px;
+  }
+
+  .broadcast-status {
+    color: #d78a8a;
+    font-size: 0.7rem;
+    white-space: nowrap;
+  }
+
+  .broadcast-title {
+    color: #071b3a;
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 7px;
+  }
+
+  .broadcast-description {
+    color: #704040;
+    font-size: 0.73rem;
+    line-height: 1.5;
+    margin-bottom: 10px;
+  }
+
+  .broadcast-footer {
+    color: #704040;
+    font-size: 0.65rem;
+  }
+
+  .broadcast-footer span {
+    margin-right: 18px;
+  }
+
+  .small-action-btn {
+    background: white;
+    border: 1px solid #efcccc;
+    color: #9b3b3b;
+    font-size: 0.62rem;
+    padding: 4px 8px;
+  }
+
+  .small-action-btn:hover {
+    background: #fff0f0;
+    color: #bd001b;
+  }
+
+  .form-label {
+    color: #542020;
+    font-size: 0.68rem;
+    font-weight: 600;
+    margin-bottom: 7px;
+  }
+
+  .form-select,
+  .form-control {
+    border: 1px solid #efcccc;
+    border-radius: 0;
+    color: #18345d;
+    font-size: 0.76rem;
+    min-height: 42px;
+  }
+
+  .form-select:focus,
+  .form-control:focus {
+    border-color: #bd001b;
+    box-shadow: 0 0 0 0.15rem rgba(189, 0, 27, 0.1);
+  }
+
+  .preview-btn {
+    background: #dce5ff;
+    border: 1px solid #c4d0f1;
+    border-radius: 2px;
+    color: #071b3a;
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 12px;
+    width: 100%;
+  }
+
+  .preview-btn:hover {
+    background: #cbd8fa;
+  }
+
+  .trigger-card {
+    margin-top: 18px;
+  }
+
+  .trigger-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eadede;
+    padding-bottom: 12px;
+    margin-bottom: 8px;
+  }
+
+  .trigger-header h5 {
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .trigger-header small {
+    color: #704040;
+    font-size: 0.65rem;
+  }
+
+  .trigger-item {
+    border-left: 2px solid #e9aaaa;
+    padding: 10px 0 10px 10px;
+    margin-left: 2px;
+  }
+
+  .trigger-item.critical {
+    background: #fff0f0;
+    border-left-color: #bd001b;
+  }
+
+  .trigger-time {
+    color: #704040;
+    font-family: monospace;
+    font-size: 0.65rem;
+    margin-bottom: 5px;
+  }
+
+  .trigger-content {
+    color: #18345d;
+    font-size: 0.7rem;
+    line-height: 1.5;
+  }
+
+  .trigger-tag {
+    display: inline-block;
+    background: #dce5ff;
+    color: #3159a2;
+    font-size: 0.58rem;
+    font-weight: 700;
+    margin-right: 5px;
+    padding: 3px 5px;
+  }
+
+  .trigger-tag.ems {
+    background: #bd001b;
+    color: white;
+  }
+
+  .trigger-tag.system {
+    background: #e7e7ed;
+    color: #55556b;
+  }
+
+  @media (max-width: 991px) {
+    .page-header .manual-btn {
+      margin-top: 15px;
+    }
+
+    .chart-legend,
+    .broadcast-top {
+      align-items: flex-start;
+    }
+  }
+</style>
+
+<div class="container-fluid alerts-page">
+
+  <!-- Page heading -->
+  <div class="page-header">
+    <div class="row align-items-center">
+
+      <div class="col-12 col-md-8">
+        <h1>Alert Configuration &amp; Messaging</h1>
+
+        <p>
+          Manage active regional broadcasts, view automated trigger logs,
+          and deploy urgent health advisories to high-risk zones.
+        </p>
+      </div>
+
+      <div class="col-12 col-md-4 text-md-end">
+        <button class="btn manual-btn">
+          <span class="me-2">📡</span>
+          MANUAL BROADCAST
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="row g-3">
+
+    <!-- Active regional broadcasts -->
+    <div class="col-12 col-lg-8">
+
+      <div class="card section-card">
+        <div class="card-body">
+
+          <div class="section-title d-flex justify-content-between align-items-center">
+            <span>
+              <span class="icon">◉</span>
+              Active Regional Broadcasts
+            </span>
+
+            <span class="active-badge">2 Active</span>
+          </div>
+
+          <!-- First broadcast -->
+          <div class="broadcast-item">
+
+            <div class="broadcast-top">
+              <div>
+                <span class="broadcast-label">
+                  URGENT HEALTH ADVISORY
+                </span>
+
+                <span class="broadcast-id">
+                  ID: BRD-892A
+                </span>
+              </div>
+
+              <span class="broadcast-status">
+                ● Broadcasting
+              </span>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-start gap-2">
+              <div>
+                <h5 class="broadcast-title">
+                  Extreme Heat Warning - Sector 4 &amp; 7
+                </h5>
+
+                <p class="broadcast-description">
+                  Sustained temperatures expected above 42°C for the next
+                  48 hours. Vulnerable populations advised to remain indoors.
+                </p>
+              </div>
+
+              <button class="btn small-action-btn">
+                PAUSE
+              </button>
+            </div>
+
+            <div class="broadcast-footer">
+              <span>▣ SMS: 45,201 sent</span>
+              <span>▣ WhatsApp: 89,012 sent</span>
+            </div>
+
+          </div>
+
+          <!-- Second broadcast -->
+          <div class="broadcast-item cooling">
+
+            <div class="broadcast-top">
+              <div>
+                <span class="broadcast-label cooling-label">
+                  COOLING CENTER INFO
+                </span>
+
+                <span class="broadcast-id">
+                  ID: BRD-891B
+                </span>
+              </div>
+
+              <span class="broadcast-status">
+                Completed 1hr ago
+              </span>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-start gap-2">
+              <div>
+                <h5 class="broadcast-title">
+                  New Centers Opened - Sector 2
+                </h5>
+
+                <p class="broadcast-description">
+                  Three new emergency cooling centers are now operational
+                  in Sector 2. Capacity: 500 each.
+                </p>
+              </div>
+
+              <button class="btn small-action-btn">
+                RESEND
+              </button>
+            </div>
+
+            <div class="broadcast-footer">
+              <span>▣ SMS: 12,400 sent</span>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right-side controls and trigger log -->
+    <div class="col-12 col-lg-4">
+
+      <!-- Targeted deployment -->
+      <div class="card section-card">
+        <div class="card-body">
+
+          <h4 class="section-title">
+            <span class="icon">◎</span>
+            Targeted Deploy
+          </h4>
+
+          <form action="/alerts/deploy" method="POST">
+
+            <div class="mb-3">
+              <label for="zone" class="form-label">
+                Select High-Risk Zone
+              </label>
+
+              <select id="zone" name="zone" class="form-select">
+                <option value="sector-4">
+                  Sector 4 - Downtown (High Risk)
+                </option>
+
+                <option value="sector-7">
+                  Sector 7 - Thane West
+                </option>
+
+                <option value="sector-2">
+                  Sector 2 - Thane East
+                </option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label for="messageTemplate" class="form-label">
+                Message Template
+              </label>
+
+              <select
+                id="messageTemplate"
+                name="messageTemplate"
+                class="form-select"
+              >
+                <option value="TPL-01">
+                  TPL-01: Evacuation Advisory
+                </option>
+
+                <option value="TPL-02">
+                  TPL-02: Cooling Center Information
+                </option>
+
+                <option value="TPL-03">
+                  TPL-03: Extreme Heat Warning
+                </option>
+              </select>
+            </div>
+
+            <button type="submit" class="btn preview-btn">
+              PREVIEW &amp; SEND
+            </button>
+
+          </form>
+
+        </div>
+      </div>
+
+      <!-- Automated triggers log -->
+      <div class="card section-card trigger-card">
+        <div class="card-body">
+
+          <div class="trigger-header">
+            <h5>
+              ◴ Automated Triggers Log
+            </h5>
+
+            <small>Last 24h</small>
+          </div>
+
+          <div class="trigger-item">
+            <div class="trigger-time">14:02</div>
+
+            <div class="trigger-content">
+              <span class="trigger-tag">CITY ADMIN</span>
+              Grid Load Warning sent to DPW.
+
+              <br>
+
+              <span class="text-muted">
+                Trigger: Temp &gt; 40°C + Grid Load &gt; 90%
+              </span>
+            </div>
+          </div>
+
+          <div class="trigger-item critical">
+            <div class="trigger-time fw-bold text-danger">11:45</div>
+
+            <div class="trigger-content">
+              <span class="trigger-tag ems">EMS</span>
+              <strong>Heatstroke Spike</strong>
+
+              <br>
+
+              Alert sent to Area Hospitals.
+
+              <br>
+
+              <span class="text-muted">
+                Trigger: EMS Calls &gt; 15/hr in Sector 4
+              </span>
+            </div>
+          </div>
+
+          <div class="trigger-item">
+            <div class="trigger-time">09:30</div>
+
+            <div class="trigger-content">
+              <span class="trigger-tag system">SYSTEM</span>
+              Daily forecast synchronized.
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
