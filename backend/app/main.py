@@ -36,5 +36,6 @@ def root():
     return {"message": "HeatGuard API is running"}
 
 
+
 app.include_router(prediction_router)
 app.include_router(wards_router)
