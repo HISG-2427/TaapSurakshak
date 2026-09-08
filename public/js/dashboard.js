@@ -687,9 +687,6 @@ function convertRiskToFiveLevel(riskLevel) {
  */
 
 function getRiskColor(risk) {
-  if (risk >= 0.80) {
-    return "darkred";
-  }
 
   if (risk >= 0.60) {
     return "red";
