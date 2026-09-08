@@ -1,35 +1,80 @@
 <% layout("layouts/boilerplate") %>
     <style>
-        nav {
+        nav,
+        footer {
             visibility: hidden;
+        }
+
+        body {
+            background-image: url("/images/LoginBG_Final.jpeg");
+            background-size: cover;
+            background-position: center;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="number"] {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        input[type="text"]::placeholder,
+        input[type="password"]::placeholder,
+        input[type="number"]::placeholder {
+            color: rgb(210, 205, 205);
+        }
+
+        label {
+            color: white;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        input[type="number"]:focus {
+            background: transparent;
+            color: white;
+            border: 3px solid white;
         }
     </style>
     <div class="row">
-        <h1 class="text-center text-danger">User Login</h1>
-        <div class="col-6 offset-3">
+        <h1 class="text-center text-light">User Login</h1>
+        <div class="col-6 offset-3 mt-5">
             <form action="/signup" method="post">
-                <div class="mb-3">
-                    <label class="form-label" for="name">Name</label>
-                    <input class="form-control" type="text" id="name" name="name">
+                <div class="row">
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label" for="name">Name</label>
+                        <input class="form-control " type="text" required id="name" name="name"
+                            placeholder="Enter your name" minlength="3" maxlength="30">
+                    </div>
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label" for="location">Location</label>
+                        <input class="form-control" type="text" required id="location" name="location"
+                            placeholder="Enter your location">
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label" for="location">Location</label>
-                    <input class="form-control" type="text" id="location" name="location">
+                <div class="row">
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label" for="password">Password</label>
+                        <input class="form-control" required type="password" id="password" name="password"
+                            placeholder="Enter your password">
+                    </div>
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label" for="age">Age</label>
+                        <input class="form-control" type="number" required id="age" name="age"
+                            placeholder="Enter your age">
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label" for="password">Password</label>
-                    <input class="form-control" type="password" id="password" name="password">
+                <div class="row">
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label" for="phonenumber">Phone Number</label>
+                        <input class="form-control" type="number" required id="phonenumber" name="phonenumber"
+                            placeholder="Enter your phone number" maxlength="10" minlength="10">
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label" for="age">Age</label>
-                    <input class="form-control" type="number" id="age" name="age">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="phonenumber">Phone Number</label>
-                    <input class="form-control" type="text" id="phonenumber" name="phonenumber">
-                </div>
-                <button type="submit" class="btn btn-outline-success d-inline m-2">Add User</button>
-                <a href="/" class="btn btn-outline-success btn-md mx-auto m-5">Back to Home</a>
+
+                <button type="submit" class="btn btn-outline-light d-inline m-2">Add User</button>
+                <a href="/" class="btn btn-outline-light btn-md mx-auto m-5">Back to Home</a>
         </div>
         </form>
     </div>

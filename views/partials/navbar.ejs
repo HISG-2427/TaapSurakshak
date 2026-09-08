@@ -205,6 +205,8 @@
 <nav id="mainNavbar" class="navbar">
     <div class="container-fluid d-block">
 
+        <img src="/public/HeatSentinelIcon.svg" alt="Logo" class="rounded-border invisible" style="width: 50px; height: 50px; ">
+
         <!-- Toggle button -->
         <button id="sidebarToggle" type="button" aria-label="Toggle sidebar" aria-expanded="true">
             <span id="toggleIcon" class="text-center fs-6">☰</span>
@@ -281,6 +283,7 @@
             }
 
             const collapsed = sidebar.classList.contains("collapsed");
+
 
             toggleButton.setAttribute(
                 "aria-expanded",

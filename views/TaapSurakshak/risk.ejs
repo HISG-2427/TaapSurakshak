@@ -13,8 +13,14 @@
         <div class="card-body m-3">
             <div class="row">
                 <div class="col-3">
-                    <h3 class="card-title">Current Mortality Risk: LEVEL 4</h3>
-                    <p class="text-white mb-0">Immediate Intervention Required</p>
+                    <h3 class="card-title">
+                        Current Mortality Risk:
+                        <span id="mortalityRiskLevel">Loading...</span>
+                    </h3>
+
+                    <p id="mortalityRiskMessage" class="text-white mb-0">
+                        Loading prediction...
+                    </p>
                 </div>
                 <div class="col-3"></div>
                 <div class="col-3"></div>
@@ -38,7 +44,9 @@
                 <div class="card bg-danger-subtle border border-danger text-danger mb-3">
                     <div class="card-body m-3">
                         <p class="card-title">Human Thermal Stress Index (WBGT)</p>
-                        <h1 class="fw-bolder" style="font-size: 60px;">32.5°C</h1>
+                        <h1 id="wbgtValue" class="fw-bolder" style="font-size: 60px;">
+                            Loading...
+                        </h1>
 
                     </div>
                 </div>
@@ -46,13 +54,18 @@
                 <!-- TEMPERATURE CARD -->
                 <div class="card bg-warning-subtle border border-warning mb-3">
                     <div class="card-body m-3">
-                        <p class="card-title text-warning">Peak Ambient Temperature</p>
-                        <h1 class="fw-bold" style="font-size: 40px;" id="ambientTemp"></h1>
+                        <p class="card-title text-warning">
+                            Peak Ambient Temperature
+                        </p>
+
+                        <h1 class="fw-bold" style="font-size: 40px;" id="ambientTemp">
+                            Loading...
+                        </h1>
                     </div>
                 </div>
 
                 <!-- ACTIVE PLANS CARD -->
-                <div class="card border mb-3">
+                <div class="card border mb-3 invisible">
                     <div class="card-body m-3">
                         <h1 class="card-title" style="font-size: 35px;">📋 Active Plans</h1>
 
@@ -80,3 +93,101 @@
 
         </div>
     </div>
+    <script>
+        async function loadHeatRiskData() {
+            try {
+                // Fetch the already-formatted data from Express
+                const response = await fetch("/api/latest-heat-data");
+
+                if (!response.ok) {
+                    throw new Error(`Backend error: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(
+                        data.message || "Heat data unavailable"
+                    );
+                }
+
+                console.log("Heat data from Express:", data);
+
+                // Express returns these fields directly
+                const wbgt = Number(data.heatStress);
+                const hmri = Number(data.mortalityRisk);
+                const riskLevel = data.riskLevel;
+
+                if (
+                    !Number.isFinite(wbgt) ||
+                    !Number.isFinite(hmri)
+                ) {
+                    throw new Error(
+                        "Invalid WBGT or HMRI value received from backend"
+                    );
+                }
+
+                // Convert backend risk level into a 1–5 scale
+                const riskScale = {
+                    "Low": 1,
+                    "Moderate": 2,
+                    "Medium": 3,
+                    "High": 4,
+                    "Very High": 4,
+                    "Extreme": 5,
+                    "Critical": 5
+                };
+
+                const mortalityRisk = riskScale[riskLevel] ?? 1;
+
+                // Update WBGT card
+                document.getElementById("wbgtValue").textContent =
+                    `${wbgt.toFixed(2)}°C`;
+
+                // Update mortality risk header
+                document.getElementById("mortalityRiskLevel").textContent =
+                    `LEVEL ${mortalityRisk}`;
+
+                // Update message according to risk level
+                let riskMessage = "";
+
+                if (mortalityRisk <= 1) {
+                    riskMessage = "Normal monitoring recommended";
+                } else if (mortalityRisk === 2) {
+                    riskMessage = "Increase monitoring of vulnerable groups";
+                } else if (mortalityRisk === 3) {
+                    riskMessage = "Prepare additional medical resources";
+                } else if (mortalityRisk === 4) {
+                    riskMessage = "Immediate intervention recommended";
+                } else {
+                    riskMessage = "Emergency intervention required";
+                }
+
+                document.getElementById("mortalityRiskMessage").textContent =
+                    riskMessage;
+
+                // Optional debugging information
+                console.log("WBGT:", wbgt);
+                console.log("HMRI:", hmri);
+                console.log("Risk level:", riskLevel);
+                console.log("Mortality risk scale:", mortalityRisk);
+
+            } catch (error) {
+                console.error("Could not load heat-risk data:", error);
+
+                document.getElementById("wbgtValue").textContent =
+                    "Error";
+
+                document.getElementById("mortalityRiskLevel").textContent =
+                    "Unavailable";
+
+                document.getElementById("mortalityRiskMessage").textContent =
+                    "Unable to connect to prediction backend";
+            }
+        }
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            loadHeatRiskData
+        );
+    </script>

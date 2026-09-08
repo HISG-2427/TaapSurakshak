@@ -1,267 +1,252 @@
 <% layout("layouts/boilerplate.ejs") %>
 
-<style>
-  .trend-card {
-    border: 1px solid #f0dada;
-    border-radius: 6px;
-    background: #ffffff;
-  }
-
-  .chart-wrapper {
-    position: relative;
-    height: 390px;
-    width: 100%;
-  }
-
-  .chart-legend {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 16px;
-    flex-wrap: wrap;
-    font-size: 0.8rem;
-  }
-
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .legend-dot {
-    height: 9px;
-    width: 9px;
-    border-radius: 50%;
-    display: inline-block;
-  }
-
-  .mortality-dot {
-    background-color: #bd001b;
-  }
-
-  .capacity-dot {
-    background-color: #a47a32;
-  }
-
-  .critical-card {
-    border: 1px solid #f5b5b5;
-    border-radius: 8px;
-  }
-</style>
-
-<div class="container-fluid">
-  <div class="row g-4 align-items-stretch">
-
-    <!-- Chart: 8 columns -->
-    <div class="col-12 col-lg-8">
-      <div class="card trend-card shadow-sm h-100">
-        <div class="card-body">
-
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4 class="mb-0 fw-bold">Trend Forecast</h4>
-
-            <div class="chart-legend">
-              <div class="legend-item">
-                <span class="legend-dot mortality-dot"></span>
-                <span>Mortality Spike Risk</span>
-              </div>
-
-              <div class="legend-item">
-                <span class="legend-dot capacity-dot"></span>
-                <span>Hospital Capacity</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="chart-wrapper">
-            <canvas id="thaneTrendChart"></canvas>
-          </div>
-
-        </div>
-      </div>
-    </div>
-
-    <!-- Critical alert: 4 columns -->
-    <div class="col-12 col-lg-4">
-      <div class="card critical-card bg-danger-subtle text-danger shadow-sm h-100">
-        <div class="card-body p-4">
-
-          <h4 class="card-title fw-bold">
-            Critical Day 4 Projection
-          </h4>
-
-          <p class="card-text">
-            Hospitalisation frequency expected to exceed the
-            <strong>90% threshold</strong> in Thane.
-          </p>
-
-          <hr>
-
-          <div class="mb-3">
-            <small class="text-uppercase fw-bold">
-              Projected Hospital Capacity
-            </small>
-
-            <h2 class="fw-bold mb-0">92%</h2>
-          </div>
-
-          <div class="mb-3">
-            <small class="text-uppercase fw-bold">
-              Mortality Spike Risk
-            </small>
-
-            <h2 class="fw-bold mb-0">78%</h2>
-          </div>
-
-          <div>
-            <small class="text-uppercase fw-bold">
-              Recommended Action
-            </small>
-
-            <p class="mb-0 mt-1">
-              Activate emergency beds and increase medical staffing.
-            </p>
-          </div>
-
-        </div>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const canvas = document.getElementById("thaneTrendChart");
-
-    if (!canvas) {
-      return;
+  <style>
+    .trend-card {
+      border: 1px solid #f0dada;
+      border-radius: 6px;
+      background: #ffffff;
     }
 
-    const labels = [
-      "Day 1",
-      "Day 2",
-      "Day 3",
-      "Day 4",
-      "Day 5"
-    ];
+    .chart-wrapper {
+      position: relative;
+      height: 390px;
+      width: 100%;
+    }
 
-    // Replace these sample values with your real Thane data
-    const hospitalCapacity = [32, 45, 68, 92, 58];
+    .chart-legend {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-size: 0.8rem;
+    }
 
-    const mortalitySpikeRisk = [53, 66, 61, 78, 30];
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
 
-    new Chart(canvas, {
-      type: "bar",
+    .legend-dot {
+      height: 9px;
+      width: 9px;
+      border-radius: 50%;
+      display: inline-block;
+    }
 
-      data: {
-        labels: labels,
+    .mortality-dot {
+      background-color: #bd001b;
+    }
 
-        datasets: [
-          {
-            type: "bar",
-            label: "Hospital Capacity",
-            data: hospitalCapacity,
+    .capacity-dot {
+      background-color: #a47a32;
+    }
 
-            backgroundColor: [
-              "#a47a32",
-              "#a47a32",
-              "#a47a32",
-              "rgba(164, 122, 50, 0.45)",
-              "#a47a32"
-            ],
+    .critical-card {
+      border: 1px solid #f5b5b5;
+      border-radius: 8px;
+    }
+  </style>
 
-            borderColor: [
-              "#a47a32",
-              "#a47a32",
-              "#a47a32",
-              "#bd001b",
-              "#a47a32"
-            ],
+  <div class="container-fluid">
+    <div class="row g-4 align-items-stretch">
 
-            borderWidth: 1,
-            barPercentage: 0.45,
-            categoryPercentage: 0.75,
-            order: 2
+      <!-- Chart: 8 columns -->
+      <div class="col-12 col-lg-8">
+        <div class="card trend-card shadow-sm h-100">
+          <div class="card-body">
+
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h4 class="mb-0 fw-bold">Trend Forecast</h4>
+            </div>
+
+            <div class="chart-wrapper">
+              <canvas id="thaneTrendChart"></canvas>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Critical alert: 4 columns -->
+      <div class="col-12 col-lg-4">
+        <div class="card critical-card bg-danger-subtle text-danger shadow-sm h-100">
+          <div class="card-body p-4">
+
+            <h2 class="fw-bold">Predicted Heat Risk</h2>
+            <hr>
+
+              <div class="mb-3">
+                <h2 id="hospitalCapacityValue" class="fw-bold mb-0">
+                  Loading...
+                </h2>
+                <p class="mb-0">Predicted Heat Risk</p>
+              </div>
+              <div class="mb-3">
+                <h2 id="mortalityRiskValue" class="fw-bold mb-0">
+                  Loading...
+                </h2>
+                <p class="mb-0">Model Prediction</p>
+              </div>
+
+              <div>
+                <small class="text-uppercase fw-bold">
+                  Recommended Action
+                </small>
+
+                <p class="mb-0 mt-1">
+                  Activate emergency beds and increase medical staffing.
+                </p>
+              </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    let heatRiskChart = null;
+
+    async function loadBackendPrediction() {
+      try {
+        const response = await fetch("http://127.0.0.1:8000/predict", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
           },
+          body: JSON.stringify({
+            temp_mean_c: 35,
+            temp_max_c: 40,
+            temp_min_c: 30,
+            humidity_pct: 60,
+            wind_speed_ms: 2,
+            solar_radiation_kwh_m2: 5
+          })
+        });
 
-          {
-            type: "line",
-            label: "Mortality Spike Risk",
-            data: mortalitySpikeRisk,
-
-            showLine: false,
-            borderWidth: 0,
-
-            pointRadius: 4,
-            pointHoverRadius: 6,
-
-            pointBackgroundColor: "#bd001b",
-            pointBorderColor: "#ffffff",
-            pointBorderWidth: 1,
-
-            order: 1
-          }
-        ]
-      },
-
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-
-        plugins: {
-          legend: {
-            display: false
-          },
-
-          tooltip: {
-            callbacks: {
-              label: function (context) {
-                return context.dataset.label + ": " + context.parsed.y + "%";
-              }
-            }
-          }
-        },
-
-        scales: {
-          x: {
-            grid: {
-              display: false
-            },
-
-            ticks: {
-              color: "#542020",
-              font: {
-                size: 10
-              }
-            }
-          },
-
-          y: {
-            beginAtZero: true,
-            max: 100,
-
-            ticks: {
-              stepSize: 25,
-              color: "#542020",
-              callback: function (value) {
-                return value + "%";
-              }
-            },
-
-            grid: {
-              display: false
-            },
-
-            border: {
-              color: "#f0dada"
-            }
-          }
+        if (!response.ok) {
+          throw new Error(`Backend error: ${response.status}`);
         }
+
+        const backendData = await response.json();
+
+        console.log("Backend data:", backendData);
+
+        // Extract the actual backend predictions
+        const prediction3d = backendData["3d"];
+        const prediction4d = backendData["4d"];
+        const prediction5d = backendData["5d"];
+
+        const wbgtValues = [
+          Number(prediction3d.wbgt_c),
+          Number(prediction4d.wbgt_c),
+          Number(prediction5d.wbgt_c)
+        ];
+
+        const hmriValues = [
+          Number(prediction3d.hmri),
+          Number(prediction4d.hmri),
+          Number(prediction5d.hmri)
+        ];
+
+        // Check that backend values are valid
+        if (
+          wbgtValues.some(value => !Number.isFinite(value)) ||
+          hmriValues.some(value => !Number.isFinite(value))
+        ) {
+          throw new Error("Backend returned invalid numeric values");
+        }
+
+        // Display the latest backend prediction
+        document.getElementById("hospitalCapacityValue").textContent =
+          `${prediction5d.wbgt_c.toFixed(2)} °C`;
+
+        document.getElementById("mortalityRiskValue").textContent =
+          `${prediction5d.hmri.toFixed(2)}`;
+
+        // Update the labels to match the actual data
+        document.querySelector(
+          "#hospitalCapacityValue + p"
+        ).textContent = "Predicted WBGT";
+
+        document.querySelector(
+          "#mortalityRiskValue + p"
+        ).textContent = "Heat-Mortality Risk Index";
+
+        const canvas = document.getElementById("thaneTrendChart");
+
+        if (!canvas) {
+          throw new Error("Chart canvas not found");
+        }
+
+        if (heatRiskChart) {
+          heatRiskChart.destroy();
+        }
+
+        heatRiskChart = new Chart(canvas, {
+          type: "line",
+          data: {
+            labels: ["3 Days", "4 Days", "5 Days"],
+            datasets: [
+              {
+                label: "WBGT (°C)",
+                data: wbgtValues,
+                borderWidth: 3,
+                pointRadius: 6,
+                tension: 0.3,
+                fill: false
+              },
+              {
+                label: "HMRI",
+                data: hmriValues,
+                borderWidth: 3,
+                pointRadius: 6,
+                tension: 0.3,
+                fill: false
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+              mode: "index",
+              intersect: false
+            },
+            plugins: {
+              legend: {
+                display: true
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true
+              }
+            }
+          }
+        });
+
+      } catch (error) {
+        console.error("Prediction request failed:", error);
+
+        document.getElementById("hospitalCapacityValue").textContent =
+          "Error";
+
+        document.getElementById("mortalityRiskValue").textContent =
+          "Error";
+
+        alert(`Prediction failed:\n${error.message}`);
       }
-    });
-  });
-</script>
+    }
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      loadBackendPrediction
+    );
+  </script>
