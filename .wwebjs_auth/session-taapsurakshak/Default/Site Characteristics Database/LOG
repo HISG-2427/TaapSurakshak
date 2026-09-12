@@ -1,3 +1,2 @@
-2026/09/08-10:18:00.942 50d8 Reusing MANIFEST D:\SIH_HeatWave\.wwebjs_auth\session-taapsurakshak\Default\Site Characteristics Database/MANIFEST-000001
-2026/09/08-10:18:00.943 50d8 Recovering log #3
-2026/09/08-10:18:00.943 50d8 Reusing old log D:\SIH_HeatWave\.wwebjs_auth\session-taapsurakshak\Default\Site Characteristics Database/000003.log 
+2026/09/13-01:57:16.502 5a00 Creating DB D:\SIH_HeatWave\.wwebjs_auth\session-taapsurakshak\Default\Site Characteristics Database since it was missing.
+2026/09/13-01:57:16.776 5a00 Reusing MANIFEST D:\SIH_HeatWave\.wwebjs_auth\session-taapsurakshak\Default\Site Characteristics Database/MANIFEST-000001

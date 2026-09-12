@@ -11,13 +11,13 @@ const whatsappClient = new Client({
     authStrategy: new LocalAuth({
         clientId: "taapsurakshak"
     }),
-
     puppeteer: {
         headless: true,
         args: [
             "--no-sandbox",
             "--disable-setuid-sandbox",
-            "--disable-dev-shm-usage"
+            "--disable-dev-shm-usage",
+            "--disable-gpu"
         ]
     }
 });
@@ -65,11 +65,11 @@ function formatWhatsAppNumber(phoneNumber) {
     return `${cleanedNumber}@c.us`;
 }
 
+
 async function sendWhatsAppFeedback(
     phoneNumber,
     name,
-    heatRisk,
-    mortalityRisk,
+    temperature,
     riskLevel = "UNKNOWN",
     suggestion = ""
 ) {
@@ -89,18 +89,15 @@ async function sendWhatsAppFeedback(
         );
     }
 
-    const formattedHeatRisk = Number(heatRisk).toFixed(2);
-    const formattedMortalityRisk = Number(mortalityRisk).toFixed(2);
-
     const message = [
-        "🌡️ *TaapSurakshak Heat Health Alert*",
+        "🔥 *TaapSurakshak Heat Alert*",
         "",
         `Hello ${name || "User"},`,
         "",
-        `🔥 Heat risk: ${formattedHeatRisk}`,
-        `⚠️ Mortality index: ${formattedMortalityRisk}`,
-        `📊 Risk level: *${riskLevel}*`,
+        `🌡️ Temperature: *${Number(temperature).toFixed(1)}°C*`,
+        `⚠️ Overall Risk Level: *${riskLevel}*`,
         "",
+        "💡 *Recommendation:*",
         suggestion ||
         "Stay hydrated, avoid unnecessary outdoor exposure, and take breaks in a cool or shaded place.",
         "",
@@ -114,15 +111,19 @@ async function sendWhatsAppFeedback(
 
     console.log("WhatsApp message sent successfully:", {
         recipient: phoneNumber,
-        messageId: sentMessage.id.id
+        messageId: sentMessage?.id?._serialized || "sent"
     });
 
-    return sentMessage;
+    return {
+        success: true,
+        messageId: sentMessage?.id?._serialized || null
+    };
 }
 
 function isWhatsAppReady() {
     return whatsappReady;
 }
+
 
 module.exports = {
     sendWhatsAppFeedback,

@@ -1,10 +1,14 @@
-<% layout("layouts/boilerplate.ejs") %>
+    <% layout("layouts/boilerplate.ejs") %>
+
     <style>
         body {
-            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.9)), url('https://images.indianexpress.com/2026/03/heat.jpg?w=640');
+            background-image:
+                linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.9)),
+                url('https://images.indianexpress.com/2026/03/heat.jpg?w=640');
             background-position: center;
             background-repeat: no-repeat;
             background-size: cover;
+            min-height: 100vh;
         }
 
         h1 {
@@ -20,8 +24,9 @@
             white-space: nowrap;
             margin: 0 auto;
             letter-spacing: .15em;
+
             animation:
-                typing 2.5s steps(14,end),
+                typing 2.5s steps(14, end),
                 blink-caret .75s step-end infinite;
         }
 
@@ -41,12 +46,8 @@
             visibility: hidden;
         }
 
-        button {
-            font-size: 50px;
-        }
-
         .scaleUp {
-            animation: scaleUp linear 1s forwards;
+            animation: scaleUp 1s linear forwards;
         }
 
         .fadeInUp {
@@ -72,12 +73,12 @@
         @keyframes scaleUp {
             from {
                 opacity: 0;
-                scale: 0;
+                transform: scale(0);
             }
 
             to {
                 opacity: 1;
-                scale: 1;
+                transform: scale(1);
             }
         }
 
@@ -93,53 +94,66 @@
             }
         }
 
-        /* The typing effect */
         @keyframes typing {
             from {
-                width: 0
+                width: 0;
             }
 
             to {
-                width: 100%
+                width: 100%;
             }
         }
 
-        /* The typewriter cursor effect */
         @keyframes blink-caret {
-
-            from,to{
-                border-color: transparent
+            from,
+            to {
+                border-color: transparent;
             }
 
             50% {
                 border-color: orange;
             }
-            100%{
-                border: none;
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 50px;
+                letter-spacing: .08em;
+            }
+
+            h2 {
+                font-size: 22px;
             }
         }
     </style>
-    <h1 class="fw-bolder text-white typing blink-caret">TaapSurakshak</h1>
-    <h2 class="text-secondary fadeInUp">"Predict Heat, Protect Lives"</h2>
-    <div class="container invisible">
-        <div class="row">
-            <a href="/login" class="d-inline text-decoration-none col-6">
-                <button type="button" class=" p-3 btn btn-outline-info btn-lg d-block mx-auto mt-5 fadeInUp">Municipal
-                Officer</button>
-            </a>
-            <a href="/login" class="d-inline text-decoration-none col-6">
-                <button type="button" class="  p-3 btn btn-outline-info btn-lg d-block mx-auto mt-5 fadeInUp">Citizen</button>
-            </a>
+
+    <div class="container-fluid py-5">
+
+        <h1 class="fw-bolder typing blink-caret">
+            TaapSurakshak
+        </h1>
+
+        <h2 class="text-light fadeInUp">
+            "Predict Heat, Protect Lives"
+        </h2>
+
+        <!-- Description -->
+        <div class="container mt-5">
+            <p class="text-center text-white fs-5 fadeInUp">
+                <strong>TaapSurakshak</strong> is a smart heat-risk monitoring
+                and response platform designed to help cities prevent
+                heat-related illness and deaths.
+
+                It combines temperature and mortality-risk analysis with
+                hospital-capacity monitoring, predictive alerts, regional
+                heatmaps, and emergency broadcast tools.
+
+                By identifying high-risk areas and forecasting critical
+                conditions, the platform helps authorities and healthcare
+                teams respond early, allocate resources efficiently, and
+                protect vulnerable communities.
+            </p>
         </div>
-    </div>
-    <div class="container">
-        <p class="text-center text-white m-5 fadeInUp fs-5">
-            **TaapSurakshak** is a smart heat-risk monitoring and response
-            platform designed to help cities prevent heat-related illness and deaths.
-            It combines temperature and mortality-risk analysis with hospital-capacity
-            monitoring, predictive alerts, regional heatmaps, and emergency broadcast tools.
-            By identifying high-risk areas and forecasting critical conditions, the platform
-            helps authorities and healthcare teams respond early, allocate resources efficiently,
-            and protect vulnerable communities.
-        </p>
+
     </div>

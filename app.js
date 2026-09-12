@@ -15,8 +15,6 @@ require("dotenv").config({
 const { GoogleGenAI } = require("@google/genai");
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-// Import SMS Helper Function
-const { sendSMSFeedback } = require("./backend/app/smsHelper");
 
 // Database Connection
 mongoose.connect("mongodb://localhost:27017/TaapSurakshak");
@@ -28,6 +26,11 @@ db.once("open", () => {
 });
 
 const app = express();
+
+const {
+    sendWhatsAppFeedback,
+    isWhatsAppReady
+} = require("./backend/app/whatsappHelper");
 
 // View Engine & Static Middleware Configuration
 app.engine("ejs", ejsMate);
@@ -98,8 +101,29 @@ app.get("/alerts", isLoggedIn, (req, res) => {
     });
 });
 
-app.get("/login", (req, res) => {
-    res.render("TaapSurakshak/login");
+app.get("/login", async (req, res) => {
+    try {
+        const response = await fetch("http://127.0.0.1:8000/wards");
+
+        if (!response.ok) {
+            throw new Error(`FastAPI returned ${response.status}`);
+        }
+
+        const wards = await response.json();
+
+        console.log("Wards:", wards);
+
+        res.render("login", {
+            wards
+        });
+
+    } catch (error) {
+        console.error("Error loading wards:", error);
+
+        res.render("login", {
+            wards: []
+        });
+    }
 });
 
 // Auth API Endpoints
@@ -165,11 +189,6 @@ app.post("/api/generate-feedback", async (req, res) => {
 
         const modelResponse = response.text;
 
-        // Dispatch SMS if phone number exists
-        if (phoneNumber) {
-            await sendSMSFeedback(phoneNumber, modelResponse);
-        }
-
         res.json({
             success: true,
             feedback: modelResponse
@@ -183,7 +202,6 @@ app.post("/api/generate-feedback", async (req, res) => {
     }
 });
 
-// Heat Stress Machine Learning API Integration
 app.get("/api/latest-heat-data", async (req, res) => {
     try {
         const response = await fetch("http://127.0.0.1:8000/predict", {
@@ -192,141 +210,135 @@ app.get("/api/latest-heat-data", async (req, res) => {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                temp_mean_c: 30,
-                temp_max_c: 35,
-                temp_min_c: 27,
-                humidity_pct: 70,
+                temp_mean_c: 35,
+                temp_max_c: 40,
+                temp_min_c: 30,
+                humidity_pct: 60,
                 wind_speed_ms: 2,
                 solar_radiation_kwh_m2: 5
             })
         });
 
-        const prediction = await response.json();
-
         if (!response.ok) {
-            console.error("FastAPI prediction error:", prediction);
-            return res.status(response.status).json({
-                success: false,
-                message: prediction.detail || "FastAPI prediction request failed."
-            });
+            throw new Error(
+                `FastAPI returned status ${response.status}`
+            );
         }
 
-        if (
-            !prediction["3d"] ||
-            prediction["3d"].wbgt_c === undefined ||
-            prediction["3d"].hmri === undefined ||
-            prediction["3d"].risk_level === undefined
-        ) {
-            return res.status(500).json({
-                success: false,
-                message: "Invalid prediction payload structure from FastAPI."
-            });
+        const result = await response.json();
+
+        console.log("🔥 FASTAPI /predict RESPONSE:");
+        console.log(result);
+
+        // Use 3-day prediction
+        const prediction = result["3d"];
+
+        if (!prediction) {
+            throw new Error("3d prediction not found in FastAPI response.");
         }
 
         res.json({
             success: true,
-            heatStress: Number(prediction["3d"].wbgt_c),
-            mortalityRisk: Number(prediction["3d"].hmri),
-            riskLevel: prediction["3d"].risk_level,
-            forecast: prediction
+
+            // These are for internal/dashboard use
+            heatStress: Number(prediction.wbgt_c),
+            mortalityRisk: Number(prediction.hmri),
+            riskLevel: prediction.risk_level
         });
 
     } catch (error) {
-        console.error("Heat data error:", error);
+        console.error("Latest heat data error:", error);
+
         res.status(500).json({
             success: false,
-            message: "Could not connect to FastAPI server. Ensure it is running on port 8000."
+            message: error.message
         });
     }
 });
-
-// Personalized SMS Alert Generation Endpoint
-app.post("/api/generate-personalized-sms", async (req, res) => {
+app.post("/api/generate-personalized-whatsapp", async (req, res) => {
     try {
-        console.log("SMS request body:", req.body);
-
-        const { name, age, phoneNumber, heat_risk, mortality_index } = req.body;
-
-        if (!name || !age || !phoneNumber) {
-            return res.status(400).json({
-                success: false,
-                message: "Name, age, and phone number are required."
-            });
-        }
-
-        if (
-            heat_risk === undefined || heat_risk === null ||
-            mortality_index === undefined || mortality_index === null
-        ) {
-            return res.status(400).json({
-                success: false,
-                message: "Heat-risk data is missing."
-            });
-        }
-
-        const fastApiResponse = await fetch(
-            "http://127.0.0.1:8000/personalized-suggestion",
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    name: String(name).trim(),
-                    age: Number(age),
-                    phone_number: String(phoneNumber).trim(),
-                    heat_risk: Number(heat_risk),
-                    mortality_index: Number(mortality_index)
-                })
-            }
-        );
-
-        const responseText = await fastApiResponse.text();
-
-        let prediction;
-        try {
-            prediction = JSON.parse(responseText);
-        } catch {
-            return res.status(500).json({
-                success: false,
-                message: "FastAPI did not return valid JSON."
-            });
-        }
-
-        if (!fastApiResponse.ok) {
-            return res.status(400).json({
-                success: false,
-                message: prediction.message || "FastAPI request failed."
-            });
-        }
-
-        const personalizedMessage = `Hi ${name}, ${prediction.message}`;
-
-        // Send SMS via your SMS helper
-        const smsResult = await sendSMSFeedback(
+        const {
+            name,
+            age,
             phoneNumber,
-            personalizedMessage
+            temperature
+        } = req.body;
+
+        if (!name || !phoneNumber) {
+            return res.status(400).json({
+                success: false,
+                message: "Name and WhatsApp number are required."
+            });
+        }
+
+        if (!isWhatsAppReady()) {
+            return res.status(503).json({
+                success: false,
+                message: "WhatsApp is not ready. Scan QR code first."
+            });
+        }
+
+        // Get WBGT + mortality + risk level
+        const heatResponse = await fetch(
+            "http://127.0.0.1:3000/api/latest-heat-data"
         );
 
-        return res.json({
+        if (!heatResponse.ok) {
+            throw new Error("Could not get heat-risk data.");
+        }
+
+        const heatData = await heatResponse.json();
+
+        const wbgt = heatData.heatStress;
+        const mortalityRisk = heatData.mortalityRisk;
+        const riskLevel = heatData.riskLevel;
+
+        let suggestion = "";
+
+        if (riskLevel === "LEVEL 5") {
+            suggestion =
+                "Extreme heat risk. Stay indoors, remain hydrated, avoid direct sunlight and strenuous activity, and check on vulnerable people.";
+        } else if (riskLevel === "LEVEL 4") {
+            suggestion =
+                "Very high heat risk. Avoid unnecessary outdoor exposure, stay hydrated, and take frequent breaks in cool areas.";
+        } else if (riskLevel === "LEVEL 3") {
+            suggestion =
+                "Moderate to high heat risk. Stay hydrated and limit prolonged outdoor activity.";
+        } else {
+            suggestion =
+                "Continue normal hydration and basic heat-safety precautions.";
+        }
+
+        const result = await sendWhatsAppFeedback(
+            phoneNumber,
+            name,
+            temperature,
+            riskLevel,
+            suggestion
+        );
+
+        res.json({
             success: true,
-            feedback: personalizedMessage,
-            smsSid: smsResult ? smsResult.sid : null,
-            smsStatus: smsResult ? smsResult.status : "sent",
-            risk_level: prediction.risk_level,
-            priority: prediction.priority
+            message: "WhatsApp alert sent successfully.",
+            data: {
+                temperature,
+                wbgt,
+                mortalityRisk,
+                riskLevel,
+                suggestion
+            },
+            result
         });
 
     } catch (error) {
-        console.error("Personalized SMS error:", error);
-        return res.status(500).json({
+        console.error("WhatsApp alert error:", error);
+
+        res.status(500).json({
             success: false,
-            message: error.message || "Server error while generating personalized SMS."
+            message: error.message
         });
     }
 });
-
-// Start Server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);

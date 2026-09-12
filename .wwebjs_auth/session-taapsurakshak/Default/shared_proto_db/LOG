@@ -1,3 +1,2 @@
-2026/09/08-10:18:01.212 595c Reusing MANIFEST D:\SIH_HeatWave\.wwebjs_auth\session-taapsurakshak\Default\shared_proto_db/MANIFEST-000001
-2026/09/08-10:18:01.220 595c Recovering log #3
-2026/09/08-10:18:01.221 595c Reusing old log D:\SIH_HeatWave\.wwebjs_auth\session-taapsurakshak\Default\shared_proto_db/000003.log 
+2026/09/13-01:57:16.744 1328 Creating DB D:\SIH_HeatWave\.wwebjs_auth\session-taapsurakshak\Default\shared_proto_db since it was missing.
+2026/09/13-01:57:16.797 1328 Reusing MANIFEST D:\SIH_HeatWave\.wwebjs_auth\session-taapsurakshak\Default\shared_proto_db/MANIFEST-000001

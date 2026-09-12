@@ -11,6 +11,17 @@
             background-position: center;
         }
 
+        select.form-select {
+            background-color: transparent !important;
+            color: white;
+            border: 2px solid white;
+        }
+
+        select.form-select option {
+            background-color: #222;
+            color: white;
+        }
+
         input[type="text"],
         input[type="password"],
         input[type="number"] {
@@ -66,10 +77,27 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="mb-3 col-md-6">
-                        <label class="form-label" for="phonenumber">Phone Number</label>
+                    <label class="form-label" for="phonenumber">Phone Number</label>
+                    <div class="col-md-2">
+                        <input class="form-control" type="text" value="+91">
+                    </div>
+                    <div class="mb-3 col-md-7">
                         <input class="form-control" type="number" required id="phonenumber" name="phonenumber"
-                            placeholder="Enter your phone number" maxlength="10" minlength="10">
+                            placeholder="Enter your phone number" value="+91 " pattern="^\+91\s\d{10}$">
+                    </div>
+                    <label for="wardName" class="form-label">Ward</label>
+                    <div class="mb-3">
+                        <select class="form-select" id="wardName" name="wardName" required>
+                            <option value="" selected disabled>
+                                Select your ward
+                            </option>
+
+                            <% wards.forEach(ward=> { %>
+                                <option value="<%= ward.ward_name %>">
+                                    <%= ward.ward_name %>
+                                </option>
+                                <% }) %>
+                        </select>
                     </div>
                 </div>
 
