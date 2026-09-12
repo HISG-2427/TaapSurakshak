@@ -1,0 +1,104 @@
+mkdir -p public && cat << 'EOF' > public/index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp AI Dispatcher</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #f4f7f6;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 6px; font-weight: bold; color: #333; }
+        input, textarea, button { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        button { cursor: pointer; background-color: #25D366; color: white; border: none; font-weight: bold; margin-top: 5px; }
+        button.ai-btn { background-color: #007bff; }
+        .status { margin-top: 15px; font-weight: bold; text-align: center; }
+    </style>
+</head>
+<body>
+    <h2>WhatsApp AI Dispatcher</h2>
+
+    <div class="form-group">
+        <label for="number">Recipient Phone Number (with Country Code):</label>
+        <input type="text" id="number" placeholder="e.g. 919876543210 or 14155552671" required>
+    </div>
+
+    <div class="form-group">
+        <label for="prompt">AI Prompt / Direction:</label>
+        <input type="text" id="prompt" placeholder="e.g. Write a friendly follow-up about the project update">
+        <button type="button" class="ai-btn" onclick="generateAISuggestion()">Generate AI Suggestion</button>
+    </div>
+
+    <div class="form-group">
+        <label for="message">Final Message to Send:</label>
+        <textarea id="message" rows="4" placeholder="AI suggestion will populate here..."></textarea>
+    </div>
+
+    <button type="button" onclick="sendMessage()">Send WhatsApp Message</button>
+
+    <div id="status" class="status"></div>
+
+    <script>
+        async function generateAISuggestion() {
+            const prompt = document.getElementById('prompt').value;
+            const statusDiv = document.getElementById('status');
+            
+            if (!prompt) return alert('Please input an AI prompt.');
+            statusDiv.textContent = 'Generating suggestion...';
+
+            try {
+                const response = await fetch('/api/generate-suggestion', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt })
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('message').value = data.suggestion;
+                    statusDiv.textContent = 'Suggestion ready!';
+                } else {
+                    statusDiv.textContent = 'Error: ' + data.error;
+                }
+            } catch (err) {
+                statusDiv.textContent = 'Failed to retrieve AI response.';
+            }
+        }
+
+        async function sendMessage() {
+            const number = document.getElementById('number').value;
+            const message = document.getElementById('message').value;
+            const statusDiv = document.getElementById('status');
+
+            if (!number || !message) return alert('Both Phone Number and Message are required.');
+            statusDiv.textContent = 'Sending message...';
+
+            try {
+                const response = await fetch('/api/send-message', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ number, message })
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    statusDiv.textContent = '✅ Message sent successfully!';
+                } else {
+                    statusDiv.textContent = '❌ Error: ' + data.error;
+                }
+            } catch (err) {
+                statusDiv.textContent = 'Failed to submit message request.';
+            }
+        }
+    </script>
+</body>
+</html>
+EOF
