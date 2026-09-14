@@ -59,7 +59,8 @@
 
 
             <div class="d-flex justify-content-between align-items-center mb-3">
-              <h4 class="mb-0 fw-bold">Trend Forecast</h4>
+              <h4 class="mb-0 fw-bold">Trend Forecast of <%= wardID %>
+              </h4>
             </div>
 
             <div class="chart-wrapper">
@@ -78,28 +79,29 @@
             <h2 class="fw-bold">Predicted Heat Risk</h2>
             <hr>
 
-              <div class="mb-3">
-                <h2 id="hospitalCapacityValue" class="fw-bold mb-0">
-                  Loading...
-                </h2>
-                <p class="mb-0">Predicted Heat Risk</p>
-              </div>
-              <div class="mb-3">
-                <h2 id="mortalityRiskValue" class="fw-bold mb-0">
-                  Loading...
-                </h2>
-                <p class="mb-0">Model Prediction</p>
-              </div>
+            <div class="mb-3">
+              <h2 id="hospitalCapacityValue" class="fw-bold mb-0">
+                Loading...
+              </h2>
+              <p class="mb-0">Predicted WBGT after 5 days</p>
+            </div>
 
-              <div>
-                <small class="text-uppercase fw-bold">
-                  Recommended Action
-                </small>
+            <div class="mb-3">
+              <h2 id="mortalityRiskValue" class="fw-bold mb-0">
+                Loading...
+              </h2>
+              <p class="mb-0">Heat-Mortality Risk Index after 5 days</p>
+            </div>
 
-                <p class="mb-0 mt-1">
-                  Activate emergency beds and increase medical staffing.
-                </p>
-              </div>
+            <div>
+              <small class="text-uppercase fw-bold">
+                Recommended Action
+              </small>
+
+              <p class="mb-0 mt-1">
+                Activate emergency beds and increase medical staffing.
+              </p>
+            </div>
 
           </div>
         </div>
@@ -110,12 +112,26 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <script>
     let heatRiskChart = null;
 
+    // Ward selected during signup/login
+    const selectedWardID = Number("<%= wardID %>");
+
     async function loadBackendPrediction() {
       try {
-        const response = await fetch("http://127.0.0.1:8000/predict", {
+
+        // Check ward ID
+        if (!Number.isFinite(selectedWardID)) {
+          throw new Error("Ward ID not found in session.");
+        }
+
+        console.log("Selected Ward ID:", selectedWardID);
+
+        // Get predictions for ALL wards
+        const response = await fetch("http://127.0.0.1:8000/predict/wards", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -136,53 +152,94 @@
 
         const backendData = await response.json();
 
-        console.log("Backend data:", backendData);
+        console.log("All ward predictions:", backendData);
 
-        // Extract the actual backend predictions
-        const prediction3d = backendData["3d"];
-        const prediction4d = backendData["4d"];
-        const prediction5d = backendData["5d"];
+        // Find the selected ward
+        const wardData = backendData.find(
+          ward => Number(ward.ward_id) === selectedWardID
+        );
 
+        if (!wardData) {
+          throw new Error(
+            `Prediction not found for ward ID ${selectedWardID}`
+          );
+        }
+
+        console.log("Selected ward prediction:", wardData);
+
+        // Ward name coming from FastAPI
+        const wardName = wardData.ward_name;
+
+        // Display actual ward name instead of ID
+        document.querySelector(".trend-card h4").textContent =
+          `Trend Forecast of ${wardName}`;
+
+        // Extract predictions
+        const prediction3d = wardData.prediction["3d"];
+        const prediction4d = wardData.prediction["4d"];
+        const prediction5d = wardData.prediction["5d"];
+
+        if (!prediction3d || !prediction4d || !prediction5d) {
+          throw new Error("3d, 4d or 5d prediction missing.");
+        }
+
+        // WBGT values
         const wbgtValues = [
           Number(prediction3d.wbgt_c),
           Number(prediction4d.wbgt_c),
           Number(prediction5d.wbgt_c)
         ];
 
+        // HMRI values
         const hmriValues = [
           Number(prediction3d.hmri),
           Number(prediction4d.hmri),
           Number(prediction5d.hmri)
         ];
 
-        // Check that backend values are valid
+        // Risk levels
+        const risk3d = prediction3d.risk_level;
+        const risk4d = prediction4d.risk_level;
+        const risk5d = prediction5d.risk_level;
+
+        console.log("3D Risk:", risk3d);
+        console.log("4D Risk:", risk4d);
+        console.log("5D Risk:", risk5d);
+
+        // Validate numeric values
         if (
           wbgtValues.some(value => !Number.isFinite(value)) ||
           hmriValues.some(value => !Number.isFinite(value))
         ) {
-          throw new Error("Backend returned invalid numeric values");
+          throw new Error("Backend returned invalid numeric values.");
         }
 
-        // Display the latest backend prediction
+        // -----------------------------
+        // Display 5-day prediction
+        // -----------------------------
+
         document.getElementById("hospitalCapacityValue").textContent =
-          `${prediction5d.wbgt_c.toFixed(2)} °C`;
+          `${wbgtValues[2].toFixed(2)} °C`;
 
         document.getElementById("mortalityRiskValue").textContent =
-          `${prediction5d.hmri.toFixed(2)}`;
+          `${hmriValues[2].toFixed(2)}`;
 
-        // Update the labels to match the actual data
         document.querySelector(
           "#hospitalCapacityValue + p"
-        ).textContent = "Predicted WBGT after 3 days";
+        ).textContent = "Predicted WBGT after 5 days";
 
         document.querySelector(
           "#mortalityRiskValue + p"
-        ).textContent = "Heat-Mortality Risk Index after 3 days";
+        ).textContent = "Heat-Mortality Risk Index after 5 days";
+
+        // -----------------------------
+        // Chart
+        // -----------------------------
 
         const canvas = document.getElementById("thaneTrendChart");
 
         if (!canvas) {
-          throw new Error("Chart canvas not found");
+          throw new Error("Chart canvas not found.");
         }
 
         if (heatRiskChart) {
@@ -191,8 +248,10 @@
 
         heatRiskChart = new Chart(canvas, {
           type: "line",
+
           data: {
             labels: ["3 Days", "4 Days", "5 Days"],
+
             datasets: [
               {
                 label: "WBGT (°C)",
@@ -202,6 +261,7 @@
                 tension: 0.3,
                 fill: false
               },
+
               {
                 label: "HMRI",
                 data: hmriValues,
@@ -212,18 +272,39 @@
               }
             ]
           },
+
           options: {
             responsive: true,
             maintainAspectRatio: false,
+
             interaction: {
               mode: "index",
               intersect: false
             },
+
             plugins: {
               legend: {
                 display: true
+              },
+
+              tooltip: {
+                callbacks: {
+                  afterBody: function (context) {
+
+                    const index = context[0].dataIndex;
+
+                    const risks = [
+                      risk3d,
+                      risk4d,
+                      risk5d
+                    ];
+
+                    return `Risk Level: ${risks[index]}`;
+                  }
+                }
               }
             },
+
             scales: {
               y: {
                 beginAtZero: true
@@ -233,6 +314,7 @@
         });
 
       } catch (error) {
+
         console.error("Prediction request failed:", error);
 
         document.getElementById("hospitalCapacityValue").textContent =

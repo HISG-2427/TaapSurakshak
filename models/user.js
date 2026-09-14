@@ -15,16 +15,20 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    wardID: {
+        type: Number,
+        required: true
+    },
     age: {
         type: Number,
         required: true,
         min: 0
     },
     phoneNumber: {
-        type: Number,
+        type: String,
         required: true,
-        min: 0,
-        max: 999999999999
+        trim: true,
+        match: /^[0-9]{10}$/
     }
 });
 

@@ -1,8 +1,7 @@
 node_modules/
-backend/venv/
 .wwebjs_auth/
 .wwebjs_cache/
 .env
+backend/venv/
 __pycache__/
 *.pyc
-backend/venv/

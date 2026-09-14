@@ -61,6 +61,7 @@ app.use(session({
 // Global Middleware for Session Views
 app.use((req, res, next) => {
     res.locals.currentUser = req.session.userName || null;
+    res.locals.wardID = req.session.wardID || null;
     next();
 });
 
@@ -85,7 +86,8 @@ app.get("/risk", isLoggedIn, (req, res) => {
 
 app.get("/predict", isLoggedIn, (req, res) => {
     res.render("TaapSurakshak/predict", {
-        userName: req.session.userName
+        userName: req.session.userName,
+        wardID: req.session.wardID
     });
 });
 
@@ -113,44 +115,67 @@ app.get("/login", async (req, res) => {
 
         console.log("Wards:", wards);
 
-        res.render("login", {
+        res.render("TaapSurakshak/login", {
             wards
         });
 
     } catch (error) {
         console.error("Error loading wards:", error);
 
-        res.render("login", {
+        res.render("TaapSurakshak/login", {
             wards: []
         });
     }
 });
 
-// Auth API Endpoints
 app.post("/signup", async (req, res) => {
     try {
-        const { name, location, password } = req.body;
+        const {
+            name,
+            location,
+            password,
+            wardID,
+            phoneNumber,
+            age
+        } = req.body;
+
+        console.log("SIGNUP:", req.body);
+
+        if (!wardID || !phoneNumber || !age) {
+            return res.status(400).send("Missing required signup fields.");
+        }
 
         const existingUser = await User.findOne({ name });
 
         if (existingUser) {
             req.session.userId = existingUser._id;
             req.session.userName = existingUser.name;
+            req.session.wardID = Number(wardID);
+
+            existingUser.wardID = Number(wardID);
+            await existingUser.save();
+
             return res.redirect("/");
         }
 
         const hashedPassword = await bcrypt.hash(password, 12);
 
         const newUser = new User({
-            name,
-            location,
-            password: hashedPassword
+            name: name,
+            location: location,
+            password: hashedPassword,
+            wardID: Number(wardID),
+            age: Number(age),
+            phoneNumber: phoneNumber
         });
 
         await newUser.save();
 
         req.session.userId = newUser._id;
         req.session.userName = newUser.name;
+        req.session.wardID = Number(wardID);
+
+        console.log("USER CREATED:", newUser._id);
 
         res.redirect("/");
 
@@ -158,8 +183,7 @@ app.post("/signup", async (req, res) => {
         console.error("Signup error:", err);
         res.status(500).send("Error creating user account");
     }
-});
-
+}); 
 app.get("/logout", (req, res) => {
     req.session.destroy((err) => {
         if (err) {

@@ -77,23 +77,23 @@
                     </div>
                 </div>
                 <div class="row">
-                    <label class="form-label" for="phonenumber">Phone Number</label>
-                    <div class="col-md-2">
-                        <input class="form-control" type="text" value="+91">
+                    <div class="mb-3 col-md-9">
+                        <label class="form-label" for="phoneNumber">Phone Number</label>
+
+                        <input class="form-control" type="tel" required id="phoneNumber" name="phoneNumber"
+                            placeholder="Enter 10-digit phone number" pattern="[0-9]{10}" maxlength="10" minlength="10">
                     </div>
-                    <div class="mb-3 col-md-7">
-                        <input class="form-control" type="number" required id="phonenumber" name="phonenumber"
-                            placeholder="Enter your phone number" value="+91 " pattern="^\+91\s\d{10}$">
-                    </div>
-                    <label for="wardName" class="form-label">Ward</label>
+
                     <div class="mb-3">
-                        <select class="form-select" id="wardName" name="wardName" required>
+                        <label for="wardID" class="form-label">Ward</label>
+
+                        <select class="form-select" id="wardID" name="wardID" required>
                             <option value="" selected disabled>
                                 Select your ward
                             </option>
 
                             <% wards.forEach(ward=> { %>
-                                <option value="<%= ward.ward_name %>">
+                                <option value="<%= ward.ward_id %>">
                                     <%= ward.ward_name %>
                                 </option>
                                 <% }) %>
