@@ -1,305 +1,814 @@
 <style>
-    /* Sidebar */
+    /* ==========================================
+       DESKTOP SIDEBAR
+    ========================================== */
+
     #mainNavbar {
         width: 250px;
         min-height: 100vh;
+
         background-color: #d3c9c9;
+
         border-right: 1px solid #e5e7eb;
+
         padding: 25px 16px;
+
         position: fixed;
+
         top: 0;
         left: 0;
+
         z-index: 1030;
-        transition: width 0.3s ease, padding 0.3s ease;
+
+        transition:
+            width 0.3s ease,
+            padding 0.3s ease;
     }
 
-    /* Project name */
+
+    /* ==========================================
+       PROJECT NAME
+    ========================================== */
+
     #mainNavbar .navbar-brand {
         display: block;
+
         color: #071b3a;
+
         font-size: 1.5rem;
         font-weight: 700;
+
         margin-bottom: 40px;
+
         text-decoration: none;
+
         white-space: nowrap;
         overflow: hidden;
     }
 
-    /* Navigation links */
+
+    /* ==========================================
+       NAVIGATION LINKS
+    ========================================== */
+
     #mainNavbar .nav-link {
         display: block;
+
         color: #071b3a;
+
         font-size: 1.1rem;
+
         padding: 12px 15px;
         margin-bottom: 8px;
+
         border-radius: 8px;
+
         text-decoration: none;
+
         white-space: nowrap;
         overflow: hidden;
-        transition: background-color 0.3s ease, color 0.3s ease;
+
+        transition:
+            background-color 0.3s ease,
+            color 0.3s ease;
     }
+
 
     #mainNavbar .nav-link:hover,
     #mainNavbar .nav-link.active {
         background-color: #fd0000;
+
         color: #ffffff !important;
     }
 
-    /* User section */
+
+    /* ==========================================
+       USER SECTION
+    ========================================== */
+
     #mainNavbar .user-section {
         border-top: 1px solid #e5e7eb;
+
         margin-top: 35px;
+
         padding-top: 20px;
     }
 
+
     #mainNavbar .navbar-text {
         display: block;
+
         color: #071b3a;
+
         font-size: 1rem;
         font-weight: 600;
+
         margin-bottom: 15px;
+
         white-space: nowrap;
         overflow: hidden;
     }
 
+
     #mainNavbar .logout-link {
         color: #d7354d;
+
         font-weight: 600;
     }
 
+
     #mainNavbar .logout-link:hover {
         background-color: #bb394a;
+
         color: #e1dbdc !important;
     }
 
-    /* Toggle button */
+
+    /* ==========================================
+       TOGGLE BUTTON
+    ========================================== */
+
     #sidebarToggle {
         position: absolute;
+
         top: 20px;
         right: -18px;
+
         width: 36px;
         height: 36px;
+
         border: 1px solid #e5e7eb;
+
         border-radius: 50%;
+
         background-color: #ffffff;
+
         color: #071b3a;
+
         display: flex;
+
         align-items: center;
         justify-content: center;
+
         cursor: pointer;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+
+        box-shadow:
+            0 2px 8px rgba(0, 0, 0, 0.12);
+
         z-index: 1040;
     }
 
+
     #sidebarToggle:hover {
         background-color: #de4343;
+
         color: #ebe5e5;
     }
 
-    /* Collapsed sidebar */
+
+    /* ==========================================
+       COLLAPSED SIDEBAR - DESKTOP
+    ========================================== */
+
     #mainNavbar.collapsed {
         width: 85px;
+
         padding: 25px 10px;
     }
 
+
     #mainNavbar.collapsed .navbar-brand {
         font-size: 0;
+
         text-align: center;
     }
+
 
     #mainNavbar.collapsed .navbar-brand::before {
         content: "☀";
+
         font-size: 20px;
     }
 
+
     #mainNavbar.collapsed .nav-link {
         text-align: center;
+
         font-size: 0;
+
         padding: 12px 5px;
     }
+
 
     #mainNavbar.collapsed .nav-link::first-letter {
         font-size: 1.1rem;
     }
 
+
     #mainNavbar.collapsed .navbar-text {
         display: none;
     }
+
 
     #mainNavbar.collapsed .user-section {
         border-top: none;
     }
 
+
     #mainNavbar.collapsed .logout-link {
         font-size: 0;
     }
 
+
     #mainNavbar.collapsed .logout-link::before {
         content: "⭘";
+
         font-size: 1.2rem;
     }
 
-    /* Main content */
+
+    /* ==========================================
+       MAIN CONTENT
+    ========================================== */
+
     .main-content {
         margin-left: 250px;
+
         transition: margin-left 0.3s ease;
     }
 
+
     .main-content.sidebar-collapsed {
-        margin-left: 75px;
+        margin-left: 85px;
     }
 
-    /* Mobile layout */
+
+    /* ==========================================
+       TABLET + MOBILE NAVBAR
+    ========================================== */
+
     @media (max-width: 991px) {
+
         #mainNavbar {
+
             width: 100%;
+
             min-height: auto;
+
             position: relative;
+
             border-right: none;
+
             border-bottom: 1px solid #e5e7eb;
+
+            padding: 14px 16px;
+
+            transition: none;
         }
+
+
+        /*
+         * Important:
+         * On tablet/mobile the desktop collapsed
+         * sidebar behavior is disabled.
+         */
 
         #mainNavbar.collapsed {
+
             width: 100%;
-            padding: 25px 16px;
+
+            padding: 14px 16px;
         }
 
+
+        /* ------------------------------------------
+           TOP BAR
+        ------------------------------------------ */
+
+        #mainNavbar .container-fluid {
+
+            display: flex !important;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            flex-wrap: wrap;
+
+            position: relative;
+        }
+
+
+        /*
+         * Keep existing logo but don't let the
+         * invisible image create unnecessary space.
+         */
+
+        #mainNavbar .container-fluid>img {
+
+            display: none;
+        }
+
+
+        /* ------------------------------------------
+           PROJECT NAME
+        ------------------------------------------ */
+
+        #mainNavbar .navbar-brand,
         #mainNavbar.collapsed .navbar-brand {
+
+            display: block;
+
             font-size: 1.5rem;
+
+            margin: 0;
+
+            padding: 5px 0;
+
             text-align: left;
+
+            order: 1;
         }
 
+
+        #mainNavbar .navbar-brand::before,
         #mainNavbar.collapsed .navbar-brand::before {
+
             content: none;
         }
 
-        #mainNavbar.collapsed .nav-link {
-            text-align: left;
-            font-size: 1.1rem;
-            padding: 12px 15px;
+
+        /* ------------------------------------------
+           HAMBURGER BUTTON
+        ------------------------------------------ */
+
+        #sidebarToggle {
+
+            position: static;
+
+            order: 2;
+
+            flex-shrink: 0;
+
+            width: 40px;
+
+            height: 40px;
+
+            border-radius: 8px;
+
+            border: 1px solid #e5e7eb;
+
+            background-color: #ffffff;
+
+            color: #071b3a;
+
+            box-shadow:
+                0 2px 8px rgba(0, 0, 0, 0.12);
         }
 
-        #mainNavbar.collapsed .navbar-text {
+
+        #sidebarToggle:hover {
+
+            background-color: #de4343;
+
+            color: #ffffff;
+        }
+
+
+        /* ------------------------------------------
+           NAVIGATION MENU
+        ------------------------------------------ */
+
+        #mainNavbar .navbar-nav {
+
+            width: 100%;
+
+            order: 3;
+
+            display: none;
+
+            margin-top: 15px;
+        }
+
+
+        /*
+         * When navbar is NOT collapsed,
+         * show the mobile menu.
+         */
+
+        #mainNavbar:not(.collapsed) .navbar-nav {
+
             display: block;
         }
 
-        #mainNavbar.collapsed .logout-link {
-            font-size: 1.1rem;
+
+        /*
+         * When collapsed,
+         * hide navigation links.
+         */
+
+        #mainNavbar.collapsed .navbar-nav {
+
+            display: none;
         }
 
+
+        #mainNavbar .nav-link,
+        #mainNavbar.collapsed .nav-link {
+
+            width: 100%;
+
+            font-size: 1.05rem;
+
+            text-align: left;
+
+            padding: 11px 15px;
+
+            margin-bottom: 6px;
+        }
+
+
+        /* ------------------------------------------
+           USER SECTION
+        ------------------------------------------ */
+
+        #mainNavbar .user-section,
+        #mainNavbar.collapsed .user-section {
+
+            width: 100%;
+
+            order: 4;
+
+            display: none;
+
+            border-top: 1px solid #e5e7eb;
+
+            margin-top: 10px;
+
+            padding-top: 15px;
+        }
+
+
+        #mainNavbar:not(.collapsed) .user-section {
+
+            display: block;
+        }
+
+
+        #mainNavbar .navbar-text,
+        #mainNavbar.collapsed .navbar-text {
+
+            display: block;
+
+            font-size: 0.95rem;
+
+            margin-bottom: 10px;
+        }
+
+
+        #mainNavbar .logout-link,
+        #mainNavbar.collapsed .logout-link {
+
+            font-size: 1.05rem;
+        }
+
+
+        #mainNavbar .logout-link::before,
         #mainNavbar.collapsed .logout-link::before {
+
             content: none;
         }
 
+
+        /* ------------------------------------------
+           MAIN CONTENT
+        ------------------------------------------ */
+
         .main-content,
         .main-content.sidebar-collapsed {
+
             margin-left: 0;
         }
 
-        #sidebarToggle {
-            right: 20px;
+    }
+
+
+    /* ==========================================
+       MOBILE
+    ========================================== */
+
+    @media (max-width: 767px) {
+
+        #mainNavbar {
+
+            padding: 12px 14px;
         }
+
+
+        #mainNavbar .navbar-brand,
+        #mainNavbar.collapsed .navbar-brand {
+
+            font-size: 1.3rem;
+
+            padding: 6px 0;
+        }
+
+
+        #sidebarToggle {
+
+            width: 38px;
+
+            height: 38px;
+        }
+
+
+        #mainNavbar .navbar-nav {
+
+            margin-top: 12px;
+        }
+
+
+        #mainNavbar .nav-link,
+        #mainNavbar.collapsed .nav-link {
+
+            font-size: 1rem;
+
+            padding: 10px 13px;
+        }
+
+
+        #mainNavbar .navbar-text,
+        #mainNavbar.collapsed .navbar-text {
+
+            font-size: 0.9rem;
+        }
+
+    }
+
+
+    /* ==========================================
+       SMALL MOBILE
+    ========================================== */
+
+    @media (max-width: 575px) {
+
+        #mainNavbar {
+
+            padding: 10px 12px;
+        }
+
+
+        #mainNavbar .navbar-brand,
+        #mainNavbar.collapsed .navbar-brand {
+
+            font-size: 1rem;
+        }
+
+
+        #sidebarToggle {
+
+            width: 36px;
+
+            height: 36px;
+
+            font-size: 0.9rem;
+        }
+
+
+        #mainNavbar .nav-link,
+        #mainNavbar.collapsed .nav-link {
+
+            font-size: 0.95rem;
+
+            padding: 9px 12px;
+        }
+
+
+        #mainNavbar .navbar-text,
+        #mainNavbar.collapsed .navbar-text {
+
+            font-size: 0.85rem;
+        }
+
     }
 </style>
 
+
 <nav id="mainNavbar" class="navbar">
+
     <div class="container-fluid d-block">
 
-        <img src="/public/HeatSentinelIcon.svg" alt="Logo" class="rounded-border invisible" style="width: 50px; height: 50px; ">
+        <img src="/public/HeatSentinelIcon.svg" alt="Logo" class="rounded-border invisible"
+            style="width: 50px; height: 50px;">
+
 
         <!-- Toggle button -->
+
         <button id="sidebarToggle" type="button" aria-label="Toggle sidebar" aria-expanded="true">
-            <span id="toggleIcon" class="text-center fs-6">☰</span>
+
+            <span id="toggleIcon" class="text-center fs-6">
+                ☰
+            </span>
+
         </button>
 
+
         <!-- Project name -->
+
         <a class="navbar-brand text-danger" href="/">
             TaapSurakshak
         </a>
 
+
         <!-- Navigation links -->
+
         <div class="navbar-nav">
 
             <% if (currentUser) { %>
+
                 <a class="nav-link" href="/risk">
                     Risk
                 </a>
+
 
                 <a class="nav-link" href="/predict">
                     Predict
                 </a>
 
+
                 <a class="nav-link" href="/alerts">
                     Alerts
                 </a>
+
                 <% } %>
 
         </div>
 
+
         <!-- User section -->
+
         <div class="user-section">
 
             <% if (currentUser) { %>
+
                 <span class="navbar-text">
+
                     Welcome, <%= currentUser %>
+
                 </span>
+
 
                 <a href="/logout" class="nav-link logout-link">
                     Logout
                 </a>
+
                 <% } else { %>
+
                     <a href="/login" class="nav-link">
                         Login
                     </a>
 
+
                     <a href="/signup" class="nav-link invisible">
                         Sign Up
                     </a>
+
                     <% } %>
 
         </div>
+
     </div>
+
 </nav>
 
+
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const sidebar = document.getElementById("mainNavbar");
-        const toggleButton = document.getElementById("sidebarToggle");
-        const mainContent = document.querySelector(".main-content");
-        const toggleIcon = document.getElementById("toggleIcon");
-        const navlinks = document.querySelectorAll("#mainNavbar .nav-link");
-        const currentUrl = window.location.href;
 
-        if (!sidebar || !toggleButton) {
-            console.error("Sidebar or toggle button not found");
-            return;
-        }
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
 
-        toggleButton.addEventListener("click", function () {
-            sidebar.classList.toggle("collapsed");
+            const sidebar =
+                document.getElementById(
+                    "mainNavbar"
+                );
 
-            if (mainContent) {
-                mainContent.classList.toggle("sidebar-collapsed");
+
+            const toggleButton =
+                document.getElementById(
+                    "sidebarToggle"
+                );
+
+
+            const mainContent =
+                document.querySelector(
+                    ".main-content"
+                );
+
+
+            const toggleIcon =
+                document.getElementById(
+                    "toggleIcon"
+                );
+
+
+            const navlinks =
+                document.querySelectorAll(
+                    "#mainNavbar .nav-link"
+                );
+
+
+            const currentUrl =
+                window.location.href;
+
+
+            if (!sidebar || !toggleButton) {
+
+                console.error(
+                    "Sidebar or toggle button not found"
+                );
+
+                return;
             }
 
-            const collapsed = sidebar.classList.contains("collapsed");
+
+            toggleButton.addEventListener(
+                "click",
+                function () {
+
+                    sidebar.classList.toggle(
+                        "collapsed"
+                    );
 
 
-            toggleButton.setAttribute(
-                "aria-expanded",
-                collapsed ? "false" : "true"
+                    if (mainContent) {
+
+                        mainContent.classList.toggle(
+                            "sidebar-collapsed"
+                        );
+
+                    }
+
+
+                    const collapsed =
+                        sidebar.classList.contains(
+                            "collapsed"
+                        );
+
+
+                    toggleButton.setAttribute(
+                        "aria-expanded",
+                        collapsed
+                            ? "false"
+                            : "true"
+                    );
+
+
+                    if (toggleIcon) {
+
+                        toggleIcon.textContent =
+                            "☰";
+
+                    }
+
+                }
             );
 
-            if (toggleIcon) {
-                toggleIcon.textContent = "☰";
+
+            if (
+                navlinks[0] &&
+                currentUrl == navlinks[0].href
+            ) {
+
+                navlinks[0].classList.add(
+                    "active"
+                );
+
             }
-        });
-        if (currentUrl == navlinks[0].href) {
-            navlinks[0].classList.add("active");
-        } else if (currentUrl == navlinks[1].href) {
-            navlinks[1].classList.add("active");
-        } else if (currentUrl == navlinks[2].href) {
-            navlinks[2].classList.add("active");
+
+            else if (
+                navlinks[1] &&
+                currentUrl == navlinks[1].href
+            ) {
+
+                navlinks[1].classList.add(
+                    "active"
+                );
+
+            }
+
+            else if (
+                navlinks[2] &&
+                currentUrl == navlinks[2].href
+            ) {
+
+                navlinks[2].classList.add(
+                    "active"
+                );
+
+            }
+
         }
-    });
+    );
+
 </script>

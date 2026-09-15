@@ -3,97 +3,265 @@
   <style>
     .trend-card {
       border: 1px solid #f0dada;
+
       border-radius: 6px;
+
       background: #ffffff;
     }
 
+
     .chart-wrapper {
       position: relative;
+
       height: 390px;
+
       width: 100%;
     }
 
+
     .chart-legend {
       display: flex;
+
       justify-content: flex-end;
+
       align-items: center;
+
       gap: 16px;
+
       flex-wrap: wrap;
+
       font-size: 0.8rem;
     }
 
+
     .legend-item {
       display: flex;
+
       align-items: center;
+
       gap: 6px;
     }
 
+
     .legend-dot {
       height: 9px;
+
       width: 9px;
+
       border-radius: 50%;
+
       display: inline-block;
     }
+
 
     .mortality-dot {
       background-color: #bd001b;
     }
 
+
     .capacity-dot {
       background-color: #a47a32;
     }
 
+
     .critical-card {
       border: 1px solid #f5b5b5;
+
       border-radius: 8px;
+    }
+
+
+    /* ==========================================
+       TABLET
+    ========================================== */
+
+    @media (max-width: 991px) {
+
+      .chart-wrapper {
+
+        height: 350px;
+
+      }
+
+
+      .critical-card {
+
+        min-height: auto;
+
+      }
+
+    }
+
+
+    /* ==========================================
+       MOBILE
+    ========================================== */
+
+    @media (max-width: 767px) {
+
+      .container-fluid {
+
+        padding-left: 12px;
+
+        padding-right: 12px;
+
+      }
+
+
+      .chart-wrapper {
+
+        height: 300px;
+
+      }
+
+
+      .trend-card h4 {
+
+        font-size: 1.15rem;
+
+      }
+
+
+      .critical-card .card-body {
+
+        padding: 1.25rem !important;
+
+      }
+
+
+      .critical-card h2 {
+
+        font-size: 1.5rem;
+
+      }
+
+    }
+
+
+    /* ==========================================
+       SMALL MOBILE
+    ========================================== */
+
+    @media (max-width: 575px) {
+
+      .chart-wrapper {
+
+        height: 260px;
+
+      }
+
+
+      .trend-card h4 {
+
+        font-size: 1rem;
+
+      }
+
+
+      .trend-card .card-body {
+
+        padding: 0.9rem;
+
+      }
+
+
+      .critical-card h2 {
+
+        font-size: 1.3rem;
+
+      }
+
+
+      #hospitalCapacityValue,
+      #mortalityRiskValue {
+
+        font-size: 1.5rem;
+
+      }
+
     }
   </style>
 
+
   <div class="container-fluid">
+
     <div class="row g-4 align-items-stretch">
 
+
       <!-- Chart: 8 columns -->
+
       <div class="col-12 col-lg-8">
+
         <div class="card trend-card shadow-sm h-100">
+
           <div class="card-body">
 
 
             <div class="d-flex justify-content-between align-items-center mb-3">
-              <h4 class="mb-0 fw-bold">Trend Forecast of <%= wardID %>
+
+              <h4 class="mb-0 fw-bold">
+                Trend Forecast of <%= wardID %>
               </h4>
+
             </div>
 
+
             <div class="chart-wrapper">
+
               <canvas id="thaneTrendChart"></canvas>
+
             </div>
 
           </div>
+
         </div>
+
       </div>
 
+
       <!-- Critical alert: 4 columns -->
+
       <div class="col-12 col-lg-4">
+
         <div class="card critical-card bg-danger-subtle text-danger shadow-sm h-100">
+
           <div class="card-body p-4">
 
-            <h2 class="fw-bold">Predicted Heat Risk</h2>
+            <h2 class="fw-bold">
+              Predicted Heat Risk
+            </h2>
+
             <hr>
 
+
             <div class="mb-3">
+
               <h2 id="hospitalCapacityValue" class="fw-bold mb-0">
                 Loading...
               </h2>
-              <p class="mb-0">Predicted WBGT after 5 days</p>
+
+              <p class="mb-0">
+                Predicted WBGT after 5 days
+              </p>
+
             </div>
 
+
             <div class="mb-3">
+
               <h2 id="mortalityRiskValue" class="fw-bold mb-0">
                 Loading...
               </h2>
-              <p class="mb-0">Heat-Mortality Risk Index after 5 days</p>
+
+              <p class="mb-0">
+                Heat-Mortality Risk Index after 5 days
+              </p>
+
             </div>
 
+
             <div>
+
               <small class="text-uppercase fw-bold">
                 Recommended Action
               </small>
@@ -101,234 +269,458 @@
               <p class="mb-0 mt-1">
                 Activate emergency beds and increase medical staffing.
               </p>
+
             </div>
 
           </div>
+
         </div>
+
       </div>
 
     </div>
+
   </div>
 
+
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 
   <script>
+
     let heatRiskChart = null;
 
+
     // Ward selected during signup/login
-    const selectedWardID = Number("<%= wardID %>");
+
+    const selectedWardID =
+      Number("<%= wardID %>");
+
 
     async function loadBackendPrediction() {
+
       try {
 
         // Check ward ID
+
         if (!Number.isFinite(selectedWardID)) {
-          throw new Error("Ward ID not found in session.");
+
+          throw new Error(
+            "Ward ID not found in session."
+          );
+
         }
 
-        console.log("Selected Ward ID:", selectedWardID);
 
-        // Get predictions for ALL wards
-        const response = await fetch("http://127.0.0.1:8000/predict/wards", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            temp_mean_c: 35,
-            temp_max_c: 40,
-            temp_min_c: 30,
-            humidity_pct: 60,
-            wind_speed_ms: 2,
-            solar_radiation_kwh_m2: 5
-          })
-        });
-
-        if (!response.ok) {
-          throw new Error(`Backend error: ${response.status}`);
-        }
-
-        const backendData = await response.json();
-
-        console.log("All ward predictions:", backendData);
-
-        // Find the selected ward
-        const wardData = backendData.find(
-          ward => Number(ward.ward_id) === selectedWardID
+        console.log(
+          "Selected Ward ID:",
+          selectedWardID
         );
 
+
+        // Get predictions for ALL wards
+
+        const response =
+          await fetch(
+            "http://127.0.0.1:8000/predict/wards",
+            {
+              method: "POST",
+
+              headers: {
+                "Content-Type":
+                  "application/json"
+              },
+
+              body: JSON.stringify({
+
+                temp_mean_c: 35,
+
+                temp_max_c: 40,
+
+                temp_min_c: 30,
+
+                humidity_pct: 60,
+
+                wind_speed_ms: 2,
+
+                solar_radiation_kwh_m2: 5
+
+              })
+            }
+          );
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            `Backend error: ${response.status}`
+          );
+
+        }
+
+
+        const backendData =
+          await response.json();
+
+
+        console.log(
+          "All ward predictions:",
+          backendData
+        );
+
+
+        // Find the selected ward
+
+        const wardData =
+          backendData.find(
+            ward =>
+              Number(ward.ward_id) ===
+              selectedWardID
+          );
+
+
         if (!wardData) {
+
           throw new Error(
             `Prediction not found for ward ID ${selectedWardID}`
           );
+
         }
 
-        console.log("Selected ward prediction:", wardData);
+
+        console.log(
+          "Selected ward prediction:",
+          wardData
+        );
+
 
         // Ward name coming from FastAPI
-        const wardName = wardData.ward_name;
+
+        const wardName =
+          wardData.ward_name;
+
 
         // Display actual ward name instead of ID
-        document.querySelector(".trend-card h4").textContent =
+
+        document.querySelector(
+          ".trend-card h4"
+        ).textContent =
           `Trend Forecast of ${wardName}`;
 
-        // Extract predictions
-        const prediction3d = wardData.prediction["3d"];
-        const prediction4d = wardData.prediction["4d"];
-        const prediction5d = wardData.prediction["5d"];
 
-        if (!prediction3d || !prediction4d || !prediction5d) {
-          throw new Error("3d, 4d or 5d prediction missing.");
+        // Extract predictions
+
+        const prediction3d =
+          wardData.prediction["3d"];
+
+        const prediction4d =
+          wardData.prediction["4d"];
+
+        const prediction5d =
+          wardData.prediction["5d"];
+
+
+        if (
+          !prediction3d ||
+          !prediction4d ||
+          !prediction5d
+        ) {
+
+          throw new Error(
+            "3d, 4d or 5d prediction missing."
+          );
+
         }
+
 
         // WBGT values
+
         const wbgtValues = [
+
           Number(prediction3d.wbgt_c),
+
           Number(prediction4d.wbgt_c),
+
           Number(prediction5d.wbgt_c)
+
         ];
+
 
         // HMRI values
+
         const hmriValues = [
+
           Number(prediction3d.hmri),
+
           Number(prediction4d.hmri),
+
           Number(prediction5d.hmri)
+
         ];
 
-        // Risk levels
-        const risk3d = prediction3d.risk_level;
-        const risk4d = prediction4d.risk_level;
-        const risk5d = prediction5d.risk_level;
 
-        console.log("3D Risk:", risk3d);
-        console.log("4D Risk:", risk4d);
-        console.log("5D Risk:", risk5d);
+        // Risk levels
+
+        const risk3d =
+          prediction3d.risk_level;
+
+        const risk4d =
+          prediction4d.risk_level;
+
+        const risk5d =
+          prediction5d.risk_level;
+
+
+        console.log(
+          "3D Risk:",
+          risk3d
+        );
+
+        console.log(
+          "4D Risk:",
+          risk4d
+        );
+
+        console.log(
+          "5D Risk:",
+          risk5d
+        );
+
 
         // Validate numeric values
+
         if (
-          wbgtValues.some(value => !Number.isFinite(value)) ||
-          hmriValues.some(value => !Number.isFinite(value))
+          wbgtValues.some(
+            value =>
+              !Number.isFinite(value)
+          ) ||
+
+          hmriValues.some(
+            value =>
+              !Number.isFinite(value)
+          )
         ) {
-          throw new Error("Backend returned invalid numeric values.");
+
+          throw new Error(
+            "Backend returned invalid numeric values."
+          );
+
         }
 
-        // -----------------------------
-        // Display 5-day prediction
-        // -----------------------------
 
-        document.getElementById("hospitalCapacityValue").textContent =
+        // Display 5-day prediction
+
+        document.getElementById(
+          "hospitalCapacityValue"
+        ).textContent =
           `${wbgtValues[2].toFixed(2)} °C`;
 
-        document.getElementById("mortalityRiskValue").textContent =
+
+        document.getElementById(
+          "mortalityRiskValue"
+        ).textContent =
           `${hmriValues[2].toFixed(2)}`;
+
 
         document.querySelector(
           "#hospitalCapacityValue + p"
-        ).textContent = "Predicted WBGT after 5 days";
+        ).textContent =
+          "Predicted WBGT after 5 days";
+
 
         document.querySelector(
           "#mortalityRiskValue + p"
-        ).textContent = "Heat-Mortality Risk Index after 5 days";
+        ).textContent =
+          "Heat-Mortality Risk Index after 5 days";
 
-        // -----------------------------
+
         // Chart
-        // -----------------------------
 
-        const canvas = document.getElementById("thaneTrendChart");
+        const canvas =
+          document.getElementById(
+            "thaneTrendChart"
+          );
+
 
         if (!canvas) {
-          throw new Error("Chart canvas not found.");
+
+          throw new Error(
+            "Chart canvas not found."
+          );
+
         }
+
 
         if (heatRiskChart) {
+
           heatRiskChart.destroy();
+
         }
 
-        heatRiskChart = new Chart(canvas, {
-          type: "line",
 
-          data: {
-            labels: ["3 Days", "4 Days", "5 Days"],
+        heatRiskChart =
+          new Chart(
+            canvas,
+            {
 
-            datasets: [
-              {
-                label: "WBGT (°C)",
-                data: wbgtValues,
-                borderWidth: 3,
-                pointRadius: 6,
-                tension: 0.3,
-                fill: false
-              },
+              type: "line",
 
-              {
-                label: "HMRI",
-                data: hmriValues,
-                borderWidth: 3,
-                pointRadius: 6,
-                tension: 0.3,
-                fill: false
-              }
-            ]
-          },
+              data: {
 
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
+                labels: [
+                  "3 Days",
+                  "4 Days",
+                  "5 Days"
+                ],
 
-            interaction: {
-              mode: "index",
-              intersect: false
-            },
+                datasets: [
 
-            plugins: {
-              legend: {
-                display: true
-              },
+                  {
 
-              tooltip: {
-                callbacks: {
-                  afterBody: function (context) {
+                    label: "WBGT (°C)",
 
-                    const index = context[0].dataIndex;
+                    data: wbgtValues,
 
-                    const risks = [
-                      risk3d,
-                      risk4d,
-                      risk5d
-                    ];
+                    borderWidth: 3,
 
-                    return `Risk Level: ${risks[index]}`;
+                    pointRadius: 6,
+
+                    tension: 0.3,
+
+                    fill: false
+
+                  },
+
+
+                  {
+
+                    label: "HMRI",
+
+                    data: hmriValues,
+
+                    borderWidth: 3,
+
+                    pointRadius: 6,
+
+                    tension: 0.3,
+
+                    fill: false
+
                   }
+
+                ]
+
+              },
+
+
+              options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                interaction: {
+
+                  mode: "index",
+
+                  intersect: false
+
+                },
+
+
+                plugins: {
+
+                  legend: {
+
+                    display: true
+
+                  },
+
+
+                  tooltip: {
+
+                    callbacks: {
+
+                      afterBody:
+                        function (context) {
+
+                          const index =
+                            context[0]
+                              .dataIndex;
+
+                          const risks = [
+
+                            risk3d,
+
+                            risk4d,
+
+                            risk5d
+
+                          ];
+
+                          return `Risk Level: ${risks[index]}`;
+
+                        }
+
+                    }
+
+                  }
+
+                },
+
+
+                scales: {
+
+                  y: {
+
+                    beginAtZero: true
+
+                  }
+
                 }
-              }
-            },
 
-            scales: {
-              y: {
-                beginAtZero: true
               }
+
             }
-          }
-        });
+          );
 
-      } catch (error) {
-
-        console.error("Prediction request failed:", error);
-
-        document.getElementById("hospitalCapacityValue").textContent =
-          "Error";
-
-        document.getElementById("mortalityRiskValue").textContent =
-          "Error";
-
-        alert(`Prediction failed:\n${error.message}`);
       }
+
+
+      catch (error) {
+
+        console.error(
+          "Prediction request failed:",
+          error
+        );
+
+
+        document.getElementById(
+          "hospitalCapacityValue"
+        ).textContent =
+          "Error";
+
+
+        document.getElementById(
+          "mortalityRiskValue"
+        ).textContent =
+          "Error";
+
+
+        alert(
+          `Prediction failed:\n${error.message}`
+        );
+
+      }
+
     }
+
 
     document.addEventListener(
       "DOMContentLoaded",
       loadBackendPrediction
     );
+
   </script>
