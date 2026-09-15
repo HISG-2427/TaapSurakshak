@@ -1,945 +1,1222 @@
 <% layout("layouts/boilerplate.ejs") %>
-<style>
-  .alerts-page {
-    color: #071b3a;
-    width: 100%;
-  }
 
-  .page-header {
-    border-bottom: 1px solid #eadede;
-    padding-bottom: 16px;
-    margin-bottom: 22px;
-  }
-
-  .page-header h1 {
-    font-size: 1.55rem;
-    font-weight: 700;
-  }
-
-  .page-header p {
-    color: #704040;
-    font-size: 0.85rem;
-  }
-
-  .section-card {
-    background: #ffffff;
-    border: 1px solid #efdada;
-    border-radius: 0;
-  }
-
-  .section-card .card-body {
-    padding: 20px;
-  }
-
-  .section-title {
-    border-bottom: 1px solid #eadede;
-    padding-bottom: 12px;
-    margin-bottom: 18px;
-    font-size: 1.05rem;
-    font-weight: 700;
-  }
-
-  .section-title .icon {
-    color: #bd001b;
-    margin-right: 8px;
-  }
-
-  .form-label {
-    color: #542020;
-    font-size: 0.72rem;
-    font-weight: 600;
-    margin-bottom: 9px;
-    display: block;
-  }
-
-  .form-control,
-  .form-select {
-    border: 1px solid #efcccc;
-    border-radius: 0;
-    color: #18345d;
-    font-size: 0.8rem;
-    min-height: 42px;
-    width: 100%;
-  }
-
-  .form-control:focus,
-  .form-select:focus {
-    border-color: #bd001b;
-    box-shadow: 0 0 0 0.15rem rgba(189, 0, 27, 0.1);
-  }
-
-  .preview-btn {
-    background: #bd001b;
-    border: none;
-    border-radius: 2px;
-    color: white;
-    font-size: 0.75rem;
-    font-weight: 700;
-    padding: 13px;
-    width: 100%;
-  }
-
-  .preview-btn:hover {
-    background: #990016;
-    color: white;
-  }
-
-  .message-preview {
-    background: #fffafa;
-    border: 1px solid #f1a2a2;
-    border-left: 4px solid #bd001b;
-    padding: 15px;
-    margin-top: 18px;
-  }
-
-  .message-preview-title {
-    color: #bd001b;
-    font-size: 0.72rem;
-    font-weight: 700;
-    margin-bottom: 8px;
-  }
-
-  .message-preview-text {
-    color: #18345d;
-    font-size: 0.8rem;
-    line-height: 1.6;
-    margin-bottom: 0;
-  }
-
-  .status-message {
-    font-size: 0.78rem;
-    margin-top: 12px;
-  }
-
-  .info-box {
-    background: #f4f6ff;
-    border: 1px solid #dce5ff;
-    color: #3159a2;
-    font-size: 0.75rem;
-    line-height: 1.6;
-    padding: 14px;
-  }
-
-  .metric-box {
-    background: #fffafa;
-    border: 1px solid #efdada;
-    padding: 14px;
-  }
-
-  .metric-label {
-    color: #704040;
-    font-size: 0.7rem;
-    font-weight: 600;
-    margin-bottom: 9px;
-    display: block;
-  }
-
-  /* ==========================================
-     ALERTS FORM RESPONSIVENESS
-  ========================================== */
-
-  #personalizedSmsForm {
-    width: 100%;
-  }
-
-  #personalizedSmsForm .form-control,
-  #personalizedSmsForm .form-select {
-    width: 100%;
-  }
-
-  /* Give every normal form field enough vertical spacing */
-  #personalizedSmsForm .mb-3 {
-    margin-bottom: 1.25rem !important;
-  }
-
-  /* ==========================================
-     TABLET
-  ========================================== */
-
-  @media (max-width: 991px) {
-
+  <style>
     .alerts-page {
-      padding-left: 15px;
-      padding-right: 15px;
-    }
-
-    .section-card {
+      color: #071b3a;
       width: 100%;
     }
 
-    .section-card .card-body {
-      padding: 1.5rem;
+    .page-header {
+      border-bottom: 1px solid #eadede;
+      padding-bottom: 16px;
+      margin-bottom: 22px;
     }
 
-    #personalizedSmsForm {
-      width: 100%;
+    .page-header h1 {
+      font-size: 1.55rem;
+      font-weight: 700;
     }
 
-    #personalizedSmsForm .form-label {
-      margin-bottom: 10px;
-    }
-
-    #personalizedSmsForm .metric-label {
-      margin-bottom: 10px;
-    }
-
-  }
-
-  /* ==========================================
-     MOBILE
-  ========================================== */
-
-  @media (max-width: 767px) {
-
-    .alerts-page {
-      padding-left: 10px;
-      padding-right: 10px;
-    }
-
-    .section-card {
-      width: 100%;
-      margin-left: 0;
-      margin-right: 0;
-    }
-
-    .section-card .card-body {
-      padding: 1.25rem !important;
-    }
-
-    #personalizedSmsForm {
-      width: 100%;
-    }
-
-    #personalizedSmsForm .mb-3 {
-      width: 100%;
-      margin-bottom: 1.35rem !important;
-    }
-
-    #personalizedSmsForm .form-control,
-    #personalizedSmsForm .form-select {
-      width: 100%;
-      min-height: 46px;
-      font-size: 1rem;
-    }
-
-    #personalizedSmsForm .form-label {
-      font-size: 0.95rem;
-      margin-bottom: 10px;
-    }
-
-    #personalizedSmsForm .metric-label {
+    .page-header p {
+      color: #704040;
       font-size: 0.85rem;
-      margin-bottom: 10px;
     }
 
-    .metric-box {
-      padding: 14px;
-    }
-
-  }
-
-  /* ==========================================
-     SMALL MOBILE
-  ========================================== */
-
-  @media (max-width: 575px) {
-
-    .alerts-page {
-      padding-left: 8px;
-      padding-right: 8px;
+    .section-card {
+      background: #ffffff;
+      border: 1px solid #efdada;
+      border-radius: 0;
     }
 
     .section-card .card-body {
-      padding: 1rem !important;
+      padding: 20px;
     }
 
     .section-title {
-      font-size: 1.15rem;
-      margin-bottom: 20px;
+      border-bottom: 1px solid #eadede;
+      padding-bottom: 12px;
+      margin-bottom: 18px;
+      font-size: 1.05rem;
+      font-weight: 700;
     }
 
-    #personalizedSmsForm .mb-3 {
-      margin-bottom: 1.4rem !important;
+    .section-title .icon {
+      color: #bd001b;
+      margin-right: 8px;
+    }
+
+    .form-label {
+      color: #542020;
+      font-size: 0.72rem;
+      font-weight: 600;
+      margin-bottom: 9px;
+      display: block;
+    }
+
+    .form-control,
+    .form-select {
+      border: 1px solid #efcccc;
+      border-radius: 0;
+      color: #18345d;
+      font-size: 0.8rem;
+      min-height: 42px;
+      width: 100%;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+      border-color: #bd001b;
+      box-shadow: 0 0 0 0.15rem rgba(189, 0, 27, 0.1);
+    }
+
+    .preview-btn {
+      background: #bd001b;
+      border: none;
+      border-radius: 2px;
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 13px;
+      width: 100%;
+    }
+
+    .preview-btn:hover {
+      background: #990016;
+      color: white;
+    }
+
+    .message-preview {
+      background: #fffafa;
+      border: 1px solid #f1a2a2;
+      border-left: 4px solid #bd001b;
+      padding: 15px;
+      margin-top: 18px;
+    }
+
+    .message-preview-title {
+      color: #bd001b;
+      font-size: 0.72rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .message-preview-text {
+      color: #18345d;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      margin-bottom: 0;
+    }
+
+    .status-message {
+      font-size: 0.78rem;
+      margin-top: 12px;
+    }
+
+    .info-box {
+      background: #f4f6ff;
+      border: 1px solid #dce5ff;
+      color: #3159a2;
+      font-size: 0.75rem;
+      line-height: 1.6;
+      padding: 14px;
+    }
+
+    .metric-box {
+      background: #fffafa;
+      border: 1px solid #efdada;
+      padding: 14px;
+    }
+
+    .metric-label {
+      color: #704040;
+      font-size: 0.7rem;
+      font-weight: 600;
+      margin-bottom: 9px;
+      display: block;
+    }
+
+
+    /* ==========================================
+     QR CODE
+  ========================================== */
+
+    .qr-section {
+      margin-top: 24px;
+      text-align: center;
+    }
+
+    .qr-container {
+      background: #ffffff;
+      border: 1px solid #efdada;
+      padding: 20px;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .qr-title {
+      color: #071b3a;
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .qr-description {
+      color: #704040;
+      font-size: 0.75rem;
+      line-height: 1.5;
+      margin-bottom: 15px;
+    }
+
+    #alertsQRCode {
+      background: #ffffff;
+      padding: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 220px;
+      min-width: 220px;
+    }
+
+    #alertsQRCode img,
+    #alertsQRCode canvas {
+      max-width: 100%;
+      height: auto;
+    }
+
+    .qr-url {
+      color: #3159a2;
+      font-size: 0.7rem;
+      margin-top: 12px;
+      word-break: break-all;
+    }
+
+
+    /* ==========================================
+     ALERTS FORM RESPONSIVENESS
+  ========================================== */
+
+    #personalizedSmsForm {
+      width: 100%;
     }
 
     #personalizedSmsForm .form-control,
     #personalizedSmsForm .form-select {
-      min-height: 48px;
-      font-size: 1rem;
+      width: 100%;
     }
 
-    #personalizedSmsForm .form-label {
-      font-size: 0.9rem;
-      margin-bottom: 11px;
+    #personalizedSmsForm .mb-3 {
+      margin-bottom: 1.25rem !important;
     }
 
-    #personalizedSmsForm .metric-label {
-      font-size: 0.85rem;
-      margin-bottom: 11px;
-    }
 
-  }
-</style>
+    /* ==========================================
+     TABLET
+  ========================================== */
 
-<div class="container-fluid alerts-page">
+    @media (max-width: 991px) {
 
-  <div class="page-header">
-
-    <h1>
-      Personalized Heat-Safety Messaging
-    </h1>
-
-    <p class="mb-0">
-      Generate AI personalized heat-health advisories and dispatch them instantly via WhatsApp and SMS.
-    </p>
-
-  </div>
-
-  <div class="row g-4">
-
-    <!-- ============================= -->
-    <!-- LEFT SIDE - FORM -->
-    <!-- ============================= -->
-
-    <div class="col-12 col-lg-6">
-
-      <div class="card section-card">
-
-        <div class="card-body">
-
-          <h4 class="section-title">
-            <span class="icon">◎</span>
-            Recipient Information
-          </h4>
-
-          <form id="personalizedSmsForm">
-
-            <!-- USER NAME -->
-
-            <div class="mb-3">
-
-              <label for="userName" class="form-label">
-                User Name
-              </label>
-
-              <input
-                type="text"
-                id="userName"
-                class="form-control"
-                placeholder="Enter user name"
-                required
-              >
-
-            </div>
-
-            <!-- AGE -->
-
-            <div class="mb-3">
-
-              <label for="age" class="form-label">
-                Age
-              </label>
-
-              <input
-                type="number"
-                id="age"
-                class="form-control"
-                min="1"
-                max="120"
-                value="30"
-                placeholder="Enter age"
-                required
-              >
-
-            </div>
-
-            <!-- PHONE -->
-
-            <div class="mb-3">
-
-              <label for="phoneNumber" class="form-label">
-                WhatsApp / Phone Number
-              </label>
-
-              <input
-                type="text"
-                id="phoneNumber"
-                class="form-control"
-                value="+91 "
-                placeholder="Phone number"
-                required
-              >
-
-            </div>
-
-            <!-- ============================= -->
-            <!-- RISK + TEMPERATURE -->
-            <!-- ============================= -->
-
-            <div class="row g-3 mb-3">
-
-              <!-- OVERALL RISK -->
-
-              <div class="col-12 col-md-6">
-
-                <div class="metric-box">
-
-                  <label for="riskLevel" class="metric-label">
-                    Overall Risk Level
-                  </label>
-
-                  <input
-                    type="text"
-                    id="riskLevel"
-                    name="riskLevel"
-                    class="form-control"
-                    readonly
-                    placeholder="Loading..."
-                  >
-
-                </div>
-
-              </div>
-
-              <!-- TEMPERATURE -->
-
-              <div class="col-12 col-md-6">
-
-                <div class="metric-box">
-
-                  <label for="temperature" class="metric-label">
-                    Temperature
-                  </label>
-
-                  <input
-                    type="text"
-                    id="temperature"
-                    name="temperature"
-                    class="form-control"
-                    readonly
-                    placeholder="Loading..."
-                  >
-
-                </div>
-
-              </div>
-
-            </div>
-
-            <!-- ============================= -->
-            <!-- SEND BUTTON -->
-            <!-- ============================= -->
-
-            <button
-              type="submit"
-              class="btn preview-btn"
-              id="sendSmsButton"
-            >
-              GENERATE & SEND WHATSAPP ALERT
-            </button>
-
-            <!-- STATUS -->
-
-            <div id="smsStatus" class="status-message"></div>
-
-          </form>
-
-        </div>
-
-      </div>
-
-    </div>
-
-    <!-- ============================= -->
-    <!-- RIGHT SIDE - PREVIEW -->
-    <!-- ============================= -->
-
-    <div class="col-12 col-lg-6">
-
-      <div class="card section-card">
-
-        <div class="card-body">
-
-          <h4 class="section-title">
-
-            <span class="icon">◉</span>
-
-            Personalized Message Preview
-
-          </h4>
-
-          <div class="info-box mb-3">
-
-            The message will be dynamically generated
-            using the recipient's age, overall heat-health
-            risk and current Mumbai temperature.
-
-          </div>
-
-          <div id="smsPreview">
-
-            <p class="text-muted">
-              Your personalized alert preview will appear here once generated.
-            </p>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-  </div>
-
-</div>
-
-<script>
-
-  document.addEventListener(
-    "DOMContentLoaded",
-    async function () {
-
-      /* ==========================================
-         GET HTML ELEMENTS
-      ========================================== */
-
-      const form =
-        document.getElementById(
-          "personalizedSmsForm"
-        );
-
-      const statusElement =
-        document.getElementById(
-          "smsStatus"
-        );
-
-      const previewElement =
-        document.getElementById(
-          "smsPreview"
-        );
-
-      const sendButton =
-        document.getElementById(
-          "sendSmsButton"
-        );
-
-      const riskLevelInput =
-        document.getElementById(
-          "riskLevel"
-        );
-
-      const temperatureInput =
-        document.getElementById(
-          "temperature"
-        );
-
-      /* ==========================================
-         VARIABLES
-      ========================================== */
-
-      let overallRisk = null;
-
-      let currentTemperature = null;
-
-      /* ==========================================
-         ESCAPE HTML
-      ========================================== */
-
-      function escapeHtml(value) {
-
-        if (
-          value === null ||
-          value === undefined
-        ) {
-          return "";
-        }
-
-        return String(value)
-          .replaceAll("&", "&amp;")
-          .replaceAll("<", "&lt;")
-          .replaceAll(">", "&gt;")
-          .replaceAll('"', "&quot;")
-          .replaceAll("'", "&#039;");
-
+      .alerts-page {
+        padding-left: 15px;
+        padding-right: 15px;
       }
 
-      /* ==========================================
-         LOAD OVERALL RISK LEVEL
-         
-         FROM EXPRESS BACKEND
-         
-         GET /api/latest-heat-data
-      ========================================== */
+      .section-card {
+        width: 100%;
+      }
 
-      async function loadRiskLevel() {
+      .section-card .card-body {
+        padding: 1.5rem;
+      }
 
-        try {
+      #personalizedSmsForm {
+        width: 100%;
+      }
 
-          riskLevelInput.value =
-            "Loading...";
+      #personalizedSmsForm .form-label {
+        margin-bottom: 10px;
+      }
 
-          const response =
-            await fetch(
-              "/api/latest-heat-data"
-            );
+      #personalizedSmsForm .metric-label {
+        margin-bottom: 10px;
+      }
 
-          const result =
-            await response.json();
+      .qr-container {
+        padding: 20px;
+      }
 
-          if (
-            !response.ok ||
-            !result.success
-          ) {
+    }
 
-            throw new Error(
-              result.message ||
-              "Unable to load overall risk."
-            );
 
-          }
+    /* ==========================================
+     MOBILE
+  ========================================== */
 
-          overallRisk =
-            result.riskLevel ||
-            result.overallRisk ||
-            result.risk_level;
+    @media (max-width: 767px) {
 
-          if (!overallRisk) {
+      .alerts-page {
+        padding-left: 10px;
+        padding-right: 10px;
+      }
 
-            throw new Error(
-              "Overall risk level was not returned by backend."
-            );
+      .section-card {
+        width: 100%;
+        margin-left: 0;
+        margin-right: 0;
+      }
 
-          }
+      .section-card .card-body {
+        padding: 1.25rem !important;
+      }
 
-          riskLevelInput.value =
-            overallRisk;
+      #personalizedSmsForm {
+        width: 100%;
+      }
 
-          return true;
+      #personalizedSmsForm .mb-3 {
+        width: 100%;
+        margin-bottom: 1.35rem !important;
+      }
 
-        } catch (error) {
+      #personalizedSmsForm .form-control,
+      #personalizedSmsForm .form-select {
+        width: 100%;
+        min-height: 46px;
+        font-size: 1rem;
+      }
 
-          console.error(
-            "Risk level error:",
-            error
+      #personalizedSmsForm .form-label {
+        font-size: 0.95rem;
+        margin-bottom: 10px;
+      }
+
+      #personalizedSmsForm .metric-label {
+        font-size: 0.85rem;
+        margin-bottom: 10px;
+      }
+
+      .metric-box {
+        padding: 14px;
+      }
+
+      .qr-section {
+        margin-top: 20px;
+      }
+
+      #alertsQRCode {
+        min-height: 200px;
+        min-width: 200px;
+      }
+
+    }
+
+
+    /* ==========================================
+     SMALL MOBILE
+  ========================================== */
+
+    @media (max-width: 575px) {
+
+      .alerts-page {
+        padding-left: 8px;
+        padding-right: 8px;
+      }
+
+      .section-card .card-body {
+        padding: 1rem !important;
+      }
+
+      .section-title {
+        font-size: 1.15rem;
+        margin-bottom: 20px;
+      }
+
+      #personalizedSmsForm .mb-3 {
+        margin-bottom: 1.4rem !important;
+      }
+
+      #personalizedSmsForm .form-control,
+      #personalizedSmsForm .form-select {
+        min-height: 48px;
+        font-size: 1rem;
+      }
+
+      #personalizedSmsForm .form-label {
+        font-size: 0.9rem;
+        margin-bottom: 11px;
+      }
+
+      #personalizedSmsForm .metric-label {
+        font-size: 0.85rem;
+        margin-bottom: 11px;
+      }
+
+      .qr-container {
+        padding: 15px;
+      }
+
+      #alertsQRCode {
+        min-height: 180px;
+        min-width: 180px;
+      }
+
+      .qr-title {
+        font-size: 0.85rem;
+      }
+
+      .qr-description {
+        font-size: 0.72rem;
+      }
+
+    }
+  </style>
+
+
+  <div class="container-fluid alerts-page">
+
+    <div class="page-header">
+
+      <h1>
+        Personalized Heat-Safety Messaging
+      </h1>
+
+      <p class="mb-0">
+        Generate AI personalized heat-health advisories and dispatch them instantly via WhatsApp and SMS.
+      </p>
+
+    </div>
+
+
+    <div class="row g-4">
+
+
+      <!-- ============================= -->
+      <!-- LEFT SIDE - FORM -->
+      <!-- ============================= -->
+
+      <div class="col-12 col-lg-6">
+
+        <div class="card section-card">
+
+          <div class="card-body">
+
+            <h4 class="section-title">
+
+              <span class="icon">◎</span>
+
+              Recipient Information
+
+            </h4>
+
+
+            <form id="personalizedSmsForm">
+
+
+              <!-- USER NAME -->
+
+              <div class="mb-3">
+
+                <label for="userName" class="form-label">
+                  User Name
+                </label>
+
+                <input type="text" id="userName" class="form-control" placeholder="Enter user name" required>
+
+              </div>
+
+
+              <!-- AGE -->
+
+              <div class="mb-3">
+
+                <label for="age" class="form-label">
+                  Age
+                </label>
+
+                <input type="number" id="age" class="form-control" min="1" max="120" value="30" placeholder="Enter age"
+                  required>
+
+              </div>
+
+
+              <!-- PHONE -->
+
+              <div class="mb-3">
+
+                <label for="phoneNumber" class="form-label">
+                  WhatsApp / Phone Number
+                </label>
+
+                <input type="text" id="phoneNumber" class="form-control" value="+91 " placeholder="Phone number"
+                  required>
+
+              </div>
+
+
+              <!-- ============================= -->
+              <!-- RISK + TEMPERATURE -->
+              <!-- ============================= -->
+
+              <div class="row g-3 mb-3">
+
+
+                <!-- OVERALL RISK -->
+
+                <div class="col-12 col-md-6">
+
+                  <div class="metric-box">
+
+                    <label for="riskLevel" class="metric-label">
+                      Overall Risk Level
+                    </label>
+
+                    <input type="text" id="riskLevel" name="riskLevel" class="form-control" readonly
+                      placeholder="Loading...">
+
+                  </div>
+
+                </div>
+
+
+                <!-- TEMPERATURE -->
+
+                <div class="col-12 col-md-6">
+
+                  <div class="metric-box">
+
+                    <label for="temperature" class="metric-label">
+                      Temperature
+                    </label>
+
+                    <input type="text" id="temperature" name="temperature" class="form-control" readonly
+                      placeholder="Loading...">
+
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <!-- ============================= -->
+              <!-- SEND BUTTON -->
+              <!-- ============================= -->
+
+              <button type="submit" class="btn preview-btn" id="sendSmsButton">
+                GENERATE & SEND WHATSAPP ALERT
+              </button>
+
+
+              <!-- STATUS -->
+
+              <div id="smsStatus" class="status-message"></div>
+
+
+            </form>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+
+      <!-- ============================= -->
+      <!-- RIGHT SIDE - PREVIEW -->
+      <!-- ============================= -->
+
+      <div class="col-12 col-lg-6">
+
+        <div class="card section-card">
+
+          <div class="card-body">
+
+
+            <h4 class="section-title">
+
+              <span class="icon">◉</span>
+
+              Personalized Message Preview
+
+            </h4>
+
+
+            <div class="info-box mb-3">
+
+              The message will be dynamically generated
+              using the recipient's age, overall heat-health
+              risk and current Mumbai temperature.
+
+            </div>
+
+
+            <div id="smsPreview">
+
+              <p class="text-muted">
+                Your personalized alert preview will appear here once generated.
+              </p>
+
+            </div>
+
+
+
+            <!-- ============================= -->
+            <!-- QR CODE -->
+            <!-- ============================= -->
+
+            <div class="qr-section">
+
+              <div class="qr-container">
+
+                <div class="qr-title">
+                  Scan to Access TaapSurakshak Alerts
+                </div>
+
+                <div class="qr-description">
+                  Scan this QR code with your phone to open
+                  the TaapSurakshak Alerts page.
+                </div>
+
+
+                <div id="alertsQRCode"></div>
+
+
+                <div class="qr-url">
+                  https://taapsurakshak-app.onrender.com/alerts
+                </div>
+
+              </div>
+
+            </div>
+
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+
+  <!-- ==========================================
+     QR CODE LIBRARY
+========================================== -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+
+
+  <script>
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      async function () {
+
+
+        /* ==========================================
+           GET HTML ELEMENTS
+        ========================================== */
+
+        const form =
+          document.getElementById(
+            "personalizedSmsForm"
           );
 
-          overallRisk = null;
 
-          riskLevelInput.value =
-            "Unavailable";
+        const statusElement =
+          document.getElementById(
+            "smsStatus"
+          );
 
-          return false;
 
-        }
+        const previewElement =
+          document.getElementById(
+            "smsPreview"
+          );
 
-      }
 
-      /* ==========================================
-         LOAD TEMPERATURE FROM OPENWEATHER
-         
-         MUMBAI
-      ========================================== */
+        const sendButton =
+          document.getElementById(
+            "sendSmsButton"
+          );
 
-      async function loadTemperature() {
 
-        try {
+        const riskLevelInput =
+          document.getElementById(
+            "riskLevel"
+          );
 
-          temperatureInput.value =
-            "Loading...";
 
-          /*
-           * OpenWeather API key
-           */
+        const temperatureInput =
+          document.getElementById(
+            "temperature"
+          );
 
-          const apiKey =
-            "4a3859186dbabdd652e466a270aab3ec";
 
-          /*
-           * Mumbai
-           */
 
-          const city =
-            "Mumbai";
+        /* ==========================================
+           VARIABLES
+        ========================================== */
 
-          /*
-           * OpenWeather Current Weather API
-           */
+        let overallRisk = null;
 
-          const url =
-            "https://api.openweathermap.org/data/2.5/weather" +
-            `?q=${city}` +
-            "&units=metric" +
-            `&appid=${apiKey}`;
+        let currentTemperature = null;
 
-          const response =
-            await fetch(url);
 
-          const data =
-            await response.json();
 
-          if (!response.ok) {
+        /* ==========================================
+           GENERATE QR CODE
+        ========================================== */
 
-            throw new Error(
-              data.message ||
-              "Unable to load temperature."
+        function generateAlertsQRCode() {
+
+          const qrElement =
+            document.getElementById(
+              "alertsQRCode"
             );
+
+
+          if (!qrElement) {
+
+            console.error(
+              "QR code container not found."
+            );
+
+            return;
 
           }
 
+
           /*
-           * Temperature is inside:
-           *
-           * data.main.temp
+           * Clear existing QR code
            */
 
-          currentTemperature =
-            Number(
-              data.main.temp
-            );
+          qrElement.innerHTML = "";
+
+
+          /*
+           * Deployed TaapSurakshak Alerts URL
+           */
+
+          const alertsURL =
+            "https://taapsurakshak-app.onrender.com/alerts";
+
+
+          /*
+           * Generate QR
+           */
+
+          new QRCode(
+            qrElement,
+            {
+              text: alertsURL,
+
+              width: 200,
+
+              height: 200,
+
+              colorDark: "#071b3a",
+
+              colorLight: "#ffffff",
+
+              correctLevel:
+                QRCode.CorrectLevel.H
+            }
+          );
+
+
+          console.log(
+            "✅ Alerts QR code generated."
+          );
+
+        }
+
+
+
+        /* ==========================================
+           ESCAPE HTML
+        ========================================== */
+
+        function escapeHtml(value) {
 
           if (
-            Number.isNaN(
-              currentTemperature
+            value === null ||
+            value === undefined
+          ) {
+
+            return "";
+
+          }
+
+
+          return String(value)
+
+            .replaceAll(
+              "&",
+              "&amp;"
             )
-          ) {
 
-            throw new Error(
-              "Invalid temperature received."
+            .replaceAll(
+              "<",
+              "&lt;"
+            )
+
+            .replaceAll(
+              ">",
+              "&gt;"
+            )
+
+            .replaceAll(
+              '"',
+              "&quot;"
+            )
+
+            .replaceAll(
+              "'",
+              "&#039;"
             );
 
-          }
-
-          /*
-           * Show temperature
-           */
-
-          temperatureInput.value =
-            `${currentTemperature.toFixed(1)} °C`;
-
-          return true;
-
-        } catch (error) {
-
-          console.error(
-            "Temperature error:",
-            error
-          );
-
-          currentTemperature = null;
-
-          temperatureInput.value =
-            "Unavailable";
-
-          return false;
-
         }
 
-      }
 
-      /* ==========================================
-         LOAD BOTH DATA
-      ========================================== */
 
-      async function loadLiveData() {
+        /* ==========================================
+           LOAD OVERALL RISK LEVEL
+           
+           FROM EXPRESS BACKEND
+           
+           GET /api/latest-heat-data
+        ========================================== */
 
-        statusElement.innerHTML =
-          '<span class="text-primary">' +
-          'Loading live risk and temperature...' +
-          '</span>';
-
-        const [
-          riskLoaded,
-          temperatureLoaded
-        ] = await Promise.all([
-
-          loadRiskLevel(),
-
-          loadTemperature()
-
-        ]);
-
-        if (
-          riskLoaded &&
-          temperatureLoaded
-        ) {
-
-          statusElement.innerHTML =
-            '<span class="text-success">' +
-            '✅ Risk level and temperature loaded.' +
-            '</span>';
-
-        }
-
-        else if (riskLoaded) {
-
-          statusElement.innerHTML =
-            '<span class="text-warning">' +
-            '⚠️ Risk loaded, but temperature unavailable.' +
-            '</span>';
-
-        }
-
-        else if (temperatureLoaded) {
-
-          statusElement.innerHTML =
-            '<span class="text-warning">' +
-            '⚠️ Temperature loaded, but risk unavailable.' +
-            '</span>';
-
-        }
-
-        else {
-
-          statusElement.innerHTML =
-            '<span class="text-danger">' +
-            '❌ Unable to load live data.' +
-            '</span>';
-
-        }
-
-      }
-
-      /* ==========================================
-         FORM SUBMIT
-      ========================================== */
-
-      form.addEventListener(
-        "submit",
-        async function (event) {
-
-          event.preventDefault();
-
-          const name =
-            document
-              .getElementById("userName")
-              .value
-              .trim();
-
-          const age =
-            Number(
-              document
-                .getElementById("age")
-                .value
-            );
-
-          const phoneNumber =
-            document
-              .getElementById("phoneNumber")
-              .value
-              .trim();
-
-          if (
-            !name ||
-            !age ||
-            !phoneNumber
-          ) {
-
-            statusElement.innerHTML =
-              '<span class="text-danger">' +
-              'Please fill in all required fields.' +
-              '</span>';
-
-            return;
-
-          }
-
-          if (!overallRisk) {
-
-            statusElement.innerHTML =
-              '<span class="text-danger">' +
-              'Overall risk level is not available.' +
-              '</span>';
-
-            return;
-
-          }
-
-          if (
-            currentTemperature === null
-          ) {
-
-            statusElement.innerHTML =
-              '<span class="text-danger">' +
-              'Temperature is not available.' +
-              '</span>';
-
-            return;
-
-          }
-
-          sendButton.disabled =
-            true;
-
-          sendButton.textContent =
-            "GENERATING & SENDING...";
-
-          statusElement.innerHTML =
-            '<span class="text-primary">' +
-            'Generating AI message & dispatching WhatsApp alert...' +
-            '</span>';
-
-          previewElement.innerHTML =
-            "";
+        async function loadRiskLevel() {
 
           try {
 
-            const requestBody = {
+            riskLevelInput.value =
+              "Loading...";
 
-              name: name,
 
-              age: age,
+            const response =
+              await fetch(
+                "/api/latest-heat-data"
+              );
 
-              phoneNumber: phoneNumber,
 
-              overall_risk:
-                overallRisk,
-
-              temperature:
-                currentTemperature
-
-            };
-
-            const response = await fetch(
-              "/api/generate-personalized-whatsapp",
-              {
-
-                method: "POST",
-
-                headers: {
-                  "Content-Type":
-                    "application/json"
-                },
-
-                body:
-                  JSON.stringify(
-                    requestBody
-                  )
-
-              }
-            );
-
-            const data =
+            const result =
               await response.json();
+
 
             if (
               !response.ok ||
-              !data.success
+              !result.success
             ) {
 
               throw new Error(
-                data.message ||
-                "Unable to generate or send advisory."
+                result.message ||
+                "Unable to load overall risk."
               );
 
             }
 
+
+            overallRisk =
+              result.riskLevel ||
+              result.overallRisk ||
+              result.risk_level;
+
+
+            if (!overallRisk) {
+
+              throw new Error(
+                "Overall risk level was not returned by backend."
+              );
+
+            }
+
+
+            riskLevelInput.value =
+              overallRisk;
+
+
+            return true;
+
+          } catch (error) {
+
+            console.error(
+              "Risk level error:",
+              error
+            );
+
+
+            overallRisk = null;
+
+
+            riskLevelInput.value =
+              "Unavailable";
+
+
+            return false;
+
+          }
+
+        }
+
+
+
+        /* ==========================================
+           LOAD TEMPERATURE FROM OPENWEATHER
+           
+           MUMBAI
+        ========================================== */
+
+        async function loadTemperature() {
+
+          try {
+
+            temperatureInput.value =
+              "Loading...";
+
+
+            /*
+             * OpenWeather API key
+             */
+
+            const apiKey =
+              "4a3859186dbabdd652e466a270aab3ec";
+
+
+            /*
+             * Mumbai
+             */
+
+            const city =
+              "Mumbai";
+
+
+            /*
+             * OpenWeather Current Weather API
+             */
+
+            const url =
+              "https://api.openweathermap.org/data/2.5/weather" +
+              `?q=${city}` +
+              "&units=metric" +
+              `&appid=${apiKey}`;
+
+
+            const response =
+              await fetch(url);
+
+
+            const data =
+              await response.json();
+
+
+            if (!response.ok) {
+
+              throw new Error(
+                data.message ||
+                "Unable to load temperature."
+              );
+
+            }
+
+
+            /*
+             * Temperature is inside:
+             *
+             * data.main.temp
+             */
+
+            currentTemperature =
+              Number(
+                data.main.temp
+              );
+
+
+            if (
+              Number.isNaN(
+                currentTemperature
+              )
+            ) {
+
+              throw new Error(
+                "Invalid temperature received."
+              );
+
+            }
+
+
+            /*
+             * Show temperature
+             */
+
+            temperatureInput.value =
+              `${currentTemperature.toFixed(1)} °C`;
+
+
+            return true;
+
+          } catch (error) {
+
+            console.error(
+              "Temperature error:",
+              error
+            );
+
+
+            currentTemperature = null;
+
+
+            temperatureInput.value =
+              "Unavailable";
+
+
+            return false;
+
+          }
+
+        }
+
+
+
+        /* ==========================================
+           LOAD BOTH DATA
+        ========================================== */
+
+        async function loadLiveData() {
+
+          statusElement.innerHTML =
+            '<span class="text-primary">' +
+            'Loading live risk and temperature...' +
+            '</span>';
+
+
+          const [
+            riskLoaded,
+            temperatureLoaded
+          ] = await Promise.all([
+
+            loadRiskLevel(),
+
+            loadTemperature()
+
+          ]);
+
+
+          if (
+            riskLoaded &&
+            temperatureLoaded
+          ) {
+
             statusElement.innerHTML =
               '<span class="text-success">' +
-              '✅ Alert dispatched successfully!' +
+              '✅ Risk level and temperature loaded.' +
               '</span>';
 
-            previewElement.innerHTML = `
+          }
+
+
+          else if (riskLoaded) {
+
+            statusElement.innerHTML =
+              '<span class="text-warning">' +
+              '⚠️ Risk loaded, but temperature unavailable.' +
+              '</span>';
+
+          }
+
+
+          else if (temperatureLoaded) {
+
+            statusElement.innerHTML =
+              '<span class="text-warning">' +
+              '⚠️ Temperature loaded, but risk unavailable.' +
+              '</span>';
+
+          }
+
+
+          else {
+
+            statusElement.innerHTML =
+              '<span class="text-danger">' +
+              '❌ Unable to load live data.' +
+              '</span>';
+
+          }
+
+        }
+
+
+
+        /* ==========================================
+           FORM SUBMIT
+        ========================================== */
+
+        form.addEventListener(
+          "submit",
+          async function (event) {
+
+            event.preventDefault();
+
+
+            const name =
+              document
+                .getElementById("userName")
+                .value
+                .trim();
+
+
+            const age =
+              Number(
+                document
+                  .getElementById("age")
+                  .value
+              );
+
+
+            const phoneNumber =
+              document
+                .getElementById("phoneNumber")
+                .value
+                .trim();
+
+
+            if (
+              !name ||
+              !age ||
+              !phoneNumber
+            ) {
+
+              statusElement.innerHTML =
+                '<span class="text-danger">' +
+                'Please fill in all required fields.' +
+                '</span>';
+
+
+              return;
+
+            }
+
+
+            if (!overallRisk) {
+
+              statusElement.innerHTML =
+                '<span class="text-danger">' +
+                'Overall risk level is not available.' +
+                '</span>';
+
+
+              return;
+
+            }
+
+
+            if (
+              currentTemperature === null
+            ) {
+
+              statusElement.innerHTML =
+                '<span class="text-danger">' +
+                'Temperature is not available.' +
+                '</span>';
+
+
+              return;
+
+            }
+
+
+            sendButton.disabled =
+              true;
+
+
+            sendButton.textContent =
+              "GENERATING & SENDING...";
+
+
+            statusElement.innerHTML =
+              '<span class="text-primary">' +
+              'Generating AI message & dispatching WhatsApp alert...' +
+              '</span>';
+
+
+            previewElement.innerHTML =
+              "";
+
+
+            try {
+
+              const requestBody = {
+
+                name: name,
+
+                age: age,
+
+                phoneNumber: phoneNumber,
+
+                overall_risk:
+                  overallRisk,
+
+                temperature:
+                  currentTemperature
+
+              };
+
+
+              const response =
+                await fetch(
+                  "/api/generate-personalized-whatsapp",
+                  {
+
+                    method: "POST",
+
+                    headers: {
+                      "Content-Type":
+                        "application/json"
+                    },
+
+                    body:
+                      JSON.stringify(
+                        requestBody
+                      )
+
+                  }
+                );
+
+
+              const data =
+                await response.json();
+
+
+              if (
+                !response.ok ||
+                !data.success
+              ) {
+
+                throw new Error(
+                  data.message ||
+                  "Unable to generate or send advisory."
+                );
+
+              }
+
+
+              statusElement.innerHTML =
+                '<span class="text-success">' +
+                '✅ Alert dispatched successfully!' +
+                '</span>';
+
+
+              previewElement.innerHTML = `
 
               <div class="message-preview">
 
@@ -952,13 +1229,14 @@
                   style="white-space: pre-wrap;"
                 >
                   ${escapeHtml(
-                    data.feedback ||
-                    data.message ||
-                    "Message generated successfully."
-                  )}
+                data.feedback ||
+                data.message ||
+                "Message generated successfully."
+              )}
                 </p>
 
               </div>
+
 
               <div class="mt-3 small border p-2 bg-light">
 
@@ -967,9 +1245,9 @@
                 </strong>
 
                 ${escapeHtml(
-                  data.whatsappStatus ||
-                  "Sent"
-                )}
+                data.whatsappStatus ||
+                "Sent"
+              )}
 
                 <br>
 
@@ -978,8 +1256,8 @@
                 </strong>
 
                 ${escapeHtml(
-                  overallRisk
-                )}
+                overallRisk
+              )}
 
                 <br>
 
@@ -988,47 +1266,60 @@
                 </strong>
 
                 ${escapeHtml(
-                  currentTemperature.toFixed(1)
-                )} °C
+                currentTemperature.toFixed(1)
+              )} °C
 
               </div>
 
             `;
 
-          } catch (error) {
 
-            console.error(
-              "Personalized alert error:",
-              error
-            );
+            } catch (error) {
 
-            statusElement.innerHTML =
-              `<span class="text-danger">
+              console.error(
+                "Personalized alert error:",
+                error
+              );
+
+
+              statusElement.innerHTML =
+                `<span class="text-danger">
                 ${escapeHtml(
                   error.message
                 )}
               </span>`;
 
-          } finally {
+            } finally {
 
-            sendButton.disabled =
-              false;
+              sendButton.disabled =
+                false;
 
-            sendButton.textContent =
-              "GENERATE & SEND WHATSAPP ALERT";
+
+              sendButton.textContent =
+                "GENERATE & SEND WHATSAPP ALERT";
+
+            }
 
           }
+        );
 
-        }
-      );
 
-      /* ==========================================
-         START
-      ========================================== */
 
-      await loadLiveData();
+        /* ==========================================
+           GENERATE QR
+        ========================================== */
 
-    }
-  );
+        generateAlertsQRCode();
 
-</script>
+
+
+        /* ==========================================
+           START
+        ========================================== */
+
+        await loadLiveData();
+
+      }
+    );
+
+  </script>
