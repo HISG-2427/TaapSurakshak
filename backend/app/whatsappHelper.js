@@ -1,6 +1,6 @@
 const { Client, LocalAuth } = require("whatsapp-web.js");
 const qrcode = require("qrcode");
-
+const puppeteer = require("puppeteer");
 // ============================================================
 // WHATSAPP STATE
 // ============================================================
@@ -30,6 +30,8 @@ if (process.env.ENABLE_WHATSAPP === "true") {
 
             headless: true,
 
+            executablePath: puppeteer.executablePath(),
+
             args: [
                 "--no-sandbox",
                 "--disable-setuid-sandbox",
@@ -37,13 +39,17 @@ if (process.env.ENABLE_WHATSAPP === "true") {
                 "--disable-accelerated-2d-canvas",
                 "--no-first-run",
                 "--no-zygote",
-                "--disable-gpu"
+                "--disable-gpu",
+                "--disable-software-rasterizer",
+                "--disable-extensions",
+                "--disable-background-networking",
+                "--disable-background-timer-throttling",
+                "--disable-renderer-backgrounding"
             ]
 
         }
 
     });
-
 
     // ========================================================
     // QR CODE GENERATED
