@@ -6,7 +6,7 @@ const ejsMate = require("ejs-mate");
 const methodOverride = require("method-override");
 const bcrypt = require("bcrypt");
 const session = require("express-session");
-const MongoStore = require("connect-mongo");
+const {MongoStore} = require("connect-mongo");
 require("dotenv").config({
     path: path.resolve(__dirname, ".env")
 });
