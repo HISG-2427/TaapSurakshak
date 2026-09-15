@@ -137,60 +137,67 @@
 
 
     /* ==========================================
-     QR CODE
+     WHATSAPP QR SECTION
   ========================================== */
 
-    .qr-section {
+    .whatsapp-section {
       margin-top: 24px;
+    }
+
+    .whatsapp-status-card {
+      background: #fffafa;
+      border: 1px solid #efdada;
+      padding: 20px;
       text-align: center;
     }
 
-    .qr-container {
-      background: #ffffff;
-      border: 1px solid #efdada;
-      padding: 20px;
-      display: inline-flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-    }
-
-    .qr-title {
+    .whatsapp-status-title {
       color: #071b3a;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       font-weight: 700;
       margin-bottom: 8px;
     }
 
-    .qr-description {
+    .whatsapp-status-text {
       color: #704040;
       font-size: 0.75rem;
-      line-height: 1.5;
+      line-height: 1.6;
       margin-bottom: 15px;
     }
 
-    #alertsQRCode {
+    #whatsappQRCode {
       background: #ffffff;
-      padding: 10px;
+      border: 1px solid #eadede;
+      padding: 15px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-height: 220px;
-      min-width: 220px;
+      min-width: 250px;
+      min-height: 250px;
     }
 
-    #alertsQRCode img,
-    #alertsQRCode canvas {
-      max-width: 100%;
-      height: auto;
+    #whatsappQRCode img {
+      width: 220px;
+      height: 220px;
+      display: block;
     }
 
-    .qr-url {
+    .whatsapp-ready {
+      color: #198754;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .whatsapp-waiting {
       color: #3159a2;
-      font-size: 0.7rem;
-      margin-top: 12px;
-      word-break: break-all;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .whatsapp-disabled {
+      color: #bd001b;
+      font-size: 0.8rem;
+      font-weight: 600;
     }
 
 
@@ -241,10 +248,6 @@
 
       #personalizedSmsForm .metric-label {
         margin-bottom: 10px;
-      }
-
-      .qr-container {
-        padding: 20px;
       }
 
     }
@@ -301,13 +304,14 @@
         padding: 14px;
       }
 
-      .qr-section {
-        margin-top: 20px;
+      #whatsappQRCode {
+        min-width: 230px;
+        min-height: 230px;
       }
 
-      #alertsQRCode {
-        min-height: 200px;
-        min-width: 200px;
+      #whatsappQRCode img {
+        width: 200px;
+        height: 200px;
       }
 
     }
@@ -353,21 +357,19 @@
         margin-bottom: 11px;
       }
 
-      .qr-container {
+      .whatsapp-status-card {
         padding: 15px;
       }
 
-      #alertsQRCode {
-        min-height: 180px;
-        min-width: 180px;
+      #whatsappQRCode {
+        min-width: 210px;
+        min-height: 210px;
+        padding: 10px;
       }
 
-      .qr-title {
-        font-size: 0.85rem;
-      }
-
-      .qr-description {
-        font-size: 0.72rem;
+      #whatsappQRCode img {
+        width: 180px;
+        height: 180px;
       }
 
     }
@@ -375,6 +377,7 @@
 
 
   <div class="container-fluid alerts-page">
+
 
     <div class="page-header">
 
@@ -525,15 +528,19 @@
 
 
       <!-- ============================= -->
-      <!-- RIGHT SIDE - PREVIEW -->
+      <!-- RIGHT SIDE -->
       <!-- ============================= -->
 
       <div class="col-12 col-lg-6">
 
+
+        <!-- ============================= -->
+        <!-- MESSAGE PREVIEW -->
+        <!-- ============================= -->
+
         <div class="card section-card">
 
           <div class="card-body">
-
 
             <h4 class="section-title">
 
@@ -561,55 +568,81 @@
 
             </div>
 
+          </div>
+
+        </div>
 
 
-            <!-- ============================= -->
-            <!-- QR CODE -->
-            <!-- ============================= -->
 
-            <div class="qr-section">
+        <!-- ============================= -->
+        <!-- WHATSAPP LINKING -->
+        <!-- ============================= -->
 
-              <div class="qr-container">
+        <div class="whatsapp-section">
 
-                <div class="qr-title">
-                  Scan to Access TaapSurakshak Alerts
+          <div class="card section-card">
+
+            <div class="card-body">
+
+              <h4 class="section-title">
+
+                <span class="icon">◉</span>
+
+                WhatsApp Linking
+
+              </h4>
+
+
+              <div class="whatsapp-status-card">
+
+
+                <div class="whatsapp-status-title">
+
+                  Link WhatsApp to TaapSurakshak
+
                 </div>
 
-                <div class="qr-description">
-                  Scan this QR code with your phone to open
-                  the TaapSurakshak Alerts page.
+
+                <div id="whatsappStatusText" class="whatsapp-status-text">
+
+                  Checking WhatsApp connection...
+
                 </div>
 
 
-                <div id="alertsQRCode"></div>
+                <div id="whatsappQRCode">
 
+                  <span class="whatsapp-waiting">
+                    Waiting for WhatsApp QR...
+                  </span>
 
-                <div class="qr-url">
-                  https://taapsurakshak-app.onrender.com/alerts
                 </div>
+
+
+                <div class="whatsapp-status-text" style="margin-top:15px;">
+
+                  Open WhatsApp on your phone →
+                  Linked Devices →
+                  Link a Device →
+                  Scan this QR code.
+
+                </div>
+
 
               </div>
 
             </div>
 
-
           </div>
 
         </div>
+
 
       </div>
 
     </div>
 
   </div>
-
-
-
-  <!-- ==========================================
-     QR CODE LIBRARY
-========================================== -->
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 
 
@@ -660,6 +693,17 @@
           );
 
 
+        const whatsappQRCode =
+          document.getElementById(
+            "whatsappQRCode"
+          );
+
+
+        const whatsappStatusText =
+          document.getElementById(
+            "whatsappStatusText"
+          );
+
 
         /* ==========================================
            VARIABLES
@@ -668,76 +712,6 @@
         let overallRisk = null;
 
         let currentTemperature = null;
-
-
-
-        /* ==========================================
-           GENERATE QR CODE
-        ========================================== */
-
-        function generateAlertsQRCode() {
-
-          const qrElement =
-            document.getElementById(
-              "alertsQRCode"
-            );
-
-
-          if (!qrElement) {
-
-            console.error(
-              "QR code container not found."
-            );
-
-            return;
-
-          }
-
-
-          /*
-           * Clear existing QR code
-           */
-
-          qrElement.innerHTML = "";
-
-
-          /*
-           * Deployed TaapSurakshak Alerts URL
-           */
-
-          const alertsURL =
-            "https://taapsurakshak-app.onrender.com/alerts";
-
-
-          /*
-           * Generate QR
-           */
-
-          new QRCode(
-            qrElement,
-            {
-              text: alertsURL,
-
-              width: 200,
-
-              height: 200,
-
-              colorDark: "#071b3a",
-
-              colorLight: "#ffffff",
-
-              correctLevel:
-                QRCode.CorrectLevel.H
-            }
-          );
-
-
-          console.log(
-            "✅ Alerts QR code generated."
-          );
-
-        }
-
 
 
         /* ==========================================
@@ -785,6 +759,185 @@
 
         }
 
+
+        /* ==========================================
+           LOAD WHATSAPP QR
+        ========================================== */
+
+        async function loadWhatsAppStatus() {
+
+          try {
+
+            const response =
+              await fetch(
+                "/api/whatsapp-status"
+              );
+
+
+            const result =
+              await response.json();
+
+
+            if (
+              !response.ok ||
+              !result.success
+            ) {
+
+              throw new Error(
+                result.message ||
+                "Unable to check WhatsApp status."
+              );
+
+            }
+
+
+            /* ======================================
+               WHATSAPP DISABLED
+            ====================================== */
+
+            if (!result.enabled) {
+
+              whatsappStatusText.innerHTML =
+                '<span class="whatsapp-disabled">' +
+                '⚠️ WhatsApp linking is currently disabled.' +
+                '</span>';
+
+
+              whatsappQRCode.innerHTML = `
+
+              <div class="whatsapp-disabled">
+
+                Enable WhatsApp on the server
+                to generate the linking QR.
+
+              </div>
+
+            `;
+
+              return;
+
+            }
+
+
+            /* ======================================
+               WHATSAPP ALREADY CONNECTED
+            ====================================== */
+
+            if (result.ready) {
+
+              whatsappStatusText.innerHTML =
+                '<span class="whatsapp-ready">' +
+                '✅ WhatsApp is connected and ready.' +
+                '</span>';
+
+
+              whatsappQRCode.innerHTML = `
+
+              <div class="whatsapp-ready">
+
+                ✅ WhatsApp Linked
+
+                <br>
+
+                You can now send
+                personalized WhatsApp alerts.
+
+              </div>
+
+            `;
+
+              return;
+
+            }
+
+
+            /* ======================================
+               QR AVAILABLE
+            ====================================== */
+
+            if (result.qr) {
+
+              whatsappStatusText.innerHTML =
+                '<span class="whatsapp-waiting">' +
+                '📱 Scan the QR code with WhatsApp.' +
+                '</span>';
+
+
+              whatsappQRCode.innerHTML = `
+
+              <img
+                src="${result.qr}"
+                alt="WhatsApp linking QR code"
+              >
+
+            `;
+
+              return;
+
+            }
+
+
+            /* ======================================
+               WAITING FOR QR
+            ====================================== */
+
+            whatsappStatusText.innerHTML =
+              '<span class="whatsapp-waiting">' +
+              '⏳ Waiting for WhatsApp to generate QR...' +
+              '</span>';
+
+
+            whatsappQRCode.innerHTML = `
+
+            <span class="whatsapp-waiting">
+
+              Waiting for QR code...
+
+            </span>
+
+          `;
+
+
+          } catch (error) {
+
+            console.error(
+              "WhatsApp status error:",
+              error
+            );
+
+
+            whatsappStatusText.innerHTML =
+              '<span class="whatsapp-disabled">' +
+              '❌ Unable to connect to WhatsApp service.' +
+              '</span>';
+
+
+            whatsappQRCode.innerHTML = `
+
+            <span class="whatsapp-disabled">
+
+              WhatsApp status unavailable.
+
+            </span>
+
+          `;
+
+          }
+
+        }
+
+
+        /* ==========================================
+           KEEP QR STATUS UPDATED
+        ========================================== */
+
+        await loadWhatsAppStatus();
+
+
+        setInterval(
+          loadWhatsAppStatus,
+          3000
+        );
 
 
         /* ==========================================
@@ -869,11 +1022,8 @@
         }
 
 
-
         /* ==========================================
-           LOAD TEMPERATURE FROM OPENWEATHER
-           
-           MUMBAI
+           LOAD TEMPERATURE
         ========================================== */
 
         async function loadTemperature() {
@@ -884,25 +1034,13 @@
               "Loading...";
 
 
-            /*
-             * OpenWeather API key
-             */
-
             const apiKey =
               "4a3859186dbabdd652e466a270aab3ec";
 
 
-            /*
-             * Mumbai
-             */
-
             const city =
               "Mumbai";
 
-
-            /*
-             * OpenWeather Current Weather API
-             */
 
             const url =
               "https://api.openweathermap.org/data/2.5/weather" +
@@ -929,12 +1067,6 @@
             }
 
 
-            /*
-             * Temperature is inside:
-             *
-             * data.main.temp
-             */
-
             currentTemperature =
               Number(
                 data.main.temp
@@ -953,10 +1085,6 @@
 
             }
 
-
-            /*
-             * Show temperature
-             */
 
             temperatureInput.value =
               `${currentTemperature.toFixed(1)} °C`;
@@ -984,7 +1112,6 @@
           }
 
         }
-
 
 
         /* ==========================================
@@ -1054,7 +1181,6 @@
           }
 
         }
-
 
 
         /* ==========================================
@@ -1304,17 +1430,8 @@
         );
 
 
-
         /* ==========================================
-           GENERATE QR
-        ========================================== */
-
-        generateAlertsQRCode();
-
-
-
-        /* ==========================================
-           START
+           START LIVE DATA
         ========================================== */
 
         await loadLiveData();
