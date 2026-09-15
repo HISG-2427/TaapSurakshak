@@ -85,6 +85,11 @@
       color: white;
     }
 
+    .preview-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
     .message-preview {
       background: #fffafa;
       border: 1px solid #f1a2a2;
@@ -134,7 +139,6 @@
       margin-bottom: 9px;
       display: block;
     }
-
 
     /* ==========================================
      WHATSAPP QR SECTION
@@ -200,9 +204,8 @@
       font-weight: 600;
     }
 
-
     /* ==========================================
-     ALERTS FORM RESPONSIVENESS
+     FORM
   ========================================== */
 
     #personalizedSmsForm {
@@ -217,7 +220,6 @@
     #personalizedSmsForm .mb-3 {
       margin-bottom: 1.25rem !important;
     }
-
 
     /* ==========================================
      TABLET
@@ -238,20 +240,7 @@
         padding: 1.5rem;
       }
 
-      #personalizedSmsForm {
-        width: 100%;
-      }
-
-      #personalizedSmsForm .form-label {
-        margin-bottom: 10px;
-      }
-
-      #personalizedSmsForm .metric-label {
-        margin-bottom: 10px;
-      }
-
     }
-
 
     /* ==========================================
      MOBILE
@@ -272,10 +261,6 @@
 
       .section-card .card-body {
         padding: 1.25rem !important;
-      }
-
-      #personalizedSmsForm {
-        width: 100%;
       }
 
       #personalizedSmsForm .mb-3 {
@@ -315,7 +300,6 @@
       }
 
     }
-
 
     /* ==========================================
      SMALL MOBILE
@@ -378,6 +362,9 @@
 
   <div class="container-fluid alerts-page">
 
+    <!-- ==========================================
+       PAGE HEADER
+  ========================================== -->
 
     <div class="page-header">
 
@@ -394,10 +381,9 @@
 
     <div class="row g-4">
 
-
-      <!-- ============================= -->
-      <!-- LEFT SIDE - FORM -->
-      <!-- ============================= -->
+      <!-- ==========================================
+         LEFT SIDE
+    ========================================== -->
 
       <div class="col-12 col-lg-6">
 
@@ -414,8 +400,13 @@
             </h4>
 
 
-            <form id="personalizedSmsForm">
+            <!-- IMPORTANT:
+               No action attribute.
+               Button below is type="button".
+               Therefore browser cannot perform GET navigation.
+          -->
 
+            <form id="personalizedSmsForm" onsubmit="return false;">
 
               <!-- USER NAME -->
 
@@ -458,14 +449,13 @@
               </div>
 
 
-              <!-- ============================= -->
-              <!-- RISK + TEMPERATURE -->
-              <!-- ============================= -->
+              <!-- ======================================
+                 RISK + TEMPERATURE
+            ======================================= -->
 
               <div class="row g-3 mb-3">
 
-
-                <!-- OVERALL RISK -->
+                <!-- RISK -->
 
                 <div class="col-12 col-md-6">
 
@@ -503,11 +493,14 @@
               </div>
 
 
-              <!-- ============================= -->
-              <!-- SEND BUTTON -->
-              <!-- ============================= -->
+              <!-- ======================================
+                 SEND BUTTON
+                 
+                 IMPORTANT:
+                 type="button", NOT submit
+            ======================================= -->
 
-              <button type="submit" class="btn preview-btn" id="sendSmsButton">
+              <button type="button" class="btn preview-btn" id="sendSmsButton">
                 GENERATE & SEND WHATSAPP ALERT
               </button>
 
@@ -515,7 +508,6 @@
               <!-- STATUS -->
 
               <div id="smsStatus" class="status-message"></div>
-
 
             </form>
 
@@ -526,17 +518,16 @@
       </div>
 
 
-
-      <!-- ============================= -->
-      <!-- RIGHT SIDE -->
-      <!-- ============================= -->
+      <!-- ==========================================
+         RIGHT SIDE
+    ========================================== -->
 
       <div class="col-12 col-lg-6">
 
 
-        <!-- ============================= -->
-        <!-- MESSAGE PREVIEW -->
-        <!-- ============================= -->
+        <!-- ==========================================
+           MESSAGE PREVIEW
+      ========================================== -->
 
         <div class="card section-card">
 
@@ -573,10 +564,9 @@
         </div>
 
 
-
-        <!-- ============================= -->
-        <!-- WHATSAPP LINKING -->
-        <!-- ============================= -->
+        <!-- ==========================================
+           WHATSAPP LINKING
+      ========================================== -->
 
         <div class="whatsapp-section">
 
@@ -594,7 +584,6 @@
 
 
               <div class="whatsapp-status-card">
-
 
                 <div class="whatsapp-status-title">
 
@@ -628,7 +617,6 @@
 
                 </div>
 
-
               </div>
 
             </div>
@@ -637,7 +625,6 @@
 
         </div>
 
-
       </div>
 
     </div>
@@ -645,12 +632,15 @@
   </div>
 
 
-
   <script>
 
     document.addEventListener(
       "DOMContentLoaded",
-      async function () {
+      function () {
+
+        console.log(
+          "🚀 Alerts page JavaScript loaded."
+        );
 
 
         /* ==========================================
@@ -662,47 +652,66 @@
             "personalizedSmsForm"
           );
 
-
         const statusElement =
           document.getElementById(
             "smsStatus"
           );
-
 
         const previewElement =
           document.getElementById(
             "smsPreview"
           );
 
-
         const sendButton =
           document.getElementById(
             "sendSmsButton"
           );
-
 
         const riskLevelInput =
           document.getElementById(
             "riskLevel"
           );
 
-
         const temperatureInput =
           document.getElementById(
             "temperature"
           );
-
 
         const whatsappQRCode =
           document.getElementById(
             "whatsappQRCode"
           );
 
-
         const whatsappStatusText =
           document.getElementById(
             "whatsappStatusText"
           );
+
+
+        /* ==========================================
+           CHECK ELEMENTS
+        ========================================== */
+
+        if (!form) {
+
+          console.error(
+            "❌ personalizedSmsForm not found."
+          );
+
+          return;
+
+        }
+
+
+        if (!sendButton) {
+
+          console.error(
+            "❌ sendSmsButton not found."
+          );
+
+          return;
+
+        }
 
 
         /* ==========================================
@@ -728,7 +737,6 @@
             return "";
 
           }
-
 
           return String(value)
 
@@ -761,7 +769,7 @@
 
 
         /* ==========================================
-           LOAD WHATSAPP QR
+           LOAD WHATSAPP STATUS
         ========================================== */
 
         async function loadWhatsAppStatus() {
@@ -770,12 +778,22 @@
 
             const response =
               await fetch(
-                "/api/whatsapp-status"
+                "/api/whatsapp-status",
+                {
+                  method: "GET",
+                  cache: "no-store"
+                }
               );
 
 
             const result =
               await response.json();
+
+
+            console.log(
+              "📱 WhatsApp status:",
+              result
+            );
 
 
             if (
@@ -792,7 +810,7 @@
 
 
             /* ======================================
-               WHATSAPP DISABLED
+               DISABLED
             ====================================== */
 
             if (!result.enabled) {
@@ -805,14 +823,14 @@
 
               whatsappQRCode.innerHTML = `
 
-              <div class="whatsapp-disabled">
+            <div class="whatsapp-disabled">
 
-                Enable WhatsApp on the server
-                to generate the linking QR.
+              Enable WhatsApp on the server
+              to generate the linking QR.
 
-              </div>
+            </div>
 
-            `;
+          `;
 
               return;
 
@@ -820,7 +838,7 @@
 
 
             /* ======================================
-               WHATSAPP ALREADY CONNECTED
+               READY
             ====================================== */
 
             if (result.ready) {
@@ -833,18 +851,18 @@
 
               whatsappQRCode.innerHTML = `
 
-              <div class="whatsapp-ready">
+            <div class="whatsapp-ready">
 
-                ✅ WhatsApp Linked
+              ✅ WhatsApp Linked
 
-                <br>
+              <br><br>
 
-                You can now send
-                personalized WhatsApp alerts.
+              You can now send
+              personalized WhatsApp alerts.
 
-              </div>
+            </div>
 
-            `;
+          `;
 
               return;
 
@@ -865,12 +883,12 @@
 
               whatsappQRCode.innerHTML = `
 
-              <img
-                src="${result.qr}"
-                alt="WhatsApp linking QR code"
-              >
+            <img
+              src="${escapeHtml(result.qr)}"
+              alt="WhatsApp linking QR code"
+            >
 
-            `;
+          `;
 
               return;
 
@@ -889,19 +907,19 @@
 
             whatsappQRCode.innerHTML = `
 
-            <span class="whatsapp-waiting">
+          <span class="whatsapp-waiting">
 
-              Waiting for QR code...
+            Waiting for QR code...
 
-            </span>
+          </span>
 
-          `;
+        `;
 
 
           } catch (error) {
 
             console.error(
-              "WhatsApp status error:",
+              "❌ WhatsApp status error:",
               error
             );
 
@@ -914,13 +932,13 @@
 
             whatsappQRCode.innerHTML = `
 
-            <span class="whatsapp-disabled">
+          <span class="whatsapp-disabled">
 
-              WhatsApp status unavailable.
+            WhatsApp status unavailable.
 
-            </span>
+          </span>
 
-          `;
+        `;
 
           }
 
@@ -928,11 +946,15 @@
 
 
         /* ==========================================
-           KEEP QR STATUS UPDATED
+           INITIAL WHATSAPP STATUS
         ========================================== */
 
-        await loadWhatsAppStatus();
+        loadWhatsAppStatus();
 
+
+        /* ==========================================
+           REFRESH WHATSAPP STATUS EVERY 3 SECONDS
+        ========================================== */
 
         setInterval(
           loadWhatsAppStatus,
@@ -941,11 +963,7 @@
 
 
         /* ==========================================
-           LOAD OVERALL RISK LEVEL
-           
-           FROM EXPRESS BACKEND
-           
-           GET /api/latest-heat-data
+           LOAD RISK LEVEL
         ========================================== */
 
         async function loadRiskLevel() {
@@ -958,12 +976,22 @@
 
             const response =
               await fetch(
-                "/api/latest-heat-data"
+                "/api/latest-heat-data",
+                {
+                  method: "GET",
+                  cache: "no-store"
+                }
               );
 
 
             const result =
               await response.json();
+
+
+            console.log(
+              "🔥 Latest heat data:",
+              result
+            );
 
 
             if (
@@ -1003,7 +1031,7 @@
           } catch (error) {
 
             console.error(
-              "Risk level error:",
+              "❌ Risk level error:",
               error
             );
 
@@ -1034,6 +1062,12 @@
               "Loading...";
 
 
+            /*
+             * IMPORTANT:
+             * This API key should eventually be moved
+             * to your backend/environment variable.
+             */
+
             const apiKey =
               "4a3859186dbabdd652e466a270aab3ec";
 
@@ -1044,7 +1078,7 @@
 
             const url =
               "https://api.openweathermap.org/data/2.5/weather" +
-              `?q=${city}` +
+              `?q=${encodeURIComponent(city)}` +
               "&units=metric" +
               `&appid=${apiKey}`;
 
@@ -1095,7 +1129,7 @@
           } catch (error) {
 
             console.error(
-              "Temperature error:",
+              "❌ Temperature error:",
               error
             );
 
@@ -1115,7 +1149,7 @@
 
 
         /* ==========================================
-           LOAD BOTH DATA
+           LOAD LIVE DATA
         ========================================== */
 
         async function loadLiveData() {
@@ -1126,16 +1160,21 @@
             '</span>';
 
 
-          const [
-            riskLoaded,
-            temperatureLoaded
-          ] = await Promise.all([
+          const results =
+            await Promise.all([
 
-            loadRiskLevel(),
+              loadRiskLevel(),
 
-            loadTemperature()
+              loadTemperature()
 
-          ]);
+            ]);
+
+
+          const riskLoaded =
+            results[0];
+
+          const temperatureLoaded =
+            results[1];
 
 
           if (
@@ -1150,7 +1189,6 @@
 
           }
 
-
           else if (riskLoaded) {
 
             statusElement.innerHTML =
@@ -1160,7 +1198,6 @@
 
           }
 
-
           else if (temperatureLoaded) {
 
             statusElement.innerHTML =
@@ -1169,7 +1206,6 @@
               '</span>';
 
           }
-
 
           else {
 
@@ -1184,15 +1220,28 @@
 
 
         /* ==========================================
-           FORM SUBMIT
+           SEND WHATSAPP ALERT
+           
+           IMPORTANT:
+           This is a CLICK event, NOT form submit.
+           
+           Therefore browser will NEVER perform:
+           
+           GET /api/generate-personalized-whatsapp
         ========================================== */
 
-        form.addEventListener(
-          "submit",
-          async function (event) {
+        sendButton.addEventListener(
+          "click",
+          async function () {
 
-            event.preventDefault();
+            console.log(
+              "🟢 GENERATE & SEND button clicked."
+            );
 
+
+            /* ======================================
+               GET FORM VALUES
+            ====================================== */
 
             const name =
               document
@@ -1216,17 +1265,44 @@
                 .trim();
 
 
+            /* ======================================
+               VALIDATION
+            ====================================== */
+
+            if (!name) {
+
+              statusElement.innerHTML =
+                '<span class="text-danger">' +
+                'Please enter the user name.' +
+                '</span>';
+
+              return;
+
+            }
+
+
             if (
-              !name ||
               !age ||
-              !phoneNumber
+              age < 1 ||
+              age > 120
             ) {
 
               statusElement.innerHTML =
                 '<span class="text-danger">' +
-                'Please fill in all required fields.' +
+                'Please enter a valid age between 1 and 120.' +
                 '</span>';
 
+              return;
+
+            }
+
+
+            if (!phoneNumber) {
+
+              statusElement.innerHTML =
+                '<span class="text-danger">' +
+                'Please enter a WhatsApp phone number.' +
+                '</span>';
 
               return;
 
@@ -1237,9 +1313,8 @@
 
               statusElement.innerHTML =
                 '<span class="text-danger">' +
-                'Overall risk level is not available.' +
+                'Overall risk level is not available. Please wait for the risk data to load.' +
                 '</span>';
-
 
               return;
 
@@ -1247,7 +1322,8 @@
 
 
             if (
-              currentTemperature === null
+              currentTemperature === null ||
+              Number.isNaN(currentTemperature)
             ) {
 
               statusElement.innerHTML =
@@ -1255,11 +1331,73 @@
                 'Temperature is not available.' +
                 '</span>';
 
+              return;
+
+            }
+
+
+            /* ======================================
+               CHECK WHATSAPP STATUS BEFORE SENDING
+            ====================================== */
+
+            try {
+
+              const whatsappResponse =
+                await fetch(
+                  "/api/whatsapp-status",
+                  {
+                    method: "GET",
+                    cache: "no-store"
+                  }
+                );
+
+
+              const whatsappData =
+                await whatsappResponse.json();
+
+
+              console.log(
+                "📱 WhatsApp status before sending:",
+                whatsappData
+              );
+
+
+              if (
+                !whatsappData.ready
+              ) {
+
+                statusElement.innerHTML =
+                  '<span class="text-danger">' +
+                  '❌ WhatsApp is not ready. Please scan the QR code first.' +
+                  '</span>';
+
+
+                return;
+
+              }
+
+            } catch (error) {
+
+              console.error(
+                "❌ Unable to check WhatsApp:",
+                error
+              );
+
+
+              statusElement.innerHTML =
+                '<span class="text-danger">' +
+                '❌ Unable to check WhatsApp connection.' +
+                '</span>';
+
 
               return;
 
             }
 
+
+            /* ======================================
+               DISABLE BUTTON
+            ====================================== */
 
             sendButton.disabled =
               true;
@@ -1279,39 +1417,131 @@
               "";
 
 
+            /* ======================================
+               REQUEST BODY
+            ====================================== */
+
+            const requestBody = {
+
+              phoneNumber:
+                phoneNumber,
+
+              name:
+                name,
+
+              age:
+                age,
+
+              overall_risk:
+                overallRisk,
+
+              temperature:
+                currentTemperature
+
+            };
+
+
+            console.log(
+              "📤 POST /api/generate-personalized-whatsapp",
+              requestBody
+            );
+
+
+            /* ======================================
+               SEND POST REQUEST
+            ====================================== */
+
             try {
 
-              const requestBody = {
+              const response =
+                await fetch(
+                  "/api/generate-personalized-whatsapp",
+                  {
+                    method: "POST",
 
-                name: name,
+                    headers: {
+                      "Content-Type": "application/json",
+                      "Accept": "application/json"
+                    },
 
-                age: age,
-
-                phoneNumber: phoneNumber,
-
-                overall_risk:
-                  overallRisk,
-
-                temperature:
-                  currentTemperature
-
-              };
+                    body:
+                      JSON.stringify(
+                        requestBody
+                      )
+                  }
+                );
 
 
-              const response = await fetch("/api/generate-personalized-whatsapp", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                  phoneNumber,
-                  name,
-                  temperature
-                })
-              });
+              console.log(
+                "📥 Server HTTP status:",
+                response.status
+              );
 
-              const data = await response.json();
 
+              const contentType =
+                response.headers.get(
+                  "content-type"
+                );
+
+
+              let data;
+
+
+              /* ====================================
+                 JSON RESPONSE
+              ==================================== */
+
+              if (
+                contentType &&
+                contentType.includes(
+                  "application/json"
+                )
+              ) {
+
+                data =
+                  await response.json();
+
+              }
+
+              /* ====================================
+                 NON JSON RESPONSE
+                 
+                 This is useful if Express sends:
+                 
+                 Cannot GET...
+                 Cannot POST...
+                 
+                 or an HTML error page.
+              ==================================== */
+
+              else {
+
+                const text =
+                  await response.text();
+
+
+                console.error(
+                  "❌ Server returned non-JSON:",
+                  text
+                );
+
+
+                throw new Error(
+                  `Server returned ${response.status}: ${text.substring(0, 200)}`
+                );
+
+              }
+
+
+              console.log(
+                "📥 WhatsApp API response:",
+                data
+              );
+
+
+              /* ====================================
+                 CHECK RESPONSE
+              ==================================== */
 
               if (
                 !response.ok ||
@@ -1320,11 +1550,15 @@
 
                 throw new Error(
                   data.message ||
-                  "Unable to generate or send advisory."
+                  `Unable to generate or send advisory. Server status: ${response.status}`
                 );
 
               }
 
+
+              /* ====================================
+                 SUCCESS
+              ==================================== */
 
               statusElement.innerHTML =
                 '<span class="text-success">' +
@@ -1332,78 +1566,121 @@
                 '</span>';
 
 
+              const feedback =
+                data.feedback ||
+                data.personalizedMessage ||
+                data.message ||
+                "Message generated successfully.";
+
+
               previewElement.innerHTML = `
 
-              <div class="message-preview">
+            <div class="message-preview">
 
-                <div class="message-preview-title">
-                  DISPATCHED MESSAGE
-                </div>
+              <div class="message-preview-title">
 
-                <p
-                  class="message-preview-text"
-                  style="white-space: pre-wrap;"
-                >
-                  ${escapeHtml(
-                data.feedback ||
-                data.message ||
-                "Message generated successfully."
-              )}
-                </p>
+                DISPATCHED MESSAGE
 
               </div>
 
 
-              <div class="mt-3 small border p-2 bg-light">
+              <p
+                class="message-preview-text"
+                style="white-space: pre-wrap;"
+              >${escapeHtml(feedback)}</p>
 
-                <strong>
-                  WhatsApp Delivery Status:
-                </strong>
+            </div>
 
-                ${escapeHtml(
+
+            <div
+              class="mt-3 small border p-2 bg-light"
+            >
+
+              <strong>
+                WhatsApp Delivery Status:
+              </strong>
+
+              ${escapeHtml(
                 data.whatsappStatus ||
                 "Sent"
               )}
 
-                <br>
+              <br>
 
-                <strong>
-                  Overall Risk Level:
-                </strong>
+              <strong>
+                Recipient:
+              </strong>
 
-                ${escapeHtml(
+              ${escapeHtml(
+                name
+              )}
+
+              <br>
+
+              <strong>
+                Age:
+              </strong>
+
+              ${escapeHtml(
+                age
+              )}
+
+              <br>
+
+              <strong>
+                Overall Risk Level:
+              </strong>
+
+              ${escapeHtml(
                 overallRisk
               )}
 
-                <br>
+              <br>
 
-                <strong>
-                  Temperature:
-                </strong>
+              <strong>
+                Temperature:
+              </strong>
 
-                ${escapeHtml(
+              ${escapeHtml(
                 currentTemperature.toFixed(1)
               )} °C
 
-              </div>
+            </div>
 
-            `;
+          `;
 
 
             } catch (error) {
 
               console.error(
-                "Personalized alert error:",
+                "❌ Personalized WhatsApp alert error:",
                 error
               );
 
 
               statusElement.innerHTML =
                 `<span class="text-danger">
-                ${escapeHtml(
-                  error.message
-                )}
-              </span>`;
+              ❌ ${escapeHtml(error.message)}
+            </span>`;
+
+
+              previewElement.innerHTML = `
+
+            <div class="message-preview">
+
+              <div class="message-preview-title">
+                ALERT FAILED
+              </div>
+
+              <p
+                class="message-preview-text text-danger"
+              >${escapeHtml(
+                error.message
+              )}</p>
+
+            </div>
+
+          `;
 
             } finally {
 
@@ -1421,12 +1698,32 @@
 
 
         /* ==========================================
+           PREVENT ANY FORM SUBMISSION
+           
+           Extra safety layer.
+        ========================================== */
+
+        form.addEventListener(
+          "submit",
+          function (event) {
+
+            event.preventDefault();
+
+            console.log(
+              "ℹ️ Native form submission blocked."
+            );
+
+          }
+        );
+
+
+        /* ==========================================
            START LIVE DATA
         ========================================== */
 
-        await loadLiveData();
+        loadLiveData();
 
       }
     );
 
-  </script>
+  </script> 
