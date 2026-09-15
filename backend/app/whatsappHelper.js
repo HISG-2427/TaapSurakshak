@@ -52,7 +52,25 @@ whatsappClient.on("disconnected", (reason) => {
     console.log("WhatsApp disconnected:", reason);
 });
 
-whatsappClient.initialize();
+
+/*
+ * WhatsApp initialization
+ *
+ * Local:
+ * ENABLE_WHATSAPP=true
+ *
+ * Render:
+ * ENABLE_WHATSAPP=false
+ *
+ * This prevents Puppeteer/Chrome from starting on Render.
+ */
+if (process.env.ENABLE_WHATSAPP === "true") {
+    console.log("Starting WhatsApp client...");
+    whatsappClient.initialize();
+} else {
+    console.log("WhatsApp disabled.");
+}
+
 
 function formatWhatsAppNumber(phoneNumber) {
     const cleanedNumber = String(phoneNumber || "")
@@ -73,6 +91,12 @@ async function sendWhatsAppFeedback(
     riskLevel = "UNKNOWN",
     suggestion = ""
 ) {
+    if (process.env.ENABLE_WHATSAPP !== "true") {
+        throw new Error(
+            "WhatsApp notifications are disabled on this server."
+        );
+    }
+
     if (!whatsappReady) {
         throw new Error(
             "WhatsApp is not ready. Scan the QR code in the terminal first."
@@ -119,6 +143,7 @@ async function sendWhatsAppFeedback(
         messageId: sentMessage?.id?._serialized || null
     };
 }
+
 
 function isWhatsAppReady() {
     return whatsappReady;
