@@ -1298,29 +1298,19 @@
               };
 
 
-              const response =
-                await fetch(
-                  "/api/generate-personalized-whatsapp",
-                  {
+              const response = await fetch("/api/generate-personalized-whatsapp", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                  phoneNumber,
+                  name,
+                  temperature
+                })
+              });
 
-                    method: "POST",
-
-                    headers: {
-                      "Content-Type":
-                        "application/json"
-                    },
-
-                    body:
-                      JSON.stringify(
-                        requestBody
-                      )
-
-                  }
-                );
-
-
-              const data =
-                await response.json();
+              const data = await response.json();
 
 
               if (
