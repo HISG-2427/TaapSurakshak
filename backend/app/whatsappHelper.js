@@ -1,7 +1,6 @@
 const { Client, LocalAuth } = require("whatsapp-web.js");
 const qrcode = require("qrcode");
 
-
 // ============================================================
 // WHATSAPP STATE
 // ============================================================
@@ -88,6 +87,23 @@ if (process.env.ENABLE_WHATSAPP === "true") {
 
 
     // ========================================================
+    // LOADING SCREEN
+    // ========================================================
+    // This is important for debugging after QR scanning.
+
+    whatsappClient.on(
+        "loading_screen",
+        (percent, message) => {
+
+            console.log(
+                `⏳ WhatsApp loading: ${percent}% - ${message}`
+            );
+
+        }
+    );
+
+
+    // ========================================================
     // AUTHENTICATED
     // ========================================================
 
@@ -96,8 +112,12 @@ if (process.env.ENABLE_WHATSAPP === "true") {
         () => {
 
             console.log(
-                "✅ WhatsApp authenticated."
+                "✅ WhatsApp authenticated successfully."
             );
+
+            // Authentication has succeeded.
+            // Client may still be loading, so DON'T mark
+            // whatsappReady=true here.
 
         }
     );
@@ -112,13 +132,32 @@ if (process.env.ENABLE_WHATSAPP === "true") {
         () => {
 
             console.log(
-                "✅ WhatsApp client is ready."
+                "✅ WhatsApp client is READY."
             );
 
             whatsappReady = true;
 
             // QR is no longer needed
             currentQRCode = null;
+
+        }
+    );
+
+
+    // ========================================================
+    // CHANGE STATE
+    // ========================================================
+    // Helps diagnose cases where WhatsApp authenticates
+    // but never reaches READY.
+
+    whatsappClient.on(
+        "change_state",
+        (state) => {
+
+            console.log(
+                "🔄 WhatsApp state changed:",
+                state
+            );
 
         }
     );
@@ -169,6 +208,10 @@ if (process.env.ENABLE_WHATSAPP === "true") {
     // ========================================================
     // INITIALIZE CLIENT
     // ========================================================
+
+    console.log(
+        "🚀 Initializing WhatsApp client..."
+    );
 
     whatsappClient
         .initialize()
@@ -268,7 +311,7 @@ async function sendWhatsAppFeedback(
 
 
     // --------------------------------------------------------
-    // Check authentication
+    // Check authentication / ready state
     // --------------------------------------------------------
 
     if (!whatsappReady) {
@@ -289,8 +332,10 @@ async function sendWhatsAppFeedback(
             .replace(/\D/g, "");
 
 
+    // --------------------------------------------------------
     // Indian 10-digit number
     // automatically gets +91
+    // --------------------------------------------------------
 
     if (number.length === 10) {
 
@@ -331,26 +376,38 @@ Please follow heat-safety precautions and stay hydrated.
     // Send message
     // --------------------------------------------------------
 
-    const result =
-        await whatsappClient.sendMessage(
-            chatId,
-            message
+    try {
+
+        const result =
+            await whatsappClient.sendMessage(
+                chatId,
+                message
+            );
+
+
+        console.log(
+            `✅ WhatsApp alert sent to ${number}`
         );
 
 
-    console.log(
-        `✅ WhatsApp alert sent to ${number}`
-    );
+        return result;
 
+    } catch (error) {
 
-    return result;
+        console.error(
+            `❌ Failed to send WhatsApp alert to ${number}:`,
+            error
+        );
+
+        throw error;
+
+    }
 
 }
 
 
 // ============================================================
 // EXPORTS
-// VERY IMPORTANT
 // ============================================================
 
 module.exports = {
