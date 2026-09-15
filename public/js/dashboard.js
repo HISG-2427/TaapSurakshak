@@ -84,7 +84,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 async function loadWards() {
   try {
     const response = await fetch(
-      "http://127.0.0.1:8000/wards"
+      "https://taapsurakshak.onrender.com/wards"
     );
 
     if (!response.ok) {
@@ -126,7 +126,7 @@ async function loadWardPredictions() {
 
   try {
     const response = await fetch(
-      "http://127.0.0.1:8000/predict/wards",
+      "https://taapsurakshak.onrender.com/predict/wards",
       {
         method: "POST",
         headers: {
