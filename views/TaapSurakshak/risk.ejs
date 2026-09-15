@@ -1,11 +1,21 @@
 <% layout("layouts/boilerplate.ejs") %>
 
     <style>
+        /* ==========================================
+       HEATMAP
+    ========================================== */
+
         #mumbaiHeatmap {
-            height: 98vh;
+            height: 700px;
             width: 100%;
             border-radius: 5px;
         }
+
+        .heatmap-card {
+            width: 100%;
+            overflow: hidden;
+        }
+
 
         /* ==========================================
        MORTALITY HEADER
@@ -53,22 +63,14 @@
 
 
         /* ==========================================
-       HEATMAP CARD
-    ========================================== */
-
-        .heatmap-card {
-            overflow: hidden;
-        }
-
-
-        /* ==========================================
        TABLET
     ========================================== */
 
         @media (max-width: 991px) {
 
             #mumbaiHeatmap {
-                height: 65vh;
+                height: 500px;
+                width: 100%;
                 min-height: 450px;
             }
 
@@ -88,6 +90,10 @@
             #levelCard .col-3:last-child {
                 width: 25%;
                 text-align: right;
+            }
+
+            .heatmap-card {
+                width: 100%;
             }
 
         }
@@ -134,8 +140,15 @@
             }
 
             #mumbaiHeatmap {
-                height: 60vh;
+                height: 450px;
+                width: 100%;
                 min-height: 400px;
+            }
+
+            .heatmap-card {
+                width: 100%;
+                margin-left: 0;
+                margin-right: 0;
             }
 
         }
@@ -170,15 +183,22 @@
             }
 
             #mumbaiHeatmap {
-                height: 55vh;
+                height: 400px;
+                width: 100%;
                 min-height: 350px;
+            }
+
+            .heatmap-card {
+                width: 100%;
             }
 
         }
     </style>
 
 
-    <!-- MORTALITY RISK HEADER -->
+    <!-- ==========================================
+     MORTALITY RISK HEADER
+========================================== -->
 
     <div class="card text-white mb-3" id="levelCard">
 
@@ -222,11 +242,17 @@
     </div>
 
 
+    <!-- ==========================================
+     MAIN DASHBOARD
+========================================== -->
+
     <div class="container-fluid px-0">
 
         <div class="row g-4">
 
-            <!-- LEFT COLUMN -->
+            <!-- ======================================
+             LEFT COLUMN
+        ======================================= -->
 
             <div class="col-12 col-lg-4">
 
@@ -270,17 +296,15 @@
             </div>
 
 
-            <!-- RIGHT COLUMN: MUMBAI HEATMAP -->
+            <!-- ======================================
+             RIGHT COLUMN - MUMBAI HEATMAP
+        ======================================= -->
 
             <div class="col-12 col-lg-8">
 
                 <div class="card mb-3 heatmap-card">
 
-                    <div>
-
-                        <div id="mumbaiHeatmap"></div>
-
-                    </div>
+                    <div id="mumbaiHeatmap"></div>
 
                 </div>
 
@@ -302,8 +326,10 @@
                 const levelCard =
                     document.getElementById("levelCard");
 
+
                 const response =
                     await fetch("/api/latest-heat-data");
+
 
                 if (!response.ok) {
 
@@ -313,8 +339,10 @@
 
                 }
 
+
                 const data =
                     await response.json();
+
 
                 if (!data.success) {
 
@@ -323,6 +351,7 @@
                     );
 
                 }
+
 
                 console.log(
                     "Heat data from Express:",
@@ -335,8 +364,10 @@
                 const wbgt =
                     Number(data.heatStress);
 
+
                 const hmri =
                     Number(data.mortalityRisk);
+
 
                 const riskLevel =
                     data.riskLevel;
@@ -470,15 +501,18 @@
                     wbgt
                 );
 
+
                 console.log(
                     "HMRI:",
                     hmri
                 );
 
+
                 console.log(
                     "Risk level:",
                     riskLevel
                 );
+
 
                 console.log(
                     "Mortality risk scale:",
@@ -516,9 +550,65 @@
         }
 
 
+        /* ==========================================
+           START PAGE
+        ========================================== */
+
         document.addEventListener(
             "DOMContentLoaded",
             loadHeatRiskData
+        );
+
+
+        /* ==========================================
+           LEAFLET MAP RESPONSIVENESS
+        ========================================== */
+
+        window.addEventListener(
+            "load",
+            function () {
+
+                setTimeout(
+                    function () {
+
+                        if (
+                            typeof map !== "undefined" &&
+                            map
+                        ) {
+
+                            map.invalidateSize();
+
+                        }
+
+                    },
+                    500
+                );
+
+            }
+        );
+
+
+        window.addEventListener(
+            "resize",
+            function () {
+
+                setTimeout(
+                    function () {
+
+                        if (
+                            typeof map !== "undefined" &&
+                            map
+                        ) {
+
+                            map.invalidateSize();
+
+                        }
+
+                    },
+                    200
+                );
+
+            }
         );
 
     </script>
