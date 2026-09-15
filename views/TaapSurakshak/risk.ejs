@@ -9,7 +9,7 @@
     </style>
 
     <!-- MORTALITY RISK HEADER -->
-    <div class="card bg-danger text-white mb-3">
+    <div class="card text-white mb-3" id="levelCard">
         <div class="card-body m-3">
             <div class="row">
                 <div class="col-3">
@@ -97,6 +97,7 @@
         async function loadHeatRiskData() {
             try {
                 // Fetch the already-formatted data from Express
+                const levelCard = document.getElementById("levelCard")
                 const response = await fetch("/api/latest-heat-data");
 
                 if (!response.ok) {
@@ -139,6 +140,12 @@
                 };
 
                 const mortalityRisk = riskScale[riskLevel] ?? 1;
+
+                if(1<=mortalityRisk<3){
+                    levelCard.classList.add("bg-success");
+                }else{
+                    levelCard.classList.add("bg-danger");
+                }
 
                 // Update WBGT card
                 document.getElementById("wbgtValue").textContent =
