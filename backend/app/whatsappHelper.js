@@ -1,156 +1,366 @@
-const {
-    Client,
-    LocalAuth
-} = require("whatsapp-web.js");
+const { Client, LocalAuth } = require("whatsapp-web.js");
+const qrcode = require("qrcode");
 
-const qrcode = require("qrcode-terminal");
+
+// ============================================================
+// WHATSAPP STATE
+// ============================================================
+
+let whatsappClient = null;
 
 let whatsappReady = false;
 
-const whatsappClient = new Client({
-    authStrategy: new LocalAuth({
-        clientId: "taapsurakshak"
-    }),
-    puppeteer: {
-        headless: true,
-        args: [
-            "--no-sandbox",
-            "--disable-setuid-sandbox",
-            "--disable-dev-shm-usage",
-            "--disable-gpu"
-        ]
-    }
-});
-
-whatsappClient.on("qr", (qr) => {
-    console.log("\n======================================");
-    console.log("SCAN THIS QR CODE WITH WHATSAPP");
-    console.log("WhatsApp → Settings → Linked Devices");
-    console.log("======================================\n");
-
-    qrcode.generate(qr, {
-        small: true
-    });
-});
-
-whatsappClient.on("authenticated", () => {
-    console.log("WhatsApp authenticated successfully.");
-});
-
-whatsappClient.on("ready", () => {
-    whatsappReady = true;
-    console.log("WhatsApp client is ready.");
-});
-
-whatsappClient.on("auth_failure", (message) => {
-    whatsappReady = false;
-    console.error("WhatsApp authentication failed:", message);
-});
-
-whatsappClient.on("disconnected", (reason) => {
-    whatsappReady = false;
-    console.log("WhatsApp disconnected:", reason);
-});
+let currentQRCode = null;
 
 
-/*
- * WhatsApp initialization
- *
- * Local:
- * ENABLE_WHATSAPP=true
- *
- * Render:
- * ENABLE_WHATSAPP=false
- *
- * This prevents Puppeteer/Chrome from starting on Render.
- */
+// ============================================================
+// INITIALIZE WHATSAPP
+// ============================================================
+
 if (process.env.ENABLE_WHATSAPP === "true") {
-    console.log("Starting WhatsApp client...");
-    whatsappClient.initialize();
+
+    console.log("📱 Starting WhatsApp service...");
+
+    whatsappClient = new Client({
+
+        authStrategy: new LocalAuth({
+            dataPath: "./.wwebjs_auth"
+        }),
+
+        puppeteer: {
+
+            headless: true,
+
+            args: [
+                "--no-sandbox",
+                "--disable-setuid-sandbox",
+                "--disable-dev-shm-usage",
+                "--disable-accelerated-2d-canvas",
+                "--no-first-run",
+                "--no-zygote",
+                "--disable-gpu"
+            ]
+
+        }
+
+    });
+
+
+    // ========================================================
+    // QR CODE GENERATED
+    // ========================================================
+
+    whatsappClient.on(
+        "qr",
+        async (qr) => {
+
+            try {
+
+                console.log(
+                    "📱 WhatsApp QR code generated."
+                );
+
+                whatsappReady = false;
+
+
+                // Convert WhatsApp authentication QR
+                // into a browser-displayable image
+
+                currentQRCode =
+                    await qrcode.toDataURL(qr);
+
+
+                console.log(
+                    "📱 WhatsApp QR ready for Alerts page."
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "❌ Failed to generate WhatsApp QR:",
+                    error
+                );
+
+            }
+
+        }
+    );
+
+
+    // ========================================================
+    // AUTHENTICATED
+    // ========================================================
+
+    whatsappClient.on(
+        "authenticated",
+        () => {
+
+            console.log(
+                "✅ WhatsApp authenticated."
+            );
+
+        }
+    );
+
+
+    // ========================================================
+    // READY
+    // ========================================================
+
+    whatsappClient.on(
+        "ready",
+        () => {
+
+            console.log(
+                "✅ WhatsApp client is ready."
+            );
+
+            whatsappReady = true;
+
+            // QR is no longer needed
+            currentQRCode = null;
+
+        }
+    );
+
+
+    // ========================================================
+    // AUTH FAILURE
+    // ========================================================
+
+    whatsappClient.on(
+        "auth_failure",
+        (message) => {
+
+            console.error(
+                "❌ WhatsApp authentication failure:",
+                message
+            );
+
+            whatsappReady = false;
+
+            currentQRCode = null;
+
+        }
+    );
+
+
+    // ========================================================
+    // DISCONNECTED
+    // ========================================================
+
+    whatsappClient.on(
+        "disconnected",
+        (reason) => {
+
+            console.log(
+                "⚠️ WhatsApp disconnected:",
+                reason
+            );
+
+            whatsappReady = false;
+
+            currentQRCode = null;
+
+        }
+    );
+
+
+    // ========================================================
+    // INITIALIZE CLIENT
+    // ========================================================
+
+    whatsappClient
+        .initialize()
+        .catch((error) => {
+
+            console.error(
+                "❌ WhatsApp initialization failed:",
+                error
+            );
+
+            whatsappReady = false;
+
+        });
+
+
 } else {
-    console.log("WhatsApp disabled.");
+
+    console.log(
+        "⚠️ WhatsApp disabled."
+    );
+
+    console.log(
+        "Set ENABLE_WHATSAPP=true to enable WhatsApp linking."
+    );
+
 }
 
 
-function formatWhatsAppNumber(phoneNumber) {
-    const cleanedNumber = String(phoneNumber || "")
-        .replace(/[^\d]/g, "");
+// ============================================================
+// GET WHATSAPP STATUS
+// IMPORTANT: app.js uses this function
+// ============================================================
 
-    if (!cleanedNumber) {
-        throw new Error("WhatsApp phone number is missing.");
-    }
+function getWhatsAppStatus() {
 
-    return `${cleanedNumber}@c.us`;
+    return {
+
+        enabled:
+            process.env.ENABLE_WHATSAPP === "true",
+
+        ready:
+            whatsappReady,
+
+        qr:
+            currentQRCode
+
+    };
+
 }
 
+
+// ============================================================
+// GET WHATSAPP QR CODE
+// ============================================================
+
+function getWhatsAppQRCode() {
+
+    return currentQRCode;
+
+}
+
+
+// ============================================================
+// CHECK WHATSAPP READY
+// ============================================================
+
+function isWhatsAppReady() {
+
+    return whatsappReady;
+
+}
+
+
+// ============================================================
+// SEND WHATSAPP FEEDBACK
+// ============================================================
 
 async function sendWhatsAppFeedback(
     phoneNumber,
     name,
     temperature,
-    riskLevel = "UNKNOWN",
-    suggestion = ""
+    riskLevel,
+    suggestion
 ) {
-    if (process.env.ENABLE_WHATSAPP !== "true") {
+
+    // --------------------------------------------------------
+    // Check WhatsApp client
+    // --------------------------------------------------------
+
+    if (!whatsappClient) {
+
         throw new Error(
-            "WhatsApp notifications are disabled on this server."
+            "WhatsApp service is disabled."
         );
+
     }
+
+
+    // --------------------------------------------------------
+    // Check authentication
+    // --------------------------------------------------------
 
     if (!whatsappReady) {
+
         throw new Error(
-            "WhatsApp is not ready. Scan the QR code in the terminal first."
+            "WhatsApp is not ready. Scan the QR code first."
         );
+
     }
 
-    const chatId = formatWhatsAppNumber(phoneNumber);
 
-    const exists = await whatsappClient.isRegisteredUser(chatId);
+    // --------------------------------------------------------
+    // Clean phone number
+    // --------------------------------------------------------
 
-    if (!exists) {
-        throw new Error(
-            `The number ${phoneNumber} is not registered on WhatsApp.`
-        );
+    let number =
+        String(phoneNumber)
+            .replace(/\D/g, "");
+
+
+    // Indian 10-digit number
+    // automatically gets +91
+
+    if (number.length === 10) {
+
+        number =
+            "91" + number;
+
     }
 
-    const message = [
-        "🔥 *TaapSurakshak Heat Alert*",
-        "",
-        `Hello ${name || "User"},`,
-        "",
-        `🌡️ Temperature: *${Number(temperature).toFixed(1)}°C*`,
-        `⚠️ Overall Risk Level: *${riskLevel}*`,
-        "",
-        "💡 *Recommendation:*",
-        suggestion ||
-        "Stay hydrated, avoid unnecessary outdoor exposure, and take breaks in a cool or shaded place.",
-        "",
-        "This is an automated health-safety notification from TaapSurakshak."
-    ].join("\n");
 
-    const sentMessage = await whatsappClient.sendMessage(
-        chatId,
-        message
+    // --------------------------------------------------------
+    // WhatsApp chat ID
+    // --------------------------------------------------------
+
+    const chatId =
+        `${number}@c.us`;
+
+
+    // --------------------------------------------------------
+    // Message
+    // --------------------------------------------------------
+
+    const message =
+        `🔥 TaapSurakshak Heat Alert
+
+Hello ${name},
+
+🌡️ Temperature: ${temperature} °C
+⚠️ Risk Level: ${riskLevel}
+
+${suggestion}
+
+Please follow heat-safety precautions and stay hydrated.
+
+— TaapSurakshak`;
+
+
+    // --------------------------------------------------------
+    // Send message
+    // --------------------------------------------------------
+
+    const result =
+        await whatsappClient.sendMessage(
+            chatId,
+            message
+        );
+
+
+    console.log(
+        `✅ WhatsApp alert sent to ${number}`
     );
 
-    console.log("WhatsApp message sent successfully:", {
-        recipient: phoneNumber,
-        messageId: sentMessage?.id?._serialized || "sent"
-    });
 
-    return {
-        success: true,
-        messageId: sentMessage?.id?._serialized || null
-    };
+    return result;
+
 }
 
 
-function isWhatsAppReady() {
-    return whatsappReady;
-}
-
+// ============================================================
+// EXPORTS
+// VERY IMPORTANT
+// ============================================================
 
 module.exports = {
+
     sendWhatsAppFeedback,
-    isWhatsAppReady
+
+    isWhatsAppReady,
+
+    getWhatsAppStatus,
+
+    getWhatsAppQRCode
+
 };

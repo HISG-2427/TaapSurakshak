@@ -6,7 +6,8 @@ const ejsMate = require("ejs-mate");
 const methodOverride = require("method-override");
 const bcrypt = require("bcrypt");
 const session = require("express-session");
-const {MongoStore} = require("connect-mongo");
+const { MongoStore } = require("connect-mongo");
+
 require("dotenv").config({
     path: path.resolve(__dirname, ".env")
 });
@@ -41,7 +42,7 @@ const MONGODB_URI =
 
 const FASTAPI_URL =
     process.env.FASTAPI_URL ||
-    "http://taapsurakshak.onrender.com";
+    "http://127.0.0.1:8000";
 
 
 // ============================================================
@@ -57,7 +58,9 @@ const app = express();
 
 const {
     sendWhatsAppFeedback,
-    isWhatsAppReady
+    isWhatsAppReady,
+    getWhatsAppStatus,
+    getWhatsAppQRCode
 } = require("./backend/app/whatsappHelper");
 
 
@@ -288,6 +291,105 @@ app.get(
                     req.session.userName
             }
         );
+
+    }
+);
+
+
+// ============================================================
+// WHATSAPP STATUS / QR
+// Used by Alerts page
+// ============================================================
+
+app.get(
+    "/api/whatsapp-status",
+    (req, res) => {
+
+        try {
+
+            const status =
+                getWhatsAppStatus();
+
+            res.json({
+
+                success: true,
+
+                enabled:
+                    status.enabled,
+
+                ready:
+                    status.ready,
+
+                qr:
+                    status.qr || null
+
+            });
+
+        } catch (error) {
+
+            console.error(
+                "❌ WhatsApp status error:",
+                error
+            );
+
+            res
+                .status(500)
+                .json({
+
+                    success: false,
+
+                    message:
+                        error.message
+
+                });
+
+        }
+
+    }
+);
+
+
+// ============================================================
+// OPTIONAL WHATSAPP QR ENDPOINT
+// ============================================================
+
+app.get(
+    "/api/whatsapp-qr",
+    (req, res) => {
+
+        try {
+
+            const qr =
+                getWhatsAppQRCode();
+
+            res.json({
+
+                success: true,
+
+                qr:
+                    qr || null
+
+            });
+
+        } catch (error) {
+
+            console.error(
+                "❌ WhatsApp QR error:",
+                error
+            );
+
+            res
+                .status(500)
+                .json({
+
+                    success: false,
+
+                    message:
+                        error.message
+
+                });
+
+        }
 
     }
 );
@@ -1052,6 +1154,10 @@ app.listen(
 
         console.log(
             `FastAPI URL: ${FASTAPI_URL}`
+        );
+
+        console.log(
+            `WhatsApp enabled: ${process.env.ENABLE_WHATSAPP === "true"}`
         );
 
     }
