@@ -5,7 +5,27 @@ const {
 
 const qrcode = require("qrcode");
 
+process.on("exit", (code) => {
+    console.log("🛑 NODE PROCESS EXITED WITH CODE:", code);
+});
 
+process.on("SIGTERM", () => {
+    console.log("🛑 NODE RECEIVED SIGTERM");
+});
+
+process.on("SIGINT", () => {
+    console.log("🛑 NODE RECEIVED SIGINT");
+});
+
+process.on("uncaughtException", (error) => {
+    console.error("💥 UNCAUGHT EXCEPTION:");
+    console.error(error);
+});
+
+process.on("unhandledRejection", (reason) => {
+    console.error("💥 UNHANDLED REJECTION:");
+    console.error(reason);
+});
 /*
 ============================================================
 WHATSAPP STATE
@@ -30,7 +50,7 @@ const whatsappClient = new Client({
         clientId: "taapsurakshak"
     }),
 
-    authTimeoutMs: 60000,
+    authTimeoutMs: 0,
 
     qrMaxRetries: 10,
 
