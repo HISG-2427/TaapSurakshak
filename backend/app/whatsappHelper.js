@@ -207,32 +207,23 @@ if (
     "true"
 ) {
 
-    console.log(
-        "Starting WhatsApp client..."
-    );
+    console.log("Starting WhatsApp client...");
+    console.log("WhatsApp initialization started at:", new Date().toISOString());
 
+    whatsappClient.initialize()
+        .then(() => {
+            console.log("WhatsApp initialize() promise resolved.");
+        })
+        .catch((error) => {
+            whatsappReady = false;
+            whatsappState = "ERROR";
+            whatsappError = error.message;
 
-    whatsappClient
-        .initialize()
-        .catch(
-            (error) => {
-
-                whatsappReady = false;
-
-                whatsappState =
-                    "ERROR";
-
-                whatsappError =
-                    error.message;
-
-
-                console.error(
-                    "WhatsApp initialization failed:",
-                    error
-                );
-
-            }
-        );
+            console.error(
+                "WhatsApp initialization failed:",
+                error
+            );
+        });
 
 } else {
 
