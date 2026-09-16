@@ -12,7 +12,6 @@ require("dotenv").config({
     path: path.resolve(__dirname, ".env")
 });
 
-
 // ============================================================
 // GEMINI AI
 // ============================================================
@@ -23,18 +22,9 @@ const ai = new GoogleGenAI({
     apiKey: process.env.GEMINI_API_KEY
 });
 
-
 // ============================================================
 // ENVIRONMENT VARIABLES
 // ============================================================
-
-// Local development:
-// MONGODB_URI not set -> localhost MongoDB
-// FASTAPI_URL not set -> localhost FastAPI
-//
-// Render:
-// MONGODB_URI -> MongoDB Atlas connection string
-// FASTAPI_URL -> deployed FastAPI Render URL
 
 const MONGODB_URI =
     process.env.MONGODB_URI ||
@@ -44,13 +34,11 @@ const FASTAPI_URL =
     process.env.FASTAPI_URL ||
     "http://127.0.0.1:8000";
 
-
 // ============================================================
 // EXPRESS APP
 // ============================================================
 
 const app = express();
-
 
 // ============================================================
 // WHATSAPP HELPER
@@ -59,31 +47,28 @@ const app = express();
 const {
     sendWhatsAppFeedback,
     isWhatsAppReady,
-    getWhatsAppStatus,
-    getWhatsAppQRCode
+    getWhatsAppStatus
 } = require("./backend/app/whatsappHelper");
-
 
 // ============================================================
 // DATABASE CONNECTION
 // ============================================================
 
-mongoose.connect(MONGODB_URI);
+mongoose
+    .connect(MONGODB_URI)
+    .then(() => {
+        console.log("Database connected successfully");
+    })
+    .catch((error) => {
+        console.error("Database connection error:", error);
+    });
 
 const db = mongoose.connection;
 
-db.on(
-    "error",
-    console.error.bind(
-        console,
-        "Database connection error:"
-    )
-);
-
-db.once("open", () => {
-    console.log("Database connected successfully");
-});
-
+db.on("error", console.error.bind(
+    console,
+    "Database connection error:"
+));
 
 // ============================================================
 // VIEW ENGINE
@@ -98,7 +83,6 @@ app.set(
     path.join(__dirname, "views")
 );
 
-
 // ============================================================
 // MIDDLEWARE
 // ============================================================
@@ -109,11 +93,15 @@ app.use(
     })
 );
 
+app.use(express.json());
+
 app.use(methodOverride("_method"));
 
-app.use(express.static("public"));
-
-app.use(express.json());
+app.use(
+    express.static(
+        path.join(__dirname, "public")
+    )
+);
 
 app.use(
     "/images",
@@ -122,16 +110,14 @@ app.use(
     )
 );
 
-
 // ============================================================
 // TRUST PROXY
-// Needed by Render for secure cookies
+// Required for Render secure cookies
 // ============================================================
 
 if (process.env.NODE_ENV === "production") {
     app.set("trust proxy", 1);
 }
-
 
 // ============================================================
 // SESSION
@@ -167,13 +153,11 @@ app.use(
     })
 );
 
-
 // ============================================================
 // GLOBAL SESSION LOCALS
 // ============================================================
 
 app.use((req, res, next) => {
-
     res.locals.currentUser =
         req.session.userName || null;
 
@@ -183,13 +167,11 @@ app.use((req, res, next) => {
     next();
 });
 
-
 // ============================================================
 // LOGIN CHECK
 // ============================================================
 
 function isLoggedIn(req, res, next) {
-
     if (!req.session.userId) {
         return res.redirect("/login");
     }
@@ -197,17 +179,13 @@ function isLoggedIn(req, res, next) {
     next();
 }
 
-
 // ============================================================
-// HOME
+// HOME PAGE
 // ============================================================
 
 app.get("/", (req, res) => {
-
     res.render("home");
-
 });
-
 
 // ============================================================
 // RISK PAGE
@@ -217,18 +195,14 @@ app.get(
     "/risk",
     isLoggedIn,
     (req, res) => {
-
         res.render(
             "TaapSurakshak/risk",
             {
-                userName:
-                    req.session.userName
+                userName: req.session.userName
             }
         );
-
     }
 );
-
 
 // ============================================================
 // PREDICT PAGE
@@ -238,21 +212,15 @@ app.get(
     "/predict",
     isLoggedIn,
     (req, res) => {
-
         res.render(
             "TaapSurakshak/predict",
             {
-                userName:
-                    req.session.userName,
-
-                wardID:
-                    req.session.wardID
+                userName: req.session.userName,
+                wardID: req.session.wardID
             }
         );
-
     }
 );
-
 
 // ============================================================
 // INTERVENE PAGE
@@ -262,18 +230,14 @@ app.get(
     "/intervene",
     isLoggedIn,
     (req, res) => {
-
         res.render(
             "TaapSurakshak/intervene",
             {
-                userName:
-                    req.session.userName
+                userName: req.session.userName
             }
         );
-
     }
 );
-
 
 // ============================================================
 // ALERTS PAGE
@@ -283,129 +247,37 @@ app.get(
     "/alerts",
     isLoggedIn,
     (req, res) => {
-
         res.render(
             "TaapSurakshak/alerts",
             {
-                userName:
-                    req.session.userName
+                userName: req.session.userName
             }
         );
-
     }
 );
-
-
-// ============================================================
-// WHATSAPP STATUS / QR
-// Used by Alerts page
-// ============================================================
-
-app.get("/api/whatsapp-status", (req, res) => {
-    try {
-        const status = getWhatsAppStatus();
-
-        console.log("📱 WhatsApp STATUS API:", {
-            enabled: status.enabled,
-            ready: status.ready,
-            hasQR: !!status.qr
-        });
-
-        res.json({
-            success: true,
-            enabled: status.enabled,
-            ready: status.ready,
-            qr: status.qr || null
-        });
-
-    } catch (error) {
-        console.error("❌ WhatsApp status error:", error);
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
-    }
-});
-
-
-// ============================================================
-// OPTIONAL WHATSAPP QR ENDPOINT
-// ============================================================
-
-app.get(
-    "/api/whatsapp-qr",
-    (req, res) => {
-
-        try {
-
-            const qr =
-                getWhatsAppQRCode();
-
-            res.json({
-
-                success: true,
-
-                qr:
-                    qr || null
-
-            });
-
-        } catch (error) {
-
-            console.error(
-                "❌ WhatsApp QR error:",
-                error
-            );
-
-            res
-                .status(500)
-                .json({
-
-                    success: false,
-
-                    message:
-                        error.message
-
-                });
-
-        }
-
-    }
-);
-
 
 // ============================================================
 // LOGIN PAGE
-// Get wards from FastAPI
+// Loads wards from FastAPI
 // ============================================================
 
 app.get(
     "/login",
     async (req, res) => {
-
         try {
-
-            const response =
-                await fetch(
-                    `${FASTAPI_URL}/wards`
-                );
+            const response = await fetch(
+                `${FASTAPI_URL}/wards`
+            );
 
             if (!response.ok) {
-
                 throw new Error(
                     `FastAPI returned ${response.status}`
                 );
-
             }
 
-            const wards =
-                await response.json();
+            const wards = await response.json();
 
-            console.log(
-                "Wards:",
-                wards
-            );
+            console.log("Wards:", wards);
 
             res.render(
                 "TaapSurakshak/login",
@@ -413,9 +285,7 @@ app.get(
                     wards
                 }
             );
-
         } catch (error) {
-
             console.error(
                 "Error loading wards:",
                 error
@@ -428,10 +298,8 @@ app.get(
                 }
             );
         }
-
     }
 );
-
 
 // ============================================================
 // SIGNUP
@@ -440,9 +308,7 @@ app.get(
 app.post(
     "/signup",
     async (req, res) => {
-
         try {
-
             const {
                 name,
                 location,
@@ -452,31 +318,47 @@ app.post(
                 age
             } = req.body;
 
-
             console.log(
-                "SIGNUP:",
+                "SIGNUP REQUEST:",
                 req.body
             );
 
-
             // --------------------------------------------
-            // Required fields
+            // Validate required fields
             // --------------------------------------------
 
             if (
+                !name ||
+                !location ||
+                !password ||
                 !wardID ||
                 !phoneNumber ||
                 !age
             ) {
-
                 return res
                     .status(400)
                     .send(
                         "Missing required signup fields."
                     );
-
             }
 
+            // --------------------------------------------
+            // Validate age
+            // --------------------------------------------
+
+            const numericAge = Number(age);
+
+            if (
+                !Number.isFinite(numericAge) ||
+                numericAge < 1 ||
+                numericAge > 120
+            ) {
+                return res
+                    .status(400)
+                    .send(
+                        "Please enter a valid age."
+                    );
+            }
 
             // --------------------------------------------
             // Check existing user
@@ -487,9 +369,7 @@ app.post(
                     name
                 });
 
-
             if (existingUser) {
-
                 req.session.userId =
                     existingUser._id;
 
@@ -499,18 +379,13 @@ app.post(
                 req.session.wardID =
                     Number(wardID);
 
-
                 existingUser.wardID =
                     Number(wardID);
 
-
                 await existingUser.save();
 
-
                 return res.redirect("/");
-
             }
-
 
             // --------------------------------------------
             // Hash password
@@ -522,35 +397,26 @@ app.post(
                     12
                 );
 
-
             // --------------------------------------------
             // Create user
             // --------------------------------------------
 
             const newUser =
                 new User({
+                    name: String(name).trim(),
 
-                    name: name,
+                    location: String(location).trim(),
 
-                    location: location,
+                    password: hashedPassword,
 
-                    password:
-                        hashedPassword,
+                    wardID: Number(wardID),
 
-                    wardID:
-                        Number(wardID),
+                    age: numericAge,
 
-                    age:
-                        Number(age),
-
-                    phoneNumber:
-                        phoneNumber
-
+                    phoneNumber: String(phoneNumber).trim()
                 });
 
-
             await newUser.save();
-
 
             // --------------------------------------------
             // Create session
@@ -565,32 +431,26 @@ app.post(
             req.session.wardID =
                 Number(wardID);
 
-
             console.log(
                 "USER CREATED:",
                 newUser._id
             );
 
-
             res.redirect("/");
-
-        } catch (err) {
-
+        } catch (error) {
             console.error(
                 "Signup error:",
-                err
+                error
             );
 
             res
                 .status(500)
                 .send(
-                    "Error creating user account"
+                    "Error creating user account."
                 );
         }
-
     }
 );
-
 
 // ============================================================
 // LOGOUT
@@ -599,28 +459,26 @@ app.post(
 app.get(
     "/logout",
     (req, res) => {
-
         req.session.destroy(
-            (err) => {
-
-                if (err) {
+            (error) => {
+                if (error) {
+                    console.error(
+                        "Logout error:",
+                        error
+                    );
 
                     return res
                         .status(500)
                         .send(
-                            "Unable to log out"
+                            "Unable to log out."
                         );
-
                 }
 
                 res.redirect("/login");
-
             }
         );
-
     }
 );
-
 
 // ============================================================
 // GEMINI AI FEEDBACK
@@ -629,80 +487,104 @@ app.get(
 app.post(
     "/api/generate-feedback",
     async (req, res) => {
-
         try {
-
             const {
                 userPrompt,
                 phoneNumber
             } = req.body;
 
-
             if (!userPrompt) {
-
                 return res
                     .status(400)
                     .json({
-
                         success: false,
-
                         message:
-                            "userPrompt is required"
-
+                            "userPrompt is required."
                     });
-
             }
-
 
             const response =
                 await ai.models.generateContent({
-
-                    model:
-                        "gemini-2.5-flash",
-
-                    contents:
-                        userPrompt
-
+                    model: "gemini-2.5-flash",
+                    contents: userPrompt
                 });
-
 
             const modelResponse =
                 response.text;
 
-
             res.json({
-
                 success: true,
-
-                feedback:
-                    modelResponse
-
+                feedback: modelResponse
             });
-
         } catch (error) {
-
             console.error(
                 "Feedback generation error:",
                 error
             );
 
-
             res
                 .status(500)
                 .json({
-
                     success: false,
-
                     message:
-                        "Failed to generate feedback via Gemini API"
-
+                        "Failed to generate feedback via Gemini API."
                 });
-
         }
-
     }
 );
 
+// ============================================================
+// WHATSAPP STATUS + REAL QR
+// ============================================================
+
+app.get(
+    "/api/whatsapp-status",
+    (req, res) => {
+        try {
+            const status =
+                getWhatsAppStatus();
+
+            /*
+             * This endpoint only returns the QR already
+             * generated by whatsapp-web.js.
+             *
+             * It does not generate a new QR.
+             */
+
+            return res.json({
+                success: true,
+
+                enabled:
+                    status.enabled,
+
+                ready:
+                    status.ready,
+
+                state:
+                    status.state,
+
+                qr:
+                    status.qr || null,
+
+                error:
+                    status.error || null
+            });
+        } catch (error) {
+            console.error(
+                "WhatsApp status error:",
+                error
+            );
+
+            return res
+                .status(500)
+                .json({
+                    success: false,
+                    message:
+                        "Unable to get WhatsApp status."
+                });
+        }
+    }
+);
 
 // ============================================================
 // LATEST HEAT DATA
@@ -712,81 +594,57 @@ app.post(
 app.get(
     "/api/latest-heat-data",
     async (req, res) => {
-
         try {
-
             const response =
                 await fetch(
                     `${FASTAPI_URL}/predict`,
                     {
-
                         method: "POST",
 
                         headers: {
                             "Content-Type":
+                                "application/json",
+
+                            "Accept":
                                 "application/json"
                         },
 
                         body:
                             JSON.stringify({
-
                                 temp_mean_c: 35,
-
                                 temp_max_c: 40,
-
                                 temp_min_c: 30,
-
                                 humidity_pct: 60,
-
                                 wind_speed_ms: 2,
-
                                 solar_radiation_kwh_m2: 5
-
                             })
-
                     }
                 );
 
-
             if (!response.ok) {
-
                 throw new Error(
                     `FastAPI returned status ${response.status}`
                 );
-
             }
-
 
             const result =
                 await response.json();
 
-
             console.log(
-                "🔥 FASTAPI /predict RESPONSE:"
+                "FASTAPI /predict RESPONSE:",
+                result
             );
-
-            console.log(result);
-
-
-            // --------------------------------------------
-            // 3-day prediction
-            // --------------------------------------------
 
             const prediction =
                 result["3d"];
 
-
             if (!prediction) {
-
                 throw new Error(
                     "3d prediction not found in FastAPI response."
                 );
-
             }
 
-
             res.json({
-
                 success: true,
 
                 heatStress:
@@ -800,14 +658,334 @@ app.get(
                     ),
 
                 riskLevel:
-                    prediction.risk_level
+                    prediction.risk_level,
 
+                forecast:
+                    result
             });
+        } catch (error) {
+            console.error(
+                "Latest heat data error:",
+                error
+            );
+
+            res
+                .status(500)
+                .json({
+                    success: false,
+                    message:
+                        error.message
+                });
+        }
+    }
+);
+
+// ============================================================
+// PERSONALIZED WHATSAPP ALERT
+// ============================================================
+
+// ============================================================
+// PERSONALIZED WHATSAPP ALERT
+// ============================================================
+
+app.post(
+    "/api/generate-personalized-whatsapp",
+    async (req, res) => {
+        try {
+
+            const {
+                name,
+                age,
+                phoneNumber,
+                temperature,
+
+                // Risk level coming from Alerts page
+                riskLevel: clientRiskLevel
+
+            } = req.body;
+
+
+            // --------------------------------------------
+            // Validate input
+            // --------------------------------------------
+
+            const cleanName =
+                String(name || "").trim();
+
+            const cleanPhone =
+                String(phoneNumber || "").trim();
+
+            const numericAge =
+                Number(age);
+
+            const numericTemperature =
+                Number(temperature);
+
+
+            if (
+                !cleanName ||
+                !cleanPhone
+            ) {
+                return res
+                    .status(400)
+                    .json({
+                        success: false,
+                        message:
+                            "Name and WhatsApp number are required."
+                    });
+            }
+
+
+            if (
+                !Number.isFinite(numericAge) ||
+                numericAge < 1 ||
+                numericAge > 120
+            ) {
+                return res
+                    .status(400)
+                    .json({
+                        success: false,
+                        message:
+                            "Please enter a valid age."
+                    });
+            }
+
+
+            if (
+                !Number.isFinite(numericTemperature)
+            ) {
+                return res
+                    .status(400)
+                    .json({
+                        success: false,
+                        message:
+                            "Temperature must be a valid number."
+                    });
+            }
+
+
+            // --------------------------------------------
+            // Check WhatsApp connection
+            // --------------------------------------------
+
+            if (!isWhatsAppReady()) {
+                return res
+                    .status(503)
+                    .json({
+                        success: false,
+                        message:
+                            "WhatsApp is not ready. Scan the QR code first and wait until WhatsApp successfully connects."
+                    });
+            }
+
+
+            // --------------------------------------------
+            // Get latest heat data from FastAPI
+            // --------------------------------------------
+
+            const heatResponse =
+                await fetch(
+                    `${FASTAPI_URL}/predict`,
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json",
+
+                            "Accept":
+                                "application/json"
+                        },
+
+                        body:
+                            JSON.stringify({
+                                temp_mean_c: 35,
+                                temp_max_c: 40,
+                                temp_min_c: 30,
+                                humidity_pct: 60,
+                                wind_speed_ms: 2,
+                                solar_radiation_kwh_m2: 5
+                            })
+                    }
+                );
+
+
+            if (!heatResponse.ok) {
+                throw new Error(
+                    "Could not get heat-risk data from FastAPI."
+                );
+            }
+
+
+            const heatResult =
+                await heatResponse.json();
+
+
+            console.log(
+                "FASTAPI /predict RESPONSE:",
+                heatResult
+            );
+
+
+            const prediction =
+                heatResult["3d"];
+
+
+            if (!prediction) {
+                throw new Error(
+                    "3d prediction not found in FastAPI response."
+                );
+            }
+
+
+            // --------------------------------------------
+            // Extract FastAPI prediction values
+            // --------------------------------------------
+
+            const wbgt =
+                Number(
+                    prediction.wbgt_c
+                );
+
+
+            const mortalityRisk =
+                Number(
+                    prediction.hmri
+                );
+
+
+            // --------------------------------------------
+            // FINAL RISK LEVEL
+            // --------------------------------------------
+            //
+            // First use the risk level currently shown
+            // on the Alerts page.
+            //
+            // If Alerts page did not send one,
+            // use FastAPI's risk_level.
+            // --------------------------------------------
+
+            const fastApiRiskLevel =
+                prediction.risk_level ||
+                "UNKNOWN";
+
+
+            const riskLevel =
+                String(clientRiskLevel || "").trim() ||
+                fastApiRiskLevel;
+
+
+            console.log(
+                "FINAL WHATSAPP RISK LEVEL:",
+                riskLevel
+            );
+
+
+            // --------------------------------------------
+            // Generate safety suggestion
+            // --------------------------------------------
+
+            let suggestion = "";
+
+
+            const normalizedRisk =
+                String(
+                    riskLevel
+                ).toUpperCase();
+
+
+            if (
+                normalizedRisk === "LEVEL 5"
+            ) {
+
+                suggestion =
+                    "Extreme heat risk. Stay indoors, remain hydrated, avoid direct sunlight and strenuous activity, and check on vulnerable people.";
+
+            } else if (
+                normalizedRisk === "LEVEL 4"
+            ) {
+
+                suggestion =
+                    "Very high heat risk. Avoid unnecessary outdoor exposure, stay hydrated, and take frequent breaks in cool areas.";
+
+            } else if (
+                normalizedRisk === "LEVEL 3"
+            ) {
+
+                suggestion =
+                    "Moderate to high heat risk. Stay hydrated and limit prolonged outdoor activity.";
+
+            } else if (
+                normalizedRisk === "LEVEL 2"
+            ) {
+
+                suggestion =
+                    "Mild heat risk. Stay hydrated, avoid prolonged exposure to extreme heat, and take regular breaks.";
+
+            } else {
+
+                suggestion =
+                    "Continue normal hydration and basic heat-safety precautions.";
+            }
+
+
+            // --------------------------------------------
+            // Send WhatsApp message
+            // --------------------------------------------
+
+            const result =
+                await sendWhatsAppFeedback(
+                    cleanPhone,
+                    cleanName,
+                    numericTemperature,
+
+                    // Actual risk level
+                    riskLevel,
+
+                    suggestion
+                );
+
+
+            // --------------------------------------------
+            // Send response to Alerts page
+            // --------------------------------------------
+
+            res.json({
+
+                success: true,
+
+                message:
+                    "WhatsApp alert sent successfully.",
+
+                data: {
+
+                    temperature:
+                        numericTemperature,
+
+                    wbgt,
+
+                    mortalityRisk,
+
+                    // Final risk level used
+                    riskLevel,
+
+                    // Shows where it came from
+                    riskLevelSource:
+                        String(clientRiskLevel || "").trim()
+                            ? "alerts-page"
+                            : "fastapi",
+
+                    suggestion
+                },
+
+                result
+            });
+
 
         } catch (error) {
 
             console.error(
-                "Latest heat data error:",
+                "WhatsApp alert error:",
                 error
             );
 
@@ -822,63 +1000,22 @@ app.get(
                         error.message
 
                 });
-
         }
-
     }
 );
-
-
 // ============================================================
-// PERSONALIZED WHATSAPP ALERT
+// BACKWARD-COMPATIBLE SMS ROUTE
 // ============================================================
 
 app.post(
-    "/api/generate-personalized-whatsapp",
-    async (req, res) => {
+    "/api/generate-personalized-sms",
+    (req, res, next) => {
+        req.url =
+            "/api/generate-personalized-whatsapp";
 
-        try {
-
-            const {
-                phoneNumber,
-                name,
-                age,
-                overall_risk,
-                temperature
-            } = req.body;
-
-
-            if (!phoneNumber || !name) {
-
-                return res.status(400).json({
-                    success: false,
-                    message: "Phone number and name are required."
-                });
-
-            }
-
-
-            // Your existing personalization / WhatsApp logic
-            // goes here.
-
-
-        } catch (error) {
-
-            console.error(
-                "❌ WhatsApp generation error:",
-                error
-            );
-
-            res.status(500).json({
-                success: false,
-                message: error.message
-            });
-
-        }
-
+        next();
     }
 );
-
 
 // ============================================================
 // HEALTH CHECK
@@ -888,22 +1025,13 @@ app.post(
 app.get(
     "/health",
     (req, res) => {
-
         res.json({
-
             status: "ok",
-
-            service:
-                "TaapSurakshak",
-
-            fastapi:
-                FASTAPI_URL
-
+            service: "TaapSurakshak",
+            fastapi: FASTAPI_URL
         });
-
     }
 );
-
 
 // ============================================================
 // START SERVER
@@ -912,12 +1040,10 @@ app.get(
 const PORT =
     process.env.PORT || 3000;
 
-
 app.listen(
     PORT,
     "0.0.0.0",
     () => {
-
         console.log(
             `Server running on port ${PORT}`
         );
@@ -925,10 +1051,5 @@ app.listen(
         console.log(
             `FastAPI URL: ${FASTAPI_URL}`
         );
-
-        console.log(
-            `WhatsApp enabled: ${process.env.ENABLE_WHATSAPP === "true"}`
-        );
-
     }
 );
