@@ -75,10 +75,41 @@ const whatsappClient = new Client({
 
 });
 
-console.log(
-    "WhatsApp Client object created successfully."
-);
+const originalInitialize = whatsappClient.initialize.bind(whatsappClient);
 
+whatsappClient.initialize = async function () {
+
+    console.log("🚀 WHATSAPP INITIALIZE STARTED");
+
+    try {
+
+        const result = await originalInitialize();
+
+        console.log("✅ WHATSAPP INITIALIZE FINISHED");
+
+        return result;
+
+    } catch (error) {
+
+        console.error("❌ WHATSAPP INITIALIZE FAILED");
+        console.error("Name:", error?.name);
+        console.error("Message:", error?.message);
+        console.error("Stack:", error?.stack);
+
+        throw error;
+
+    }
+
+};
+
+
+whatsappClient.on("change_state", (state) => {
+    console.log("📡 WhatsApp change_state:", state);
+});
+
+whatsappClient.on("disconnected", (reason) => {
+    console.error("🔴 WhatsApp disconnected:", reason);
+});
 
 /*
 ============================================================
