@@ -10,12 +10,27 @@ let currentQRCode = null;
 let whatsappState = "INITIALIZING";
 let whatsappError = null;
 
-console.log(
-    "Puppeteer executable:",
-    process.env.PUPPETEER_EXECUTABLE_PATH ||
-    "/opt/render/project/src/.cache/puppeteer/chrome/linux-146.0.7680.31/chrome-linux64/chrome"
-);
+const { execFile } = require("child_process");
 
+const chromePath =
+    process.env.PUPPETEER_EXECUTABLE_PATH ||
+    "/opt/render/project/src/.cache/puppeteer/chrome/linux-146.0.7680.31/chrome-linux64/chrome";
+
+console.log("Testing Chrome executable:", chromePath);
+
+execFile(
+    chromePath,
+    ["--version"],
+    (error, stdout, stderr) => {
+        if (error) {
+            console.error("❌ Chrome launch test failed:", error);
+            console.error("stderr:", stderr);
+            return;
+        }
+
+        console.log("✅ Chrome launch test successful:", stdout.trim());
+    }
+);
 /*
 ============================================================
 WHATSAPP CLIENT
