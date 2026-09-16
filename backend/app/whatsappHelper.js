@@ -22,6 +22,8 @@ const whatsappClient = new Client({
     puppeteer: {
         headless: true,
 
+        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+
         args: [
             "--no-sandbox",
             "--disable-setuid-sandbox",
@@ -35,9 +37,7 @@ const whatsappClient = new Client({
             "--disable-background-timer-throttling",
             "--disable-renderer-backgrounding",
             "--disable-features=Translate,BackForwardCache"
-        ],
-
-        timeout: 120000
+        ]
     }
 
 });
@@ -224,6 +224,7 @@ if (
                 error
             );
         });
+    console.log("WhatsApp initialize() called. Waiting for WhatsApp Web...");
 
 } else {
 
