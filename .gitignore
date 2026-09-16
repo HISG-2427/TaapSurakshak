@@ -21,3 +21,5 @@ venv/
 .venv/
 __pycache__/
 *.pyc
+# Puppeteer Chrome cache
+.cache/
