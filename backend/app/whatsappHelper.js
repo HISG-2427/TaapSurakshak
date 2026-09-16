@@ -48,7 +48,6 @@ const whatsappClient = new Client({
 
     puppeteer: {
         headless: true,
-
         dumpio: true,
 
         args: [
@@ -58,17 +57,19 @@ const whatsappClient = new Client({
             "--disable-gpu",
             "--disable-software-rasterizer",
             "--disable-extensions",
+
+            "--no-first-run",
+            "--no-default-browser-check",
+
             "--disable-background-networking",
             "--disable-background-timer-throttling",
             "--disable-renderer-backgrounding",
-            "--disable-features=Translate,BackForwardCache",
             "--disable-backgrounding-occluded-windows",
             "--disable-ipc-flooding-protection",
-            "--no-first-run",
-            "--no-default-browser-check"
+
+            "--disable-features=Translate,BackForwardCache"
         ]
     }
-
 });
 
 const originalInitialize = whatsappClient.initialize.bind(whatsappClient);
