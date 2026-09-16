@@ -46,6 +46,10 @@ const whatsappClient = new Client({
     authTimeoutMs: 60000,
     qrMaxRetries: 10,
 
+    webVersionCache: {
+        type: "none"
+    },
+
     puppeteer: {
         headless: true,
         dumpio: true,
@@ -74,32 +78,24 @@ const whatsappClient = new Client({
 
 const originalInitialize = whatsappClient.initialize.bind(whatsappClient);
 
-
 whatsappClient.initialize = async function () {
-
     console.log("🚀 WHATSAPP INITIALIZE STARTED");
 
     try {
-
         const result = await originalInitialize();
 
         console.log("✅ WHATSAPP INITIALIZE FINISHED");
 
         return result;
-
     } catch (error) {
-
         console.error("❌ WHATSAPP INITIALIZE FAILED");
         console.error("Name:", error?.name);
         console.error("Message:", error?.message);
         console.error("Stack:", error?.stack);
 
         throw error;
-
     }
-
 };
-
 
 whatsappClient.on("change_state", (state) => {
     console.log("📡 WhatsApp change_state:", state);
