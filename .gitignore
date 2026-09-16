@@ -1,11 +1,4 @@
-# WhatsApp Web session data
-.wwebjs_auth/
-.wwebjs_auth_new/
-
-# WhatsApp Web cache/session
-.wwebjs_cache/
-
-# Node
+# Node dependencies
 node_modules/
 
 # Environment variables
@@ -16,10 +9,16 @@ node_modules/
 *.log
 logs/
 
+# WhatsApp Web session data
+.wwebjs_auth/
+.wwebjs_auth_new/
+.wwebjs_cache/
+
+# Puppeteer cache
+.cache/
+
 # Python
 venv/
 .venv/
 __pycache__/
 *.pyc
-# Puppeteer Chrome cache
-.cache/
