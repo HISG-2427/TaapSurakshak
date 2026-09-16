@@ -421,28 +421,71 @@ if (
 
     const https = require("https");
 
-https.get("https://web.whatsapp.com", (response) => {
+    const {
+        execFile
+    } = require("child_process");
 
-    console.log(
-        "🌐 WhatsApp Web connectivity status:",
-        response.statusCode
+    execFile(
+        chromePath,
+        [
+            "--headless=new",
+            "--no-sandbox",
+            "--disable-setuid-sandbox",
+            "--disable-dev-shm-usage",
+            "--disable-gpu",
+            "--dump-dom",
+            "https://web.whatsapp.com"
+        ],
+        {
+            timeout: 60000,
+            maxBuffer: 10 * 1024 * 1024
+        },
+        (error, stdout, stderr) => {
+
+            console.log("");
+            console.log("======================================");
+            console.log("🌐 DIRECT CHROME WHATSAPP TEST");
+            console.log("======================================");
+
+            if (error) {
+                console.error(
+                    "❌ Chrome WhatsApp test failed:"
+                );
+
+                console.error(
+                    error
+                );
+            }
+
+            console.log(
+                "Chrome stderr:"
+            );
+
+            console.log(
+                stderr?.slice(-5000)
+            );
+
+            console.log(
+                "WhatsApp page output length:",
+                stdout?.length || 0
+            );
+
+            console.log(
+                "Contains WhatsApp:",
+                stdout?.toLowerCase().includes("whatsapp")
+            );
+
+            console.log(
+                "Contains QR:",
+                stdout?.toLowerCase().includes("qr")
+            );
+
+            console.log(
+                "======================================"
+            );
+
+        }
     );
-
-    console.log(
-        "🌐 WhatsApp Web location:",
-        response.headers.location || "none"
-    );
-
-    response.resume();
-
-}).on("error", (error) => {
-
-    console.error(
-        "❌ Cannot reach WhatsApp Web:",
-        error.message
-    );
-
-});
 
     whatsappClient.initialize()
         .then(() => {
