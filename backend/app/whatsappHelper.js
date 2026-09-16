@@ -10,6 +10,11 @@ let currentQRCode = null;
 let whatsappState = "INITIALIZING";
 let whatsappError = null;
 
+console.log(
+    "Puppeteer executable:",
+    process.env.PUPPETEER_EXECUTABLE_PATH ||
+    "/opt/render/project/src/.cache/puppeteer/chrome/linux-146.0.7680.31/chrome-linux64/chrome"
+);
 
 /*
 ============================================================
@@ -22,7 +27,9 @@ const whatsappClient = new Client({
     puppeteer: {
         headless: true,
 
-        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+        executablePath:
+            process.env.PUPPETEER_EXECUTABLE_PATH ||
+            "/opt/render/project/src/.cache/puppeteer/chrome/linux-146.0.7680.31/chrome-linux64/chrome",
 
         args: [
             "--no-sandbox",
