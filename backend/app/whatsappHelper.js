@@ -54,46 +54,33 @@ const whatsappClient = new Client({
 
     qrMaxRetries: 10,
 
+    webVersionCache: {
+        type: "remote",
+        remotePath:
+            "https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.3000.1043191242-alpha.html"
+    },
+
     puppeteer: {
-
         headless: true,
-
         dumpio: true,
 
         args: [
-
             "--no-sandbox",
-
             "--disable-setuid-sandbox",
-
             "--disable-dev-shm-usage",
-
             "--disable-gpu",
-
             "--disable-software-rasterizer",
-
             "--disable-extensions",
-
             "--no-first-run",
-
             "--no-default-browser-check",
-
             "--disable-background-networking",
-
             "--disable-background-timer-throttling",
-
             "--disable-renderer-backgrounding",
-
             "--disable-backgrounding-occluded-windows",
-
             "--disable-ipc-flooding-protection",
-
             "--disable-features=Translate,BackForwardCache"
-
         ]
-
     }
-
 });
 
 
