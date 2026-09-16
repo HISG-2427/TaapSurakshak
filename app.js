@@ -622,11 +622,15 @@ app.get(
                 );
 
             if (!response.ok) {
-                throw new Error(
-                    `FastAPI returned status ${response.status}`
-                );
-            }
+                const errorBody = await response.text();
 
+                console.error("FASTAPI ERROR STATUS:", response.status);
+                console.error("FASTAPI ERROR BODY:", errorBody);
+
+                throw new Error(
+                    `FastAPI returned status ${response.status}: ${errorBody}`
+                );
+            }   
             const result =
                 await response.json();
 
