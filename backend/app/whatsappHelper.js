@@ -45,6 +45,9 @@ const whatsappClient = new Client({
         clientId: "taapsurakshak"
     }),
 
+    authTimeoutMs: 60000,
+    qrMaxRetries: 10,
+
     puppeteer: {
         headless: true,
 
@@ -73,6 +76,7 @@ const whatsappClient = new Client({
 });
 
 const originalInitialize = whatsappClient.initialize.bind(whatsappClient);
+
 
 whatsappClient.initialize = async function () {
 
@@ -414,6 +418,31 @@ if (
     console.log("🚀 ABOUT TO CALL whatsappClient.initialize()");
 
     const initStartedAt = Date.now();
+
+    const https = require("https");
+
+https.get("https://web.whatsapp.com", (response) => {
+
+    console.log(
+        "🌐 WhatsApp Web connectivity status:",
+        response.statusCode
+    );
+
+    console.log(
+        "🌐 WhatsApp Web location:",
+        response.headers.location || "none"
+    );
+
+    response.resume();
+
+}).on("error", (error) => {
+
+    console.error(
+        "❌ Cannot reach WhatsApp Web:",
+        error.message
+    );
+
+});
 
     whatsappClient.initialize()
         .then(() => {
