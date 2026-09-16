@@ -39,6 +39,8 @@ WHATSAPP CLIENT
 
 const whatsappClient = new Client({
 
+    console.log("WhatsApp Client object created successfully.");
+
     puppeteer: {
         headless: true,
 
@@ -218,6 +220,7 @@ whatsappClient.on("disconnected", (reason) => {
     );
 });
 
+console.log("WhatsApp initialize() called. Waiting for WhatsApp Web...");
 /*
 ============================================================
 INITIALIZE WHATSAPP
