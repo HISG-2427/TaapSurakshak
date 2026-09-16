@@ -46,10 +46,11 @@ const whatsappClient = new Client({
     }),
 
     puppeteer: {
-
         headless: true,
 
         executablePath: chromePath,
+
+        dumpio: true,
 
         args: [
             "--no-sandbox",
@@ -62,15 +63,11 @@ const whatsappClient = new Client({
             "--disable-background-timer-throttling",
             "--disable-renderer-backgrounding",
             "--disable-features=Translate,BackForwardCache",
-
-            // Reduce Chrome memory usage
             "--disable-backgrounding-occluded-windows",
-            "--disable-renderer-backgrounding",
             "--disable-ipc-flooding-protection",
             "--no-first-run",
             "--no-default-browser-check"
         ]
-
     }
 
 });
