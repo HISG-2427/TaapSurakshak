@@ -58,12 +58,17 @@ const whatsappClient = new Client({
             "--disable-gpu",
             "--disable-software-rasterizer",
             "--disable-extensions",
-            "--no-first-run",
-            "--no-zygote",
             "--disable-background-networking",
             "--disable-background-timer-throttling",
             "--disable-renderer-backgrounding",
-            "--disable-features=Translate,BackForwardCache"
+            "--disable-features=Translate,BackForwardCache",
+
+            // Reduce Chrome memory usage
+            "--disable-backgrounding-occluded-windows",
+            "--disable-renderer-backgrounding",
+            "--disable-ipc-flooding-protection",
+            "--no-first-run",
+            "--no-default-browser-check"
         ]
 
     }
@@ -378,40 +383,77 @@ if (
         new Date().toISOString()
     );
 
-    whatsappClient
-        .initialize()
+    console.log("🚀 ABOUT TO CALL whatsappClient.initialize()");
 
+    const initStartedAt = Date.now();
+
+    whatsappClient.initialize()
         .then(() => {
 
             console.log(
-                "WhatsApp initialize() promise resolved."
+                "✅ WhatsApp initialize() promise resolved after",
+                Date.now() - initStartedAt,
+                "ms"
             );
 
         })
-
         .catch((error) => {
 
-            whatsappReady =
-                false;
+            console.error("❌ WhatsApp initialize() REJECTED");
+            console.error(error);
 
-            currentQRCode =
-                null;
-
-            whatsappState =
-                "ERROR";
-
-            whatsappError =
-                error.message;
-
-            console.error(
-                "❌ WhatsApp initialization failed:"
-            );
-
-            console.error(
-                error
-            );
+            whatsappReady = false;
+            currentQRCode = null;
+            whatsappState = "ERROR";
+            whatsappError = error?.message || String(error);
 
         });
+
+    setTimeout(() => {
+
+        console.log(
+            "⏱️ WhatsApp initialization has been running for 30 seconds."
+        );
+
+        console.log(
+            "Current WhatsApp state:",
+            whatsappState
+        );
+
+        console.log(
+            "Current QR exists:",
+            Boolean(currentQRCode)
+        );
+
+        console.log(
+            "WhatsApp ready:",
+            whatsappReady
+        );
+
+    }, 30000);
+
+    setTimeout(() => {
+
+        console.log(
+            "⏱️ WhatsApp initialization has been running for 90 seconds."
+        );
+
+        console.log(
+            "Current WhatsApp state:",
+            whatsappState
+        );
+
+        console.log(
+            "Current QR exists:",
+            Boolean(currentQRCode)
+        );
+
+        console.log(
+            "WhatsApp ready:",
+            whatsappReady
+        );
+
+    }, 90000);
 
 } else {
 
@@ -698,4 +740,4 @@ module.exports = {
 
     getWhatsAppStatus
 
-};
+};  
