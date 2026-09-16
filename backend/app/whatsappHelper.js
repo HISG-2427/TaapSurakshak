@@ -39,8 +39,6 @@ WHATSAPP CLIENT
 
 const whatsappClient = new Client({
 
-    console.log("WhatsApp Client object created successfully.");
-
     puppeteer: {
         headless: true,
 
@@ -139,6 +137,9 @@ whatsappClient.on(
 
     }
 );
+
+
+console.log("WhatsApp Client object created successfully.");
 whatsappClient.on("loading_screen", (percent, message) => {
     console.log(
         `⏳ WhatsApp loading: ${percent}% - ${message}`
