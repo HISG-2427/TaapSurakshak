@@ -261,46 +261,42 @@ app.get(
 // Loads wards from FastAPI
 // ============================================================
 
-app.get(
-    "/login",
-    async (req, res) => {
-        try {
-            const response = await fetch(
-                `${FASTAPI_URL}/wards`
-            );
+app.get("/login", async (req, res) => {
+    try {
+        console.log("🔵 LOGIN: Fetching wards from:", `${FASTAPI_URL}/wards`);
 
-            if (!response.ok) {
-                throw new Error(
-                    `FastAPI returned ${response.status}`
-                );
-            }
+        const response = await fetch(`${FASTAPI_URL}/wards`);
 
-            const wards = await response.json();
+        console.log("🔵 LOGIN: FastAPI status:", response.status);
 
-            console.log("Wards:", wards);
+        const responseText = await response.text();
 
-            res.render(
-                "TaapSurakshak/login",
-                {
-                    wards
-                }
-            );
-        } catch (error) {
-            console.error(
-                "Error loading wards:",
-                error
-            );
+        console.log("🔵 LOGIN: FastAPI response:", responseText);
 
-            res.render(
-                "TaapSurakshak/login",
-                {
-                    wards: []
-                }
+        if (!response.ok) {
+            throw new Error(
+                `FastAPI returned ${response.status}: ${responseText}`
             );
         }
-    }
-);
 
+        const wards = JSON.parse(responseText);
+
+        console.log("🟢 LOGIN: Wards received:", wards);
+        console.log("🟢 LOGIN: Is array:", Array.isArray(wards));
+
+        res.render("TaapSurakshak/login", {
+            wards: Array.isArray(wards) ? wards : []
+        });
+
+    } catch (error) {
+
+        console.error("🔴 LOGIN WARDS ERROR:", error);
+
+        res.render("TaapSurakshak/login", {
+            wards: []
+        });
+    }
+});
 // ============================================================
 // SIGNUP
 // ============================================================
