@@ -711,6 +711,8 @@ app.get(
                                 wind_speed_ms: 2,
 
                                 solar_radiation_kwh_m2: 5
+                                
+                                
                             })
                     }
                 );

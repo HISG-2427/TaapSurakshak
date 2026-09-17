@@ -4,23 +4,223 @@ document.addEventListener("DOMContentLoaded", () => {
   // FASTAPI
   // =========================================================
 
-  const FASTAPI_URL = "https://taapsurakshak.onrender.com";
+  const FASTAPI_URL =
+    "https://taapsurakshak.onrender.com";
+
+
+  // =========================================================
+  // RISK PAGE
+  // WBGT + TEMPERATURE
+  // =========================================================
+
+  async function loadHeatRiskData() {
+
+    try {
+
+      console.log(
+        "🌡️ Loading WBGT and temperature..."
+      );
+
+      const response =
+        await fetch(
+          "/api/latest-heat-data",
+          {
+            method: "GET",
+
+            headers: {
+              "Accept":
+                "application/json"
+            },
+
+            cache: "no-store"
+          }
+        );
+
+
+      if (!response.ok) {
+
+        throw new Error(
+          `/api/latest-heat-data returned ${response.status}`
+        );
+
+      }
+
+
+      const data =
+        await response.json();
+
+
+      console.log(
+        "🌡️ Heat data received:",
+        data
+      );
+
+
+      // =====================================================
+      // TEMPERATURE
+      // =====================================================
+
+      const ambientTemp =
+        document.getElementById(
+          "ambientTemp"
+        );
+
+
+      if (ambientTemp) {
+
+        const temperature =
+          Number(
+            data.temperature
+          );
+
+
+        if (
+          Number.isFinite(
+            temperature
+          )
+        ) {
+
+          ambientTemp.textContent =
+            `${temperature.toFixed(1)}°C`;
+
+        } else {
+
+          ambientTemp.textContent =
+            "Unavailable";
+
+        }
+
+      }
+
+
+      // =====================================================
+      // WBGT
+      // =====================================================
+
+      const wbgtElement =
+        document.getElementById(
+          "wbgtValue"
+        );
+
+
+      if (wbgtElement) {
+
+        const wbgt =
+          Number(
+            data.heatStress
+          );
+
+
+        if (
+          Number.isFinite(
+            wbgt
+          )
+        ) {
+
+          wbgtElement.textContent =
+            `${wbgt.toFixed(1)}°C`;
+
+        } else {
+
+          wbgtElement.textContent =
+            "Unavailable";
+
+        }
+
+      }
+
+
+    } catch (error) {
+
+      console.error(
+        "❌ Failed to load WBGT/temperature:",
+        error
+      );
+
+
+      const ambientTemp =
+        document.getElementById(
+          "ambientTemp"
+        );
+
+
+      if (ambientTemp) {
+
+        ambientTemp.textContent =
+          "Unavailable";
+
+      }
+
+
+      const wbgtElement =
+        document.getElementById(
+          "wbgtValue"
+        );
+
+
+      if (wbgtElement) {
+
+        wbgtElement.textContent =
+          "Unavailable";
+
+      }
+
+    }
+
+  }
+
+
+  // =========================================================
+  // LOAD RISK DATA ON EVERY PAGE WHERE THE ELEMENT EXISTS
+  // =========================================================
+
+  loadHeatRiskData();
 
 
   // =========================================================
   // MAP
   // =========================================================
 
-  const mapElement = document.getElementById("mumbaiHeatmap");
+  const mapElement =
+    document.getElementById(
+      "mumbaiHeatmap"
+    );
+
+
+  // ---------------------------------------------------------
+  // IMPORTANT:
+  // If this is the Risk page and there is no map,
+  // DO NOT stop the entire JavaScript.
+  // ---------------------------------------------------------
 
   if (!mapElement) {
-    console.error("❌ #mumbaiHeatmap element not found.");
+
+    console.log(
+      "ℹ️ No heatmap on this page. Skipping map initialization."
+    );
+
     return;
+
   }
 
-  const map = L.map("mumbaiHeatmap", {
-    zoomControl: true
-  }).setView([19.0760, 72.8777], 11);
+
+  // =========================================================
+  // CREATE MAP
+  // =========================================================
+
+  const map =
+    L.map(
+      "mumbaiHeatmap",
+      {
+        zoomControl: true
+      }
+    ).setView(
+      [
+        19.0760,
+        72.8777
+      ],
+      11
+    );
 
 
   // =========================================================
@@ -31,18 +231,27 @@ document.addEventListener("DOMContentLoaded", () => {
     "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
     {
       maxZoom: 19,
-      attribution: "&copy; OpenStreetMap contributors"
+
+      attribution:
+        "&copy; OpenStreetMap contributors"
     }
-  ).addTo(map);
+  ).addTo(
+    map
+  );
 
 
   // =========================================================
   // LAYERS
   // =========================================================
 
-  let heatLayer = null;
+  let heatLayer =
+    null;
 
-  const wardMarkerLayer = L.layerGroup().addTo(map);
+
+  const wardMarkerLayer =
+    L.layerGroup().addTo(
+      map
+    );
 
 
   // =========================================================
@@ -54,99 +263,151 @@ document.addEventListener("DOMContentLoaded", () => {
   //
 
   const weatherData = {
+
     temp_mean_c: 35,
+
     temp_max_c: 40,
+
     temp_min_c: 30,
+
     humidity_pct: 60,
+
     wind_speed_ms: 2,
+
     solar_radiation_kwh_m2: 5
+
   };
 
 
   // =========================================================
   // HELPER: GET RISK VALUE
   // =========================================================
-  //
-  // Actual backend response:
-  //
-  // prediction: {
-  //   "3d": {
-  //      wbgt_c: ...,
-  //      hmri: ...,
-  //      risk_level: ...
-  //   },
-  //   "4d": {...},
-  //   "5d": {...}
-  // }
-  //
-  // This function receives the selected prediction data,
-  // e.g. prediction.prediction["3d"].
-  //
 
-  function getRiskValue(prediction) {
+  function getRiskValue(
+    prediction
+  ) {
 
     if (!prediction) {
+
       return null;
+
     }
 
 
-    // -----------------------------------------------------
+    // -------------------------------------------------------
     // Actual ML field
-    // -----------------------------------------------------
+    // -------------------------------------------------------
 
-    if (prediction.hmri !== undefined) {
+    if (
+      prediction.hmri !==
+      undefined
+    ) {
 
-      const value = Number(
-        prediction.hmri
-      );
+      const value =
+        Number(
+          prediction.hmri
+        );
 
-      if (Number.isFinite(value)) {
+
+      if (
+        Number.isFinite(
+          value
+        )
+      ) {
+
         return value;
+
       }
+
     }
 
 
-    // -----------------------------------------------------
-    // Possible alternative field names
-    // -----------------------------------------------------
+    // -------------------------------------------------------
+    // Alternative field
+    // -------------------------------------------------------
 
-    if (prediction.mortalityRisk !== undefined) {
+    if (
+      prediction.mortalityRisk !==
+      undefined
+    ) {
 
-      const value = Number(
-        prediction.mortalityRisk
-      );
+      const value =
+        Number(
+          prediction.mortalityRisk
+        );
 
-      if (Number.isFinite(value)) {
+
+      if (
+        Number.isFinite(
+          value
+        )
+      ) {
+
         return value;
+
       }
+
     }
 
 
-    if (prediction.mortality_risk !== undefined) {
+    // -------------------------------------------------------
+    // Alternative field
+    // -------------------------------------------------------
 
-      const value = Number(
-        prediction.mortality_risk
-      );
+    if (
+      prediction.mortality_risk !==
+      undefined
+    ) {
 
-      if (Number.isFinite(value)) {
+      const value =
+        Number(
+          prediction.mortality_risk
+        );
+
+
+      if (
+        Number.isFinite(
+          value
+        )
+      ) {
+
         return value;
+
       }
+
     }
 
 
-    if (prediction.risk !== undefined) {
+    // -------------------------------------------------------
+    // Alternative field
+    // -------------------------------------------------------
 
-      const value = Number(
-        prediction.risk
-      );
+    if (
+      prediction.risk !==
+      undefined
+    ) {
 
-      if (Number.isFinite(value)) {
+      const value =
+        Number(
+          prediction.risk
+        );
+
+
+      if (
+        Number.isFinite(
+          value
+        )
+      ) {
+
         return value;
+
       }
+
     }
 
 
     return null;
+
   }
 
 
@@ -154,38 +415,67 @@ document.addEventListener("DOMContentLoaded", () => {
   // HELPER: GET WBGT
   // =========================================================
 
-  function getWBGT(prediction) {
+  function getWBGT(
+    prediction
+  ) {
 
     if (!prediction) {
+
       return null;
+
     }
 
 
-    if (prediction.wbgt_c !== undefined) {
+    if (
+      prediction.wbgt_c !==
+      undefined
+    ) {
 
-      const value = Number(
-        prediction.wbgt_c
-      );
+      const value =
+        Number(
+          prediction.wbgt_c
+        );
 
-      if (Number.isFinite(value)) {
+
+      if (
+        Number.isFinite(
+          value
+        )
+      ) {
+
         return value;
+
       }
+
     }
 
 
-    if (prediction.wbgt !== undefined) {
+    if (
+      prediction.wbgt !==
+      undefined
+    ) {
 
-      const value = Number(
-        prediction.wbgt
-      );
+      const value =
+        Number(
+          prediction.wbgt
+        );
 
-      if (Number.isFinite(value)) {
+
+      if (
+        Number.isFinite(
+          value
+        )
+      ) {
+
         return value;
+
       }
+
     }
 
 
     return null;
+
   }
 
 
@@ -193,66 +483,77 @@ document.addEventListener("DOMContentLoaded", () => {
   // HELPER: GET RISK LEVEL
   // =========================================================
 
-  function getRiskLevel(prediction) {
+  function getRiskLevel(
+    prediction
+  ) {
 
     if (!prediction) {
+
       return "UNKNOWN";
+
     }
 
 
-    if (prediction.risk_level) {
+    if (
+      prediction.risk_level
+    ) {
+
       return prediction.risk_level;
+
     }
 
 
-    if (prediction.riskLevel) {
+    if (
+      prediction.riskLevel
+    ) {
+
       return prediction.riskLevel;
+
     }
 
 
     return "UNKNOWN";
+
   }
 
 
   // =========================================================
   // HELPER: RISK COLOR
   // =========================================================
-  //
-  // HMRI from backend is NOT a 0-1 value.
-  //
-  // Current backend values are approximately:
-  //
-  // 12 - 20
-  //
-  // Therefore risk color is based on the actual risk level
-  // returned by the ML backend where possible.
-  //
 
-  function getRiskColor(risk, riskLevel) {
+  function getRiskColor(
+    risk,
+    riskLevel
+  ) {
 
-    // -----------------------------------------------------
+    // -------------------------------------------------------
     // Prefer actual ML risk level
-    // -----------------------------------------------------
+    // -------------------------------------------------------
 
     if (riskLevel) {
 
-      const level = String(
-        riskLevel
-      ).toLowerCase();
+      const level =
+        String(
+          riskLevel
+        ).toLowerCase();
 
 
       if (
         level === "very high" ||
         level === "critical"
       ) {
+
         return "#d7191c";
+
       }
 
 
       if (
         level === "high"
       ) {
+
         return "#fdae61";
+
       }
 
 
@@ -260,126 +561,178 @@ document.addEventListener("DOMContentLoaded", () => {
         level === "moderate" ||
         level === "medium"
       ) {
+
         return "#fee08b";
+
       }
 
 
       if (
         level === "low"
       ) {
+
         return "#1a9641";
+
       }
+
     }
 
 
-    // -----------------------------------------------------
+    // -------------------------------------------------------
     // Fallback using HMRI
-    // -----------------------------------------------------
+    // -------------------------------------------------------
 
     if (
       risk === null ||
-      !Number.isFinite(risk)
+      !Number.isFinite(
+        risk
+      )
     ) {
+
       return "#808080";
+
     }
 
 
-    if (risk >= 18) {
+    if (
+      risk >= 18
+    ) {
+
       return "#d7191c";
+
     }
 
 
-    if (risk >= 16) {
+    if (
+      risk >= 16
+    ) {
+
       return "#fdae61";
+
     }
 
 
-    if (risk >= 14) {
+    if (
+      risk >= 14
+    ) {
+
       return "#fee08b";
+
     }
 
 
     return "#1a9641";
+
   }
 
 
   // =========================================================
   // HELPER: CALCULATE HMRI RANGE
   // =========================================================
-  //
-  // The backend returns HMRI values around 12-20.
-  // Leaflet heatmap requires intensity between 0 and 1.
-  //
-  // We calculate the range from the actual backend data
-  // instead of hardcoding heat values.
-  //
 
-  function getRiskRange(predictions) {
+  function getRiskRange(
+    predictions
+  ) {
 
-    const riskValues = [];
+    const riskValues =
+      [];
 
 
-    predictions.forEach(prediction => {
+    predictions.forEach(
+      prediction => {
 
-      if (!prediction) {
-        return;
+        if (!prediction) {
+
+          return;
+
+        }
+
+
+        let predictionData =
+          prediction.prediction;
+
+
+        if (
+          !predictionData ||
+          typeof predictionData !==
+          "object"
+        ) {
+
+          predictionData =
+            prediction;
+
+        }
+
+
+        // ---------------------------------------------------
+        // Use 3-day prediction
+        // ---------------------------------------------------
+
+        if (
+          predictionData["3d"] &&
+          typeof predictionData["3d"] ===
+          "object"
+        ) {
+
+          predictionData =
+            predictionData["3d"];
+
+        }
+
+
+        const risk =
+          getRiskValue(
+            predictionData
+          );
+
+
+        if (
+          risk !== null &&
+          Number.isFinite(
+            risk
+          )
+        ) {
+
+          riskValues.push(
+            risk
+          );
+
+        }
+
       }
+    );
 
 
-      let predictionData =
-        prediction.prediction;
-
-
-      if (
-        !predictionData ||
-        typeof predictionData !== "object"
-      ) {
-
-        predictionData = prediction;
-      }
-
-
-      // Use 3-day prediction for current heatmap
-
-      if (
-        predictionData["3d"] &&
-        typeof predictionData["3d"] === "object"
-      ) {
-
-        predictionData =
-          predictionData["3d"];
-      }
-
-
-      const risk =
-        getRiskValue(
-          predictionData
-        );
-
-
-      if (
-        risk !== null &&
-        Number.isFinite(risk)
-      ) {
-
-        riskValues.push(risk);
-      }
-    });
-
-
-    if (riskValues.length === 0) {
+    if (
+      riskValues.length ===
+      0
+    ) {
 
       return {
+
         min: 0,
+
         max: 1
+
       };
+
     }
 
 
     return {
-      min: Math.min(...riskValues),
-      max: Math.max(...riskValues)
+
+      min:
+        Math.min(
+          ...riskValues
+        ),
+
+      max:
+        Math.max(
+          ...riskValues
+        )
+
     };
+
   }
 
 
@@ -394,10 +747,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (
       risk === null ||
-      !Number.isFinite(risk)
+      !Number.isFinite(
+        risk
+      )
     ) {
 
       return 0.3;
+
     }
 
 
@@ -409,31 +765,41 @@ document.addEventListener("DOMContentLoaded", () => {
       riskRange.max;
 
 
-    // -----------------------------------------------------
-    // If all values are the same
-    // -----------------------------------------------------
+    // -------------------------------------------------------
+    // If all values are same
+    // -------------------------------------------------------
 
-    if (max === min) {
+    if (
+      max === min
+    ) {
+
       return 0.7;
+
     }
 
 
-    // -----------------------------------------------------
-    // Normalize actual HMRI to 0-1
-    // -----------------------------------------------------
+    // -------------------------------------------------------
+    // Normalize HMRI to 0-1
+    // -------------------------------------------------------
 
     const normalized =
-      (risk - min) /
-      (max - min);
+      (
+        risk - min
+      ) /
+      (
+        max - min
+      );
 
 
     return Math.max(
       0,
+
       Math.min(
         1,
         normalized
       )
     );
+
   }
 
 
@@ -454,11 +820,14 @@ document.addEventListener("DOMContentLoaded", () => {
       );
 
 
-    if (!response.ok) {
+    if (
+      !response.ok
+    ) {
 
       throw new Error(
         `FastAPI /wards returned ${response.status}`
       );
+
     }
 
 
@@ -472,15 +841,21 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
 
-    if (!Array.isArray(wards)) {
+    if (
+      !Array.isArray(
+        wards
+      )
+    ) {
 
       throw new Error(
         "FastAPI /wards response is not an array."
       );
+
     }
 
 
     return wards;
+
   }
 
 
@@ -499,24 +874,33 @@ document.addEventListener("DOMContentLoaded", () => {
       await fetch(
         `${FASTAPI_URL}/predict/wards`,
         {
+
           method: "POST",
 
           headers: {
-            "Content-Type": "application/json"
+
+            "Content-Type":
+              "application/json"
+
           },
 
-          body: JSON.stringify(
-            weatherData
-          )
+          body:
+            JSON.stringify(
+              weatherData
+            )
+
         }
       );
 
 
-    if (!response.ok) {
+    if (
+      !response.ok
+    ) {
 
       throw new Error(
         `FastAPI /predict/wards returned ${response.status}`
       );
+
     }
 
 
@@ -531,6 +915,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     return predictions;
+
   }
 
 
@@ -538,72 +923,60 @@ document.addEventListener("DOMContentLoaded", () => {
   // NORMALIZE PREDICTION RESPONSE
   // =========================================================
 
-  function normalizePredictions(data) {
+  function normalizePredictions(
+    data
+  ) {
 
-    /*
-     * Depending on the backend implementation,
-     * /predict/wards may return:
-     *
-     * [
-     *   {...},
-     *   {...}
-     * ]
-     *
-     * OR
-     *
-     * {
-     *   "wards": [...]
-     * }
-     *
-     * OR
-     *
-     * {
-     *   "predictions": [...]
-     * }
-     *
-     * OR
-     *
-     * {
-     *   "1": {...},
-     *   "2": {...}
-     * }
-     */
-
-
-    if (Array.isArray(data)) {
+    if (
+      Array.isArray(
+        data
+      )
+    ) {
 
       return data;
+
     }
 
 
     if (
       data &&
-      Array.isArray(data.wards)
+      Array.isArray(
+        data.wards
+      )
     ) {
 
       return data.wards;
+
     }
 
 
     if (
       data &&
-      Array.isArray(data.predictions)
+      Array.isArray(
+        data.predictions
+      )
     ) {
 
       return data.predictions;
+
     }
 
 
     if (
       data &&
-      typeof data === "object"
+      typeof data ===
+      "object"
     ) {
 
-      const result = [];
+      const result =
+        [];
 
 
       for (
-        const key of Object.keys(data)
+        const key of
+        Object.keys(
+          data
+        )
       ) {
 
         const value =
@@ -612,28 +985,45 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (
           value &&
-          typeof value === "object" &&
-          !Array.isArray(value)
+          typeof value ===
+          "object" &&
+          !Array.isArray(
+            value
+          )
         ) {
 
           result.push({
-            ward_id: Number(key),
+
+            ward_id:
+              Number(
+                key
+              ),
+
             ...value
+
           });
+
         }
+
       }
 
 
-      if (result.length > 0) {
+      if (
+        result.length >
+        0
+      ) {
 
         return result;
+
       }
+
     }
 
 
     throw new Error(
       "Could not understand /predict/wards response format."
     );
+
   }
 
 
@@ -652,25 +1042,26 @@ document.addEventListener("DOMContentLoaded", () => {
       );
 
 
-    // -----------------------------------------------------
-    // Direct ward_id match
-    // -----------------------------------------------------
-
     const match =
       predictions.find(
         prediction => {
 
-          return Number(
-            prediction.ward_id ??
-            prediction.wardID ??
-            prediction.id
-          ) === wardId;
+          return (
+            Number(
+              prediction.ward_id ??
+              prediction.wardID ??
+              prediction.id
+            ) ===
+            wardId
+          );
 
         }
       );
 
 
-    return match || null;
+    return match ||
+      null;
+
   }
 
 
@@ -688,7 +1079,8 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
 
-    const heatData = [];
+    const heatData =
+      [];
 
 
     wardMarkerLayer.clearLayers();
@@ -730,12 +1122,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         // -------------------------------------------------
-        // Skip wards without coordinates
+        // Skip invalid coordinates
         // -------------------------------------------------
 
         if (
-          !Number.isFinite(latitude) ||
-          !Number.isFinite(longitude)
+          !Number.isFinite(
+            latitude
+          ) ||
+          !Number.isFinite(
+            longitude
+          )
         ) {
 
           console.warn(
@@ -743,11 +1139,12 @@ document.addEventListener("DOMContentLoaded", () => {
           );
 
           return;
+
         }
 
 
         // -------------------------------------------------
-        // Find ML prediction
+        // Find prediction
         // -------------------------------------------------
 
         const prediction =
@@ -764,13 +1161,12 @@ document.addEventListener("DOMContentLoaded", () => {
           );
 
           return;
+
         }
 
 
         // -------------------------------------------------
-        // ACTUAL BACKEND STRUCTURE
-        //
-        // prediction.prediction["3d"]
+        // Get prediction data
         // -------------------------------------------------
 
         let predictionData =
@@ -779,30 +1175,34 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (
           !predictionData ||
-          typeof predictionData !== "object"
+          typeof predictionData !==
+          "object"
         ) {
 
           predictionData =
             prediction;
+
         }
 
 
         // -------------------------------------------------
-        // Use 3-day ML prediction
+        // Use 3-day prediction
         // -------------------------------------------------
 
         if (
           predictionData["3d"] &&
-          typeof predictionData["3d"] === "object"
+          typeof predictionData["3d"] ===
+          "object"
         ) {
 
           predictionData =
             predictionData["3d"];
+
         }
 
 
         // -------------------------------------------------
-        // Get HMRI
+        // HMRI
         // -------------------------------------------------
 
         const risk =
@@ -812,7 +1212,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         // -------------------------------------------------
-        // Get WBGT
+        // WBGT
         // -------------------------------------------------
 
         const wbgt =
@@ -822,7 +1222,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         // -------------------------------------------------
-        // Get actual ML risk level
+        // Risk level
         // -------------------------------------------------
 
         const riskLevel =
@@ -837,7 +1237,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (
           risk === null ||
-          !Number.isFinite(risk)
+          !Number.isFinite(
+            risk
+          )
         ) {
 
           console.warn(
@@ -846,6 +1248,7 @@ document.addEventListener("DOMContentLoaded", () => {
           );
 
           return;
+
         }
 
 
@@ -861,20 +1264,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         // -------------------------------------------------
-        // Add to Leaflet heat layer
-        //
-        // [latitude, longitude, intensity]
+        // Add heat data
         // -------------------------------------------------
 
-        heatData.push([
-          latitude,
-          longitude,
-          intensity
-        ]);
+        heatData.push(
+          [
+            latitude,
+            longitude,
+            intensity
+          ]
+        );
 
 
         // -------------------------------------------------
-        // Ward marker color
+        // Ward color
         // -------------------------------------------------
 
         const color =
@@ -895,11 +1298,20 @@ document.addEventListener("DOMContentLoaded", () => {
               longitude
             ],
             {
+
               radius: 9,
-              color: "#ffffff",
+
+              color:
+                "#ffffff",
+
               weight: 2,
-              fillColor: color,
-              fillOpacity: 0.9
+
+              fillColor:
+                color,
+
+              fillOpacity:
+                0.9
+
             }
           );
 
@@ -910,52 +1322,91 @@ document.addEventListener("DOMContentLoaded", () => {
 
         marker.bindPopup(`
 
-          <div style="min-width:210px">
+          <div
+            style="
+              min-width:210px
+            "
+          >
 
             <strong>
-              Ward ${ward.ward_id} - ${ward.ward_name}
+              Ward ${ward.ward_id}
+              -
+              ${ward.ward_name}
             </strong>
 
-            <hr style="margin:6px 0">
+            <hr
+              style="
+                margin:6px 0
+              "
+            >
 
             <div>
-              <strong>WBGT:</strong>
-              ${
-                wbgt !== null
-                  ? `${wbgt.toFixed(2)} °C`
-                  : "Unavailable"
-              }
+
+              <strong>
+                WBGT:
+              </strong>
+
+              ${wbgt !== null
+            ? `${wbgt.toFixed(2)} °C`
+            : "Unavailable"
+          }
+
             </div>
 
             <div>
-              <strong>HMRI:</strong>
+
+              <strong>
+                HMRI:
+              </strong>
+
               ${risk.toFixed(2)}
+
             </div>
 
             <div>
-              <strong>Risk Level:</strong>
+
+              <strong>
+                Risk Level:
+              </strong>
+
               ${riskLevel}
+
             </div>
 
             <div>
-              <strong>Vulnerability:</strong>
+
+              <strong>
+                Vulnerability:
+              </strong>
+
               ${Number(
-                ward.vulnerability
-              ).toFixed(3)}
+            ward.vulnerability
+          ).toFixed(3)}
+
             </div>
 
             <div>
-              <strong>Exposure:</strong>
+
+              <strong>
+                Exposure:
+              </strong>
+
               ${Number(
-                ward.exposure
-              ).toFixed(3)}
+            ward.exposure
+          ).toFixed(3)}
+
             </div>
 
             <div>
-              <strong>Population:</strong>
+
+              <strong>
+                Population:
+              </strong>
+
               ${Number(
-                ward.population_2025
-              ).toLocaleString()}
+            ward.population_2025
+          ).toLocaleString()}
+
             </div>
 
           </div>
@@ -975,22 +1426,27 @@ document.addEventListener("DOMContentLoaded", () => {
     // REMOVE OLD HEATMAP
     // =====================================================
 
-    if (heatLayer) {
+    if (
+      heatLayer
+    ) {
 
       map.removeLayer(
         heatLayer
       );
 
-      heatLayer = null;
+      heatLayer =
+        null;
+
     }
 
 
     // =====================================================
-    // CREATE NEW HEATMAP
+    // CHECK HEAT DATA
     // =====================================================
 
     if (
-      heatData.length === 0
+      heatData.length ===
+      0
     ) {
 
       console.error(
@@ -998,25 +1454,46 @@ document.addEventListener("DOMContentLoaded", () => {
       );
 
       return false;
+
     }
 
+
+    // =====================================================
+    // CREATE NEW HEATMAP
+    // =====================================================
 
     heatLayer =
       L.heatLayer(
         heatData,
         {
+
           radius: 45,
+
           blur: 35,
+
           maxZoom: 13,
+
           max: 1.0,
-          minOpacity: 0.35,
+
+          minOpacity:
+            0.35,
 
           gradient: {
-            0.0: "green",
-            0.5: "yellow",
-            0.8: "orange",
-            1.0: "red"
+
+            0.0:
+              "green",
+
+            0.5:
+              "yellow",
+
+            0.8:
+              "orange",
+
+            1.0:
+              "red"
+
           }
+
         }
       );
 
@@ -1044,8 +1521,11 @@ document.addEventListener("DOMContentLoaded", () => {
       L.latLngBounds(
         heatData.map(
           point => [
+
             point[0],
+
             point[1]
+
           ]
         )
       );
@@ -1058,21 +1538,25 @@ document.addEventListener("DOMContentLoaded", () => {
       map.fitBounds(
         bounds,
         {
+
           padding: [
             30,
             30
           ]
+
         }
       );
+
     }
 
 
     return true;
+
   }
 
 
   // =========================================================
-  // LOAD EVERYTHING
+  // LOAD EVERYTHING FOR MAP PAGE
   // =========================================================
 
   async function initializeDashboard() {
@@ -1084,25 +1568,25 @@ document.addEventListener("DOMContentLoaded", () => {
       );
 
 
-      // -------------------------------------------------
-      // Get ward coordinates/data
-      // -------------------------------------------------
+      // ---------------------------------------------------
+      // Get ward data
+      // ---------------------------------------------------
 
       const wards =
         await loadWards();
 
 
-      // -------------------------------------------------
+      // ---------------------------------------------------
       // Get ML predictions
-      // -------------------------------------------------
+      // ---------------------------------------------------
 
       const predictionResponse =
         await loadWardPredictions();
 
 
-      // -------------------------------------------------
-      // Normalize prediction response
-      // -------------------------------------------------
+      // ---------------------------------------------------
+      // Normalize predictions
+      // ---------------------------------------------------
 
       const predictions =
         normalizePredictions(
@@ -1116,9 +1600,9 @@ document.addEventListener("DOMContentLoaded", () => {
       );
 
 
-      // -------------------------------------------------
+      // ---------------------------------------------------
       // Build heatmap
-      // -------------------------------------------------
+      // ---------------------------------------------------
 
       const heatmapCreated =
         createHeatmap(
@@ -1127,9 +1611,9 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
 
-      // -------------------------------------------------
-      // Fix Leaflet rendering after layout
-      // -------------------------------------------------
+      // ---------------------------------------------------
+      // Fix Leaflet rendering
+      // ---------------------------------------------------
 
       setTimeout(
         () => {
@@ -1141,11 +1625,13 @@ document.addEventListener("DOMContentLoaded", () => {
       );
 
 
-      // -------------------------------------------------
-      // Success message only if heatmap actually exists
-      // -------------------------------------------------
+      // ---------------------------------------------------
+      // Success
+      // ---------------------------------------------------
 
-      if (heatmapCreated) {
+      if (
+        heatmapCreated
+      ) {
 
         console.log(
           "✅ Dashboard heatmap loaded successfully."
@@ -1165,7 +1651,9 @@ document.addEventListener("DOMContentLoaded", () => {
         "❌ Error message:",
         error.message
       );
+
     }
+
   }
 
 
@@ -1191,7 +1679,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   // =========================================================
-  // START
+  // START MAP
   // =========================================================
 
   initializeDashboard();
