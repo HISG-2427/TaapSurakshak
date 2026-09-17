@@ -262,39 +262,87 @@ app.get(
 // ============================================================
 
 app.get("/login", async (req, res) => {
+
     try {
-        console.log("🔵 LOGIN: Fetching wards from:", `${FASTAPI_URL}/wards`);
 
-        const response = await fetch(`${FASTAPI_URL}/wards`);
+        console.log("🔵 Loading wards from FastAPI...");
 
-        console.log("🔵 LOGIN: FastAPI status:", response.status);
+        let response;
+        let lastError;
 
-        const responseText = await response.text();
+        // Try up to 3 times
+        for (let attempt = 1; attempt <= 3; attempt++) {
 
-        console.log("🔵 LOGIN: FastAPI response:", responseText);
+            try {
 
-        if (!response.ok) {
-            throw new Error(
-                `FastAPI returned ${response.status}: ${responseText}`
-            );
+                console.log(
+                    `🔵 Wards request attempt ${attempt}`
+                );
+
+                response = await fetch(
+                    `${FASTAPI_URL}/wards`
+                );
+
+                if (response.ok) {
+                    break;
+                }
+
+                throw new Error(
+                    `FastAPI returned ${response.status}`
+                );
+
+            } catch (error) {
+
+                lastError = error;
+
+                console.error(
+                    `❌ Wards attempt ${attempt} failed:`,
+                    error.message
+                );
+
+                // Wait before retry
+                if (attempt < 3) {
+                    await new Promise(
+                        resolve => setTimeout(resolve, 3000)
+                    );
+                }
+            }
         }
 
-        const wards = JSON.parse(responseText);
+        if (!response || !response.ok) {
+            throw lastError ||
+                new Error("Unable to load wards");
+        }
 
-        console.log("🟢 LOGIN: Wards received:", wards);
-        console.log("🟢 LOGIN: Is array:", Array.isArray(wards));
+        const wards = await response.json();
 
-        res.render("TaapSurakshak/login", {
-            wards: Array.isArray(wards) ? wards : []
-        });
+        console.log(
+            "🟢 Wards successfully loaded:",
+            wards
+        );
+
+        res.render(
+            "TaapSurakshak/login",
+            {
+                wards: Array.isArray(wards)
+                    ? wards
+                    : []
+            }
+        );
 
     } catch (error) {
 
-        console.error("🔴 LOGIN WARDS ERROR:", error);
+        console.error(
+            "🔴 Final wards loading error:",
+            error
+        );
 
-        res.render("TaapSurakshak/login", {
-            wards: []
-        });
+        res.render(
+            "TaapSurakshak/login",
+            {
+                wards: []
+            }
+        );
     }
 });
 // ============================================================
