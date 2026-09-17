@@ -626,6 +626,62 @@ app.get(
     "/api/latest-heat-data",
     async (req, res) => {
         try {
+
+            // ==========================================
+            // 1. GET REAL WEATHER DATA FROM OPEN-METEO
+            // ==========================================
+
+            const weatherResponse = await fetch(
+                "https://api.open-meteo.com/v1/forecast" +
+                "?latitude=19.0760" +
+                "&longitude=72.8777" +
+                "&daily=temperature_2m_max" +
+                "&current=temperature_2m" +
+                "&timezone=Asia%2FKolkata"
+            );
+
+            if (!weatherResponse.ok) {
+                const errorBody =
+                    await weatherResponse.text();
+
+                console.error(
+                    "WEATHER API ERROR:",
+                    weatherResponse.status,
+                    errorBody
+                );
+
+                throw new Error(
+                    `Weather API returned ${weatherResponse.status}`
+                );
+            }
+
+            const weatherData =
+                await weatherResponse.json();
+
+            console.log(
+                "🌡️ WEATHER API RESPONSE:",
+                weatherData
+            );
+
+
+            // Today's peak temperature
+            const peakTemperature =
+                Number(
+                    weatherData.daily
+                        ?.temperature_2m_max?.[0]
+                );
+
+            if (!Number.isFinite(peakTemperature)) {
+                throw new Error(
+                    "Peak temperature not found from Weather API."
+                );
+            }
+
+
+            // ==========================================
+            // 2. SEND DATA TO FASTAPI ML MODEL
+            // ==========================================
+
             const response =
                 await fetch(
                     `${FASTAPI_URL}/predict`,
@@ -643,35 +699,61 @@ app.get(
                         body:
                             JSON.stringify({
                                 temp_mean_c: 35,
-                                temp_max_c: 40,
+
+                                // REAL WEATHER API TEMPERATURE
+                                temp_max_c:
+                                    peakTemperature,
+
                                 temp_min_c: 30,
+
                                 humidity_pct: 60,
+
                                 wind_speed_ms: 2,
+
                                 solar_radiation_kwh_m2: 5
                             })
                     }
                 );
 
-            if (!response.ok) {
-                const errorBody = await response.text();
 
-                console.error("FASTAPI ERROR STATUS:", response.status);
-                console.error("FASTAPI ERROR BODY:", errorBody);
+            if (!response.ok) {
+
+                const errorBody =
+                    await response.text();
+
+                console.error(
+                    "FASTAPI ERROR STATUS:",
+                    response.status
+                );
+
+                console.error(
+                    "FASTAPI ERROR BODY:",
+                    errorBody
+                );
 
                 throw new Error(
                     `FastAPI returned status ${response.status}: ${errorBody}`
                 );
-            }   
+            }
+
+
             const result =
                 await response.json();
+
 
             console.log(
                 "FASTAPI /predict RESPONSE:",
                 result
             );
 
+
+            // ==========================================
+            // 3. GET 3-DAY PREDICTION
+            // ==========================================
+
             const prediction =
                 result["3d"];
+
 
             if (!prediction) {
                 throw new Error(
@@ -679,7 +761,13 @@ app.get(
                 );
             }
 
+
+            // ==========================================
+            // 4. SEND EVERYTHING TO FRONTEND
+            // ==========================================
+
             res.json({
+
                 success: true,
 
                 heatStress:
@@ -695,10 +783,17 @@ app.get(
                 riskLevel:
                     prediction.risk_level,
 
+                // REAL WEATHER API TEMPERATURE
+                temperature:
+                    peakTemperature,
+
                 forecast:
                     result
             });
+
+
         } catch (error) {
+
             console.error(
                 "Latest heat data error:",
                 error

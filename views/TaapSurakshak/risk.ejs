@@ -372,6 +372,18 @@
                 const riskLevel =
                     data.riskLevel;
 
+                // Update Peak Ambient Temperature
+                const ambientTemp =
+                    Number(data.temperature);
+
+                if (Number.isFinite(ambientTemp)) {
+                    document.getElementById("ambientTemp").textContent =
+                        `${ambientTemp.toFixed(1)}°C`;
+                } else {
+                    document.getElementById("ambientTemp").textContent =
+                        "Unavailable";
+                }
+
 
                 if (
                     !Number.isFinite(wbgt) ||

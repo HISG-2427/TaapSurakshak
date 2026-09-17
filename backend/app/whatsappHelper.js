@@ -326,7 +326,6 @@ whatsappClient.on(
 AUTHENTICATED
 ============================================================
 */
-
 whatsappClient.on(
     "authenticated",
     () => {
@@ -343,13 +342,24 @@ whatsappClient.on(
             "======================================"
         );
 
-
         whatsappState =
             "AUTHENTICATED";
 
-
         whatsappError =
             null;
+
+        // Render/WhatsApp Web can authenticate
+        // without firing "ready" reliably.
+        // Treat successful authentication as connected.
+        whatsappReady =
+            true;
+
+        currentQRCode =
+            null;
+
+        console.log(
+            "✅ WHATSAPP MARKED AS READY AFTER AUTHENTICATION"
+        );
 
     }
 );

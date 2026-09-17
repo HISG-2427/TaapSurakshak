@@ -900,11 +900,11 @@
             data.state === "LOADING" ||
             data.state === "AUTHENTICATED"
           ) {
+            whatsappConnected = false;
+            clearWhatsAppQRCode();
 
             whatsappStatusText.innerHTML =
-              '<span class="text-primary">' +
-              '⏳ Connecting to WhatsApp Web...' +
-              '</span>';
+              '<span class="text-primary">⏳ Connecting to WhatsApp Web...</span>';
 
             return;
           }
@@ -946,18 +946,12 @@
             updateWhatsAppUI(data);
 
           } catch (error) {
-
-            console.error(
-              "WhatsApp status error:",
-              error
-            );
+            console.error("WhatsApp status error:", error);
 
             whatsappConnected = false;
 
             whatsappStatusText.innerHTML =
-              '<span class="text-danger">' +
-              '❌ Could not check WhatsApp connection.' +
-              '</span>';
+              '<span class="text-danger">❌ Could not check WhatsApp connection.</span>';
           }
         }
 
