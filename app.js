@@ -50,7 +50,8 @@ Vercel will forward WhatsApp requests to this server.
 */
 
 const WHATSAPP_SERVER_URL =
-    process.env.WHATSAPP_SERVER_URL
+    process.env.WHATSAPP_SERVER_URL ||
+    "https://taapsurakshak-app.onrender.com";
 
 
 // ============================================================
