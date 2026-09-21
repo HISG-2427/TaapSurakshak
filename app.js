@@ -311,7 +311,7 @@ app.get("/login", async (req, res) => {
 
         if (!response || !response.ok) {
             throw lastError ||
-                new Error("Unable to load wards");
+            new Error("Unable to load wards");
         }
 
         const wards = await response.json();
@@ -711,8 +711,8 @@ app.get(
                                 wind_speed_ms: 2,
 
                                 solar_radiation_kwh_m2: 5
-                                
-                                
+
+
                             })
                     }
                 );
@@ -1169,19 +1169,13 @@ app.get(
 // START SERVER
 // ============================================================
 
-const PORT =
-    process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
 
-app.listen(
-    PORT,
-    "0.0.0.0",
-    () => {
-        console.log(
-            `Server running on port ${PORT}`
-        );
+if (require.main === module) {
+    app.listen(PORT, "0.0.0.0", () => {
+        console.log(`Server running on port ${PORT}`);
+        console.log(`FastAPI URL: ${FASTAPI_URL}`);
+    });
+}
 
-        console.log(
-            `FastAPI URL: ${FASTAPI_URL}`
-        );
-    }
-);
+module.exports = app;
