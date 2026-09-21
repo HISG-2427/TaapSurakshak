@@ -8,36 +8,36 @@ from app.routes.wards import router as wards_router
 
 app = FastAPI(title="HeatGuard API")
 
-# Allow the Next.js frontend to communicate with FastAPI
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-    "http://localhost:3000",
-    "https://taapsurakshak-app.onrender.com"
-],
+        "http://localhost:3000",
+        "https://taapsurakshak-app.onrender.com"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 class PersonalizedSuggestionRequest(BaseModel):
     age: int
     heat_risk: float
     mortality_index: float
 
+
 @app.post("/personalized-suggestion")
-def personalized_suggestion(
-    request: PersonalizedSuggestionRequest
-):
+def personalized_suggestion(request: PersonalizedSuggestionRequest):
     return generate_personalized_suggestion(
         age=request.age,
         heat_risk=request.heat_risk,
         mortality_index=request.mortality_index
     )
+
+
 @app.get("/")
 def root():
     return {"message": "HeatGuard API is running"}
-
 
 
 app.include_router(prediction_router)
