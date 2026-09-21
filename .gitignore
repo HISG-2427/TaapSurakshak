@@ -18,6 +18,7 @@ logs/
 .cache/
 
 # Python
+backend/venv/
 venv/
 .venv/
 __pycache__/
