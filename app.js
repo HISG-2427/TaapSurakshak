@@ -42,13 +42,11 @@ const FASTAPI_URL =
 //
 // IMPORTANT:
 //
-// On Vercel:
-//     Vercel forwards WhatsApp requests to Render.
+// Vercel:
+//     Vercel -> Render -> WhatsApp Web
 //
-// On Render:
-//     Render runs whatsapp-web.js directly.
-//
-// Therefore this MUST point to the persistent Render service.
+// Render:
+//     Render -> whatsapp-web.js
 // ============================================================
 
 const WHATSAPP_SERVER_URL =
@@ -74,19 +72,78 @@ const app = express();
 // ============================================================
 // WHATSAPP HELPER
 //
-// IMPORTANT:
+// VERY IMPORTANT:
 //
-// This helper MUST be the actual whatsapp-web.js helper
-// on Render.
+// On Render we load the REAL whatsapp-web.js helper.
 //
-// Do NOT use a proxy-only helper on Render.
+// On Vercel we DO NOT load whatsapp-web.js.
+// This prevents Vercel from trying to create:
+// .wwebjs_auth/session-taapsurakshak
 // ============================================================
 
-const {
-    sendWhatsAppFeedback,
-    isWhatsAppReady,
-    getWhatsAppStatus
-} = require("./backend/app/whatsappHelper");
+let sendWhatsAppFeedback;
+let isWhatsAppReady;
+let getWhatsAppStatus;
+
+
+if (!isVercel) {
+
+    const whatsappHelper =
+        require("./backend/app/whatsappHelper");
+
+    sendWhatsAppFeedback =
+        whatsappHelper.sendWhatsAppFeedback;
+
+    isWhatsAppReady =
+        whatsappHelper.isWhatsAppReady;
+
+    getWhatsAppStatus =
+        whatsappHelper.getWhatsAppStatus;
+
+} else {
+
+    // ========================================================
+    // VERCEL PLACEHOLDERS
+    //
+    // Vercel does NOT run WhatsApp.
+    // Requests are forwarded to Render.
+    // ========================================================
+
+    sendWhatsAppFeedback =
+        async () => {
+
+            throw new Error(
+                "WhatsApp is running on the persistent Render server."
+            );
+
+        };
+
+
+    isWhatsAppReady =
+        () => false;
+
+
+    getWhatsAppStatus =
+        () => ({
+
+            enabled:
+                false,
+
+            ready:
+                false,
+
+            state:
+                "SERVER_OFFLINE",
+
+            qr:
+                null,
+
+            error:
+                "WhatsApp runs on the Render persistent server."
+
+        });
+
+}
 
 
 // ============================================================
@@ -188,7 +245,6 @@ app.use(
 
 // ============================================================
 // TRUST PROXY
-// Required for Render / Vercel secure cookies
 // ============================================================
 
 if (
@@ -427,6 +483,10 @@ app.get(
             let lastError;
 
 
+            // ------------------------------------------------
+            // Try up to 3 times
+            // ------------------------------------------------
+
             for (
                 let attempt = 1;
                 attempt <= 3;
@@ -439,10 +499,12 @@ app.get(
                         `🔵 Wards request attempt ${attempt}`
                     );
 
+
                     response =
                         await fetch(
                             `${FASTAPI_URL}/wards`
                         );
+
 
                     if (
                         response.ok
@@ -452,19 +514,23 @@ app.get(
 
                     }
 
+
                     throw new Error(
                         `FastAPI returned ${response.status}`
                     );
+
 
                 } catch (error) {
 
                     lastError =
                         error;
 
+
                     console.error(
                         `❌ Wards attempt ${attempt} failed:`,
                         error.message
                     );
+
 
                     if (
                         attempt < 3
@@ -515,7 +581,9 @@ app.get(
                 {
 
                     wards:
-                        Array.isArray(wards)
+                        Array.isArray(
+                            wards
+                        )
                             ? wards
                             : []
 
@@ -601,7 +669,9 @@ app.post(
             // --------------------------------------------
 
             const numericAge =
-                Number(age);
+                Number(
+                    age
+                );
 
 
             if (
@@ -771,7 +841,9 @@ app.get(
         req.session.destroy(
             (error) => {
 
-                if (error) {
+                if (
+                    error
+                ) {
 
                     console.error(
                         "Logout error:",
@@ -810,7 +882,8 @@ app.post(
         try {
 
             const {
-                userPrompt
+                userPrompt,
+                phoneNumber
             } = req.body;
 
 
@@ -887,6 +960,134 @@ app.post(
 
 
 // ============================================================
+// DIRECT PREDICTION PROXY
+//
+// Browser
+//    ↓
+// /api/predict
+//    ↓
+// FastAPI /predict
+//
+// This avoids browser-side CORS problems.
+// ============================================================
+
+app.post(
+    "/api/predict",
+    async (req, res) => {
+
+        try {
+
+            console.log(
+                "📥 Prediction request received:"
+            );
+
+            console.log(
+                req.body
+            );
+
+
+            const response =
+                await fetch(
+                    `${FASTAPI_URL}/predict`,
+                    {
+
+                        method:
+                            "POST",
+
+                        headers: {
+
+                            "Content-Type":
+                                "application/json",
+
+                            "Accept":
+                                "application/json"
+
+                        },
+
+                        body:
+                            JSON.stringify(
+                                req.body
+                            )
+
+                    }
+                );
+
+
+            const text =
+                await response.text();
+
+
+            console.log(
+                "📤 FastAPI prediction status:",
+                response.status
+            );
+
+
+            console.log(
+                "📤 FastAPI prediction response:",
+                text
+            );
+
+
+            let data;
+
+
+            try {
+
+                data =
+                    JSON.parse(
+                        text
+                    );
+
+            } catch {
+
+                data = {
+
+                    detail:
+                        text
+
+                };
+
+            }
+
+
+            return res
+                .status(
+                    response.status
+                )
+                .json(
+                    data
+                );
+
+
+        } catch (error) {
+
+            console.error(
+                "❌ /api/predict proxy error:",
+                error
+            );
+
+
+            return res
+                .status(500)
+                .json({
+
+                    success:
+                        false,
+
+                    error:
+                        error?.message ||
+                        String(error)
+
+                });
+
+        }
+
+    }
+);
+
+
+// ============================================================
 // WHATSAPP STATUS
 //
 // VERCEL:
@@ -894,16 +1095,12 @@ app.post(
 // Vercel
 //    ↓
 // Render /api/whatsapp-status
-//    ↓
-// whatsappHelper.js
 //
 // RENDER:
 //
 // Render
 //    ↓
 // whatsappHelper.js
-//    ↓
-// whatsapp-web.js
 // ============================================================
 
 app.get(
@@ -924,10 +1121,45 @@ app.get(
                     "☁️ Vercel WhatsApp status request"
                 );
 
+
                 console.log(
-                    "➡️ Forwarding to:",
+                    "➡️ WhatsApp server:",
                     WHATSAPP_SERVER_URL
                 );
+
+
+                if (
+                    !WHATSAPP_SERVER_URL
+                ) {
+
+                    return res
+                        .status(503)
+                        .json({
+
+                            success:
+                                false,
+
+                            enabled:
+                                false,
+
+                            ready:
+                                false,
+
+                            state:
+                                "SERVER_OFFLINE",
+
+                            qr:
+                                null,
+
+                            hasQR:
+                                false,
+
+                            error:
+                                "WHATSAPP_SERVER_URL is not configured in Vercel."
+
+                        });
+
+                }
 
 
                 const response =
@@ -1152,11 +1384,10 @@ app.get(
 // ============================================================
 // DIRECT WHATSAPP STATUS
 //
-// This route is mainly for testing:
-//
+// Render test:
 // https://taapsurakshak-app.onrender.com/whatsapp-status
 //
-// It runs only on the persistent Render server.
+// Vercel also proxies this route to Render.
 // ============================================================
 
 app.get(
@@ -1165,32 +1396,133 @@ app.get(
 
         try {
 
+            // ==================================================
+            // VERCEL
+            // ==================================================
+
+            if (
+                isVercel
+            ) {
+
+                if (
+                    !WHATSAPP_SERVER_URL
+                ) {
+
+                    return res
+                        .status(503)
+                        .json({
+
+                            success:
+                                false,
+
+                            enabled:
+                                false,
+
+                            ready:
+                                false,
+
+                            state:
+                                "SERVER_OFFLINE",
+
+                            qr:
+                                null,
+
+                            hasQR:
+                                false,
+
+                            error:
+                                "WHATSAPP_SERVER_URL is not configured in Vercel."
+
+                        });
+
+                }
+
+
+                const response =
+                    await fetch(
+                        `${WHATSAPP_SERVER_URL}/whatsapp-status`,
+                        {
+
+                            method:
+                                "GET",
+
+                            headers: {
+
+                                Accept:
+                                    "application/json"
+
+                            }
+
+                        }
+                    );
+
+
+                const text =
+                    await response.text();
+
+
+                let data;
+
+
+                try {
+
+                    data =
+                        JSON.parse(
+                            text
+                        );
+
+                } catch {
+
+                    data = {
+
+                        success:
+                            false,
+
+                        enabled:
+                            false,
+
+                        ready:
+                            false,
+
+                        state:
+                            "INVALID_RESPONSE",
+
+                        qr:
+                            null,
+
+                        hasQR:
+                            false,
+
+                        error:
+                            text ||
+                            "Invalid response from Render."
+
+                    };
+
+                }
+
+
+                return res
+                    .status(
+                        response.ok
+                            ? 200
+                            : 503
+                    )
+                    .json(
+                        data
+                    );
+
+            }
+
+
+            // ==================================================
+            // RENDER / LOCAL
+            // ==================================================
+
             const status =
                 await Promise.resolve(
                     getWhatsAppStatus()
                 );
-
-
-            console.log(
-                "📱 Direct WhatsApp status:",
-                {
-
-                    enabled:
-                        status?.enabled,
-
-                    ready:
-                        status?.ready,
-
-                    state:
-                        status?.state,
-
-                    hasQR:
-                        Boolean(
-                            status?.qr
-                        )
-
-                }
-            );
 
 
             return res.json({
@@ -1330,6 +1662,10 @@ app.get(
             );
 
 
+            // ==========================================
+            // TODAY'S PEAK TEMPERATURE
+            // ==========================================
+
             const peakTemperature =
                 Number(
                     weatherData
@@ -1369,7 +1705,7 @@ app.get(
                             "Content-Type":
                                 "application/json",
 
-                            Accept:
+                            "Accept":
                                 "application/json"
 
                         },
@@ -1518,20 +1854,10 @@ app.get(
 // PERSONALIZED WHATSAPP ALERT
 //
 // VERCEL:
-//
-// Vercel
-//    ↓
-// Render /api/generate-personalized-whatsapp
-//    ↓
-// Actual WhatsApp helper
+//     Vercel -> Render
 //
 // RENDER:
-//
-// Render
-//    ↓
-// FastAPI
-//    ↓
-// WhatsApp
+//     FastAPI -> WhatsApp
 // ============================================================
 
 app.post(
@@ -1548,22 +1874,28 @@ app.post(
                 isVercel
             ) {
 
-                console.log("");
                 console.log(
-                    "======================================"
-                );
-                console.log(
-                    "☁️ VERCEL WHATSAPP REQUEST"
-                );
-                console.log(
-                    "======================================"
+                    "☁️ Vercel WhatsApp request"
                 );
 
 
-                console.log(
-                    "➡️ Forwarding to:",
-                    WHATSAPP_SERVER_URL
-                );
+                if (
+                    !WHATSAPP_SERVER_URL
+                ) {
+
+                    return res
+                        .status(503)
+                        .json({
+
+                            success:
+                                false,
+
+                            message:
+                                "WHATSAPP_SERVER_URL is not configured in Vercel."
+
+                        });
+
+                }
 
 
                 const response =
@@ -1579,7 +1911,7 @@ app.post(
                                 "Content-Type":
                                     "application/json",
 
-                                Accept:
+                                "Accept":
                                     "application/json"
 
                             },
@@ -1642,9 +1974,7 @@ app.post(
 
                 return res
                     .status(
-                        response.ok
-                            ? 200
-                            : response.status
+                        response.status
                     )
                     .json(
                         data
@@ -1825,7 +2155,7 @@ app.post(
                             "Content-Type":
                                 "application/json",
 
-                            Accept:
+                            "Accept":
                                 "application/json"
 
                         },
@@ -2118,8 +2448,8 @@ app.get(
 
             environment:
                 isVercel
-                    ? "vercel"
-                    : "persistent-server"
+                    ? "VERCEL"
+                    : "PERSISTENT SERVER"
 
         });
 
@@ -2129,6 +2459,14 @@ app.get(
 
 // ============================================================
 // START SERVER
+//
+// IMPORTANT:
+//
+// Vercel:
+//     Does NOT call app.listen()
+//
+// Render:
+//     Starts Express normally.
 // ============================================================
 
 const PORT =
@@ -2169,5 +2507,9 @@ if (
 
 }
 
+
+// ============================================================
+// EXPORT APP
+// ============================================================
 
 module.exports = app;
