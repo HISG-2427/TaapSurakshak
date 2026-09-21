@@ -1684,4 +1684,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
   initializeDashboard();
 
-});
+}); 
