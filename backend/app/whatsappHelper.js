@@ -1,9 +1,8 @@
-const {
-    Client,
-    LocalAuth
-} = require("whatsapp-web.js");
-
-const qrcode = require("qrcode");
+/*
+============================================================
+PROCESS ERROR LOGGING
+============================================================
+*/
 
 process.on("exit", (code) => {
     console.log("🛑 NODE PROCESS EXITED WITH CODE:", code);
@@ -26,6 +25,61 @@ process.on("unhandledRejection", (reason) => {
     console.error("💥 UNHANDLED REJECTION:");
     console.error(reason);
 });
+
+
+/*
+============================================================
+ENVIRONMENT CHECK
+============================================================
+*/
+
+const isVercel =
+    process.env.VERCEL === "1";
+
+const whatsappEnabledByEnv =
+    process.env.ENABLE_WHATSAPP === "true";
+
+
+/*
+============================================================
+WHATSAPP ENABLED CHECK
+============================================================
+
+WhatsApp is NEVER started on Vercel.
+
+Even if someone accidentally sets:
+
+ENABLE_WHATSAPP=true
+
+inside Vercel, WhatsApp will still remain disabled.
+============================================================
+*/
+
+const whatsappEnabled =
+    whatsappEnabledByEnv &&
+    !isVercel;
+
+
+console.log("");
+console.log("======================================");
+console.log("📱 TAAPSURAKSHAK WHATSAPP CONFIG");
+console.log("======================================");
+console.log(
+    "Environment:",
+    isVercel ? "VERCEL" : "PERSISTENT SERVER"
+);
+console.log(
+    "ENABLE_WHATSAPP:",
+    process.env.ENABLE_WHATSAPP
+);
+console.log(
+    "WhatsApp enabled:",
+    whatsappEnabled
+);
+console.log("======================================");
+console.log("");
+
+
 /*
 ============================================================
 WHATSAPP STATE
@@ -33,8 +87,14 @@ WHATSAPP STATE
 */
 
 let whatsappReady = false;
+
 let currentQRCode = null;
-let whatsappState = "INITIALIZING";
+
+let whatsappState =
+    whatsappEnabled
+        ? "INITIALIZING"
+        : "DISABLED";
+
 let whatsappError = null;
 
 
@@ -42,256 +102,479 @@ let whatsappError = null;
 ============================================================
 WHATSAPP CLIENT
 ============================================================
-*/
 
-const whatsappClient = new Client({
+CRITICAL:
 
-    authStrategy: new LocalAuth({
-        clientId: "taapsurakshak"
-    }),
+Do NOT create LocalAuth on Vercel.
 
-    authTimeoutMs: 0,
+The require() and Client creation are inside the
+whatsappEnabled condition.
 
-    qrMaxRetries: 10,
+Therefore Vercel will never execute:
 
-    webVersionCache: {
-        type: "remote",
-        remotePath:
-            "https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.3000.1043191242-alpha.html"
-    },
+new LocalAuth(...)
 
-    puppeteer: {
-        headless: true,
-        dumpio: true,
+and will never try to create:
 
-        args: [
-            "--no-sandbox",
-            "--disable-setuid-sandbox",
-            "--disable-dev-shm-usage",
-            "--disable-gpu",
-            "--disable-software-rasterizer",
-            "--disable-extensions",
-            "--no-first-run",
-            "--no-default-browser-check",
-            "--disable-background-networking",
-            "--disable-background-timer-throttling",
-            "--disable-renderer-backgrounding",
-            "--disable-backgrounding-occluded-windows",
-            "--disable-ipc-flooding-protection",
-            "--disable-features=Translate,BackForwardCache"
-        ]
-    }
-});
-
-
-/*
-============================================================
-INITIALIZE WRAPPER
+/var/task/.wwebjs_auth/
 ============================================================
 */
 
-const originalInitialize =
-    whatsappClient.initialize.bind(
-        whatsappClient
-    );
+let whatsappClient = null;
+
+let qrcode = null;
 
 
-whatsappClient.initialize = async function () {
+if (whatsappEnabled) {
 
     console.log(
-        "🚀 WHATSAPP INITIALIZE STARTED"
+        "🚀 Loading whatsapp-web.js..."
     );
 
-    try {
+    const {
+        Client,
+        LocalAuth
+    } = require("whatsapp-web.js");
 
-        const result =
-            await originalInitialize();
-
-        console.log(
-            "✅ WHATSAPP INITIALIZE FINISHED"
-        );
-
-        return result;
-
-    } catch (error) {
-
-        console.error(
-            "❌ WHATSAPP INITIALIZE FAILED"
-        );
-
-        console.error(
-            "Name:",
-            error?.name
-        );
-
-        console.error(
-            "Message:",
-            error?.message
-        );
-
-        console.error(
-            "Stack:",
-            error?.stack
-        );
+    qrcode = require("qrcode");
 
 
-        whatsappReady =
-            false;
+    /*
+    ========================================================
+    CREATE WHATSAPP CLIENT
+    ========================================================
+    */
 
-        currentQRCode =
-            null;
+    whatsappClient = new Client({
 
-        whatsappState =
-            "ERROR";
+        authStrategy: new LocalAuth({
 
-        whatsappError =
-            error?.message ||
-            String(error);
+            clientId:
+                "taapsurakshak"
 
+        }),
 
-        throw error;
+        authTimeoutMs: 0,
 
-    }
+        qrMaxRetries: 10,
 
-};
+        webVersionCache: {
 
+            type: "remote",
 
-/*
-============================================================
-LOADING SCREEN
-============================================================
-*/
+            remotePath:
+                "https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.3000.1043191242-alpha.html"
 
-whatsappClient.on(
-    "loading_screen",
-    (percent, message) => {
+        },
 
-        console.log(
-            `📱 WhatsApp loading: ${percent}% - ${message}`
-        );
+        puppeteer: {
 
+            headless: true,
 
-        if (!whatsappReady) {
+            dumpio: true,
 
-            whatsappState =
-                `LOADING_${percent}`;
+            args: [
 
-        }
+                "--no-sandbox",
 
-    }
-);
+                "--disable-setuid-sandbox",
 
+                "--disable-dev-shm-usage",
 
-/*
-============================================================
-STATE CHANGE
-============================================================
-*/
+                "--disable-gpu",
 
-whatsappClient.on(
-    "change_state",
-    (state) => {
+                "--disable-software-rasterizer",
 
-        console.log(
-            "📡 WhatsApp state changed:",
-            state
-        );
+                "--disable-extensions",
 
+                "--no-first-run",
 
-        if (!whatsappReady) {
+                "--no-default-browser-check",
 
-            whatsappState =
-                String(
-                    state ||
-                    "UNKNOWN"
-                );
+                "--disable-background-networking",
+
+                "--disable-background-timer-throttling",
+
+                "--disable-renderer-backgrounding",
+
+                "--disable-backgrounding-occluded-windows",
+
+                "--disable-ipc-flooding-protection",
+
+                "--disable-features=Translate,BackForwardCache"
+
+            ]
 
         }
 
-    }
-);
+    });
 
 
-/*
-============================================================
-QR CODE
-============================================================
-*/
+    /*
+    ========================================================
+    INITIALIZE WRAPPER
+    ========================================================
+    */
 
-whatsappClient.on(
-    "qr",
-    async (qr) => {
-
-        console.log("");
-
-        console.log(
-            "======================================"
+    const originalInitialize =
+        whatsappClient.initialize.bind(
+            whatsappClient
         );
 
-        console.log(
-            "🔥 REAL WHATSAPP QR RECEIVED"
-        );
 
-        console.log(
-            "======================================"
-        );
+    whatsappClient.initialize =
+        async function () {
 
-        console.log(
-            "Scan with WhatsApp → Settings → Linked Devices"
-        );
+            console.log(
+                "🚀 WHATSAPP INITIALIZE STARTED"
+            );
 
-        console.log(
-            "======================================"
-        );
+            try {
 
-        console.log("");
+                const result =
+                    await originalInitialize();
 
+                console.log(
+                    "✅ WHATSAPP INITIALIZE FINISHED"
+                );
 
-        try {
+                return result;
 
-            /*
-            Convert the REAL WhatsApp QR
-            string into an image Data URL.
-            */
+            } catch (error) {
 
-            const qrDataUrl =
-                await qrcode.toDataURL(
-                    qr,
-                    {
-                        errorCorrectionLevel: "M",
+                console.error(
+                    "❌ WHATSAPP INITIALIZE FAILED"
+                );
 
-                        margin: 2,
+                console.error(
+                    "Name:",
+                    error?.name
+                );
 
-                        width: 320
-                    }
+                console.error(
+                    "Message:",
+                    error?.message
+                );
+
+                console.error(
+                    "Stack:",
+                    error?.stack
                 );
 
 
-            /*
-            Store QR for frontend.
-            */
+                whatsappReady =
+                    false;
 
-            currentQRCode =
-                qrDataUrl;
+                currentQRCode =
+                    null;
+
+                whatsappState =
+                    "ERROR";
+
+                whatsappError =
+                    error?.message ||
+                    String(error);
 
 
-            whatsappReady =
-                false;
+                throw error;
+
+            }
+
+        };
+
+
+    /*
+    ========================================================
+    LOADING SCREEN
+    ========================================================
+    */
+
+    whatsappClient.on(
+        "loading_screen",
+        (percent, message) => {
+
+            console.log(
+                `📱 WhatsApp loading: ${percent}% - ${message}`
+            );
+
+
+            if (!whatsappReady) {
+
+                whatsappState =
+                    `LOADING_${percent}`;
+
+            }
+
+        }
+    );
+
+
+    /*
+    ========================================================
+    STATE CHANGE
+    ========================================================
+    */
+
+    whatsappClient.on(
+        "change_state",
+        (state) => {
+
+            console.log(
+                "📡 WhatsApp state changed:",
+                state
+            );
+
+
+            if (!whatsappReady) {
+
+                whatsappState =
+                    String(
+                        state ||
+                        "UNKNOWN"
+                    );
+
+            }
+
+        }
+    );
+
+
+    /*
+    ========================================================
+    QR CODE
+    ========================================================
+    */
+
+    whatsappClient.on(
+        "qr",
+        async (qr) => {
+
+            console.log("");
+
+            console.log(
+                "======================================"
+            );
+
+            console.log(
+                "🔥 REAL WHATSAPP QR RECEIVED"
+            );
+
+            console.log(
+                "======================================"
+            );
+
+            console.log(
+                "Scan with WhatsApp → Settings → Linked Devices"
+            );
+
+            console.log(
+                "======================================"
+            );
+
+            console.log("");
+
+
+            try {
+
+                /*
+                Convert the REAL WhatsApp QR string
+                into an image Data URL.
+                */
+
+                const qrDataUrl =
+                    await qrcode.toDataURL(
+                        qr,
+                        {
+                            errorCorrectionLevel:
+                                "M",
+
+                            margin:
+                                2,
+
+                            width:
+                                320
+                        }
+                    );
+
+
+                /*
+                Store QR for frontend.
+                */
+
+                currentQRCode =
+                    qrDataUrl;
+
+
+                whatsappReady =
+                    false;
+
+
+                whatsappState =
+                    "QR_REQUIRED";
+
+
+                whatsappError =
+                    null;
+
+
+                console.log(
+                    "✅ REAL WHATSAPP QR STORED"
+                );
+
+            } catch (error) {
+
+                whatsappReady =
+                    false;
+
+                currentQRCode =
+                    null;
+
+                whatsappState =
+                    "ERROR";
+
+                whatsappError =
+                    error?.message ||
+                    String(error);
+
+
+                console.error(
+                    "❌ QR conversion error:",
+                    error
+                );
+
+            }
+
+        }
+    );
+
+
+    /*
+    ========================================================
+    AUTHENTICATED
+    ========================================================
+    */
+
+    whatsappClient.on(
+        "authenticated",
+        () => {
+
+            console.log("");
+
+            console.log(
+                "======================================"
+            );
+
+            console.log(
+                "🔐 WHATSAPP AUTHENTICATED"
+            );
+
+            console.log(
+                "======================================"
+            );
 
 
             whatsappState =
-                "QR_REQUIRED";
+                "AUTHENTICATED";
 
 
             whatsappError =
+                null;
+
+
+            /*
+            Render/WhatsApp Web can sometimes authenticate
+            without firing "ready" immediately.
+
+            Keep the existing behavior of treating
+            successful authentication as connected.
+            */
+
+            whatsappReady =
+                true;
+
+
+            currentQRCode =
                 null;
 
 
             console.log(
-                "✅ REAL WHATSAPP QR STORED"
+                "✅ WHATSAPP MARKED AS READY AFTER AUTHENTICATION"
             );
 
-        } catch (error) {
+        }
+    );
+
+
+    /*
+    ========================================================
+    READY
+    ========================================================
+    */
+
+    whatsappClient.on(
+        "ready",
+        () => {
+
+            whatsappReady =
+                true;
+
+
+            currentQRCode =
+                null;
+
+
+            whatsappState =
+                "READY";
+
+
+            whatsappError =
+                null;
+
+
+            console.log("");
+
+            console.log(
+                "======================================"
+            );
+
+            console.log(
+                "✅ WHATSAPP CLIENT IS READY"
+            );
+
+            console.log(
+                "======================================"
+            );
+
+            console.log("");
+
+        }
+    );
+
+
+    /*
+    ========================================================
+    AUTH FAILURE
+    ========================================================
+    */
+
+    whatsappClient.on(
+        "auth_failure",
+        (message) => {
+
+            console.log("");
+
+            console.log(
+                "======================================"
+            );
+
+            console.log(
+                "❌ WHATSAPP AUTH FAILURE"
+            );
+
+            console.log(
+                "======================================"
+            );
+
 
             whatsappReady =
                 false;
@@ -302,227 +585,83 @@ whatsappClient.on(
 
 
             whatsappState =
-                "ERROR";
+                "AUTH_FAILURE";
 
 
             whatsappError =
-                error?.message ||
-                String(error);
+                String(
+                    message ||
+                    "Authentication failed."
+                );
 
 
             console.error(
-                "❌ QR conversion error:",
-                error
+                "Authentication failure:",
+                message
             );
 
         }
-
-    }
-);
+    );
 
 
-/*
-============================================================
-AUTHENTICATED
-============================================================
-*/
-whatsappClient.on(
-    "authenticated",
-    () => {
+    /*
+    ========================================================
+    DISCONNECTED
+    ========================================================
+    */
 
-        console.log(
-            "======================================"
-        );
+    whatsappClient.on(
+        "disconnected",
+        (reason) => {
 
-        console.log(
-            "🔐 WHATSAPP AUTHENTICATED"
-        );
+            console.log("");
 
-        console.log(
-            "======================================"
-        );
+            console.log(
+                "======================================"
+            );
 
-        whatsappState =
-            "AUTHENTICATED";
+            console.log(
+                "⚠️ WHATSAPP DISCONNECTED"
+            );
 
-        whatsappError =
-            null;
-
-        // Render/WhatsApp Web can authenticate
-        // without firing "ready" reliably.
-        // Treat successful authentication as connected.
-        whatsappReady =
-            true;
-
-        currentQRCode =
-            null;
-
-        console.log(
-            "✅ WHATSAPP MARKED AS READY AFTER AUTHENTICATION"
-        );
-
-    }
-);
-
-
-/*
-============================================================
-READY
-============================================================
-*/
-
-whatsappClient.on(
-    "ready",
-    () => {
-
-        whatsappReady =
-            true;
-
-
-        currentQRCode =
-            null;
-
-
-        whatsappState =
-            "READY";
-
-
-        whatsappError =
-            null;
-
-
-        console.log(
-            "======================================"
-        );
-
-        console.log(
-            "✅ WHATSAPP CLIENT IS READY"
-        );
-
-        console.log(
-            "======================================"
-        );
-
-    }
-);
-
-
-/*
-============================================================
-AUTH FAILURE
-============================================================
-*/
-
-whatsappClient.on(
-    "auth_failure",
-    (message) => {
-
-        console.log("");
-
-        console.log(
-            "======================================"
-        );
-
-        console.log(
-            "❌ WHATSAPP AUTH FAILURE"
-        );
-
-        console.log(
-            "======================================"
-        );
-
-
-        whatsappReady =
-            false;
-
-
-        currentQRCode =
-            null;
-
-
-        whatsappState =
-            "AUTH_FAILURE";
-
-
-        whatsappError =
-            String(
-                message ||
-                "Authentication failed."
+            console.log(
+                "======================================"
             );
 
 
-        console.error(
-            "Authentication failure:",
-            message
-        );
-
-    }
-);
+            whatsappReady =
+                false;
 
 
-/*
-============================================================
-DISCONNECTED
-============================================================
-*/
-
-whatsappClient.on(
-    "disconnected",
-    (reason) => {
-
-        console.log("");
-
-        console.log(
-            "======================================"
-        );
-
-        console.log(
-            "⚠️ WHATSAPP DISCONNECTED"
-        );
-
-        console.log(
-            "======================================"
-        );
+            currentQRCode =
+                null;
 
 
-        whatsappReady =
-            false;
+            whatsappState =
+                "DISCONNECTED";
 
 
-        currentQRCode =
-            null;
+            whatsappError =
+                String(
+                    reason ||
+                    "WhatsApp disconnected."
+                );
 
 
-        whatsappState =
-            "DISCONNECTED";
-
-
-        whatsappError =
-            String(
-                reason ||
-                "WhatsApp disconnected."
+            console.log(
+                "Disconnect reason:",
+                reason
             );
 
-
-        console.log(
-            "Disconnect reason:",
-            reason
-        );
-
-    }
-);
+        }
+    );
 
 
-/*
-============================================================
-INITIALIZE WHATSAPP
-============================================================
-*/
-
-if (
-    process.env.ENABLE_WHATSAPP ===
-    "true"
-) {
+    /*
+    ========================================================
+    INITIALIZE WHATSAPP
+    ========================================================
+    */
 
     console.log("");
 
@@ -612,7 +751,9 @@ if (
 
 
     /*
+    ========================================================
     30 SECOND DIAGNOSTIC
+    ========================================================
     */
 
     setTimeout(() => {
@@ -645,7 +786,9 @@ if (
 
 
     /*
+    ========================================================
     90 SECOND DIAGNOSTIC
+    ========================================================
     */
 
     setTimeout(() => {
@@ -678,13 +821,72 @@ if (
 
 } else {
 
+    /*
+    ========================================================
+    WHATSAPP DISABLED
+    ========================================================
+    */
+
+    whatsappReady =
+        false;
+
+    currentQRCode =
+        null;
+
     whatsappState =
-        "DISABLED";
+        isVercel
+            ? "DISABLED_ON_VERCEL"
+            : "DISABLED";
+
+    whatsappError =
+        null;
+
+
+    console.log("");
+
+    console.log(
+        "======================================"
+    );
+
+    console.log(
+        isVercel
+            ? "☁️ VERCEL DETECTED"
+            : "📱 WHATSAPP DISABLED"
+    );
+
+    console.log(
+        "======================================"
+    );
+
+
+    if (isVercel) {
+
+        console.log(
+            "WhatsApp Web will NOT start on Vercel."
+        );
+
+        console.log(
+            "LocalAuth will NOT be initialized."
+        );
+
+        console.log(
+            "WhatsApp should run on the persistent server."
+        );
+
+    } else {
+
+        console.log(
+            "WhatsApp disabled because ENABLE_WHATSAPP is not true."
+        );
+
+    }
 
 
     console.log(
-        "WhatsApp disabled."
+        "======================================"
     );
+
+    console.log("");
 
 }
 
@@ -700,8 +902,7 @@ function getWhatsAppStatus() {
     return {
 
         enabled:
-            process.env.ENABLE_WHATSAPP ===
-            "true",
+            whatsappEnabled,
 
         ready:
             whatsappReady,
@@ -795,13 +996,25 @@ async function sendWhatsAppFeedback(
     notifications are enabled.
     */
 
-    if (
-        process.env.ENABLE_WHATSAPP !==
-        "true"
-    ) {
+    if (!whatsappEnabled) {
 
         throw new Error(
-            "WhatsApp notifications are disabled on this server."
+            isVercel
+                ? "WhatsApp is not available on Vercel. WhatsApp is running on the persistent WhatsApp server."
+                : "WhatsApp notifications are disabled on this server."
+        );
+
+    }
+
+
+    /*
+    Check WhatsApp client.
+    */
+
+    if (!whatsappClient) {
+
+        throw new Error(
+            "WhatsApp client is not initialized."
         );
 
     }
@@ -886,7 +1099,9 @@ async function sendWhatsAppFeedback(
 
 
     /*
-    Send message.
+    ========================================================
+    SEND MESSAGE
+    ========================================================
     */
 
     const sentMessage =
