@@ -36,18 +36,20 @@ const FASTAPI_URL =
     process.env.FASTAPI_URL ||
     "http://127.0.0.1:8000";
 
-/*
-IMPORTANT:
 
-This is the persistent Render server that actually runs:
-
-- whatsapp-web.js
-- Chromium
-- LocalAuth
-- .wwebjs_auth
-
-Vercel will forward WhatsApp requests to this server.
-*/
+// ============================================================
+// WHATSAPP SERVER
+//
+// IMPORTANT:
+//
+// On Vercel:
+//     Vercel forwards WhatsApp requests to Render.
+//
+// On Render:
+//     Render runs whatsapp-web.js directly.
+//
+// Therefore this MUST point to the persistent Render service.
+// ============================================================
 
 const WHATSAPP_SERVER_URL =
     process.env.WHATSAPP_SERVER_URL ||
@@ -71,6 +73,13 @@ const app = express();
 
 // ============================================================
 // WHATSAPP HELPER
+//
+// IMPORTANT:
+//
+// This helper MUST be the actual whatsapp-web.js helper
+// on Render.
+//
+// Do NOT use a proxy-only helper on Render.
 // ============================================================
 
 const {
@@ -87,16 +96,25 @@ const {
 mongoose
     .connect(MONGODB_URI)
     .then(() => {
-        console.log("Database connected successfully");
+
+        console.log(
+            "Database connected successfully"
+        );
+
     })
     .catch((error) => {
+
         console.error(
             "Database connection error:",
             error
         );
+
     });
 
-const db = mongoose.connection;
+
+const db =
+    mongoose.connection;
+
 
 db.on(
     "error",
@@ -111,13 +129,22 @@ db.on(
 // VIEW ENGINE
 // ============================================================
 
-app.engine("ejs", ejsMate);
+app.engine(
+    "ejs",
+    ejsMate
+);
 
-app.set("view engine", "ejs");
+app.set(
+    "view engine",
+    "ejs"
+);
 
 app.set(
     "views",
-    path.join(__dirname, "views")
+    path.join(
+        __dirname,
+        "views"
+    )
 );
 
 
@@ -131,7 +158,9 @@ app.use(
     })
 );
 
-app.use(express.json());
+app.use(
+    express.json()
+);
 
 app.use(
     methodOverride("_method")
@@ -139,14 +168,20 @@ app.use(
 
 app.use(
     express.static(
-        path.join(__dirname, "public")
+        path.join(
+            __dirname,
+            "public"
+        )
     )
 );
 
 app.use(
     "/images",
     express.static(
-        path.join(__dirname, "images")
+        path.join(
+            __dirname,
+            "images"
+        )
     )
 );
 
@@ -159,7 +194,12 @@ app.use(
 if (
     process.env.NODE_ENV === "production"
 ) {
-    app.set("trust proxy", 1);
+
+    app.set(
+        "trust proxy",
+        1
+    );
+
 }
 
 
@@ -176,17 +216,25 @@ app.use(
 
         store:
             MongoStore.create({
-                mongoUrl: MONGODB_URI,
-                collectionName: "sessions"
+
+                mongoUrl:
+                    MONGODB_URI,
+
+                collectionName:
+                    "sessions"
+
             }),
 
-        resave: false,
+        resave:
+            false,
 
-        saveUninitialized: false,
+        saveUninitialized:
+            false,
 
         cookie: {
 
-            httpOnly: true,
+            httpOnly:
+                true,
 
             secure:
                 process.env.NODE_ENV === "production",
@@ -211,10 +259,12 @@ app.use(
     (req, res, next) => {
 
         res.locals.currentUser =
-            req.session.userName || null;
+            req.session.userName ||
+            null;
 
         res.locals.wardID =
-            req.session.wardID || null;
+            req.session.wardID ||
+            null;
 
         next();
 
@@ -232,7 +282,9 @@ function isLoggedIn(
     next
 ) {
 
-    if (!req.session.userId) {
+    if (
+        !req.session.userId
+    ) {
 
         return res.redirect(
             "/login"
@@ -241,6 +293,7 @@ function isLoggedIn(
     }
 
     next();
+
 }
 
 
@@ -252,7 +305,9 @@ app.get(
     "/",
     (req, res) => {
 
-        res.render("home");
+        res.render(
+            "home"
+        );
 
     }
 );
@@ -270,8 +325,10 @@ app.get(
         res.render(
             "TaapSurakshak/risk",
             {
+
                 userName:
                     req.session.userName
+
             }
         );
 
@@ -291,11 +348,13 @@ app.get(
         res.render(
             "TaapSurakshak/predict",
             {
+
                 userName:
                     req.session.userName,
 
                 wardID:
                     req.session.wardID
+
             }
         );
 
@@ -315,8 +374,10 @@ app.get(
         res.render(
             "TaapSurakshak/intervene",
             {
+
                 userName:
                     req.session.userName
+
             }
         );
 
@@ -336,8 +397,10 @@ app.get(
         res.render(
             "TaapSurakshak/alerts",
             {
+
                 userName:
                     req.session.userName
+
             }
         );
 
@@ -364,7 +427,6 @@ app.get(
             let lastError;
 
 
-            // Try up to 3 times
             for (
                 let attempt = 1;
                 attempt <= 3;
@@ -377,36 +439,32 @@ app.get(
                         `🔵 Wards request attempt ${attempt}`
                     );
 
-
                     response =
                         await fetch(
                             `${FASTAPI_URL}/wards`
                         );
 
-
-                    if (response.ok) {
+                    if (
+                        response.ok
+                    ) {
 
                         break;
 
                     }
 
-
                     throw new Error(
                         `FastAPI returned ${response.status}`
                     );
-
 
                 } catch (error) {
 
                     lastError =
                         error;
 
-
                     console.error(
                         `❌ Wards attempt ${attempt} failed:`,
                         error.message
                     );
-
 
                     if (
                         attempt < 3
@@ -455,10 +513,12 @@ app.get(
             res.render(
                 "TaapSurakshak/login",
                 {
+
                     wards:
                         Array.isArray(wards)
                             ? wards
                             : []
+
                 }
             );
 
@@ -474,7 +534,9 @@ app.get(
             res.render(
                 "TaapSurakshak/login",
                 {
+
                     wards: []
+
                 }
             );
 
@@ -495,12 +557,14 @@ app.post(
         try {
 
             const {
+
                 name,
                 location,
                 password,
                 wardID,
                 phoneNumber,
                 age
+
             } = req.body;
 
 
@@ -567,7 +631,9 @@ app.post(
                 });
 
 
-            if (existingUser) {
+            if (
+                existingUser
+            ) {
 
                 req.session.userId =
                     existingUser._id;
@@ -576,11 +642,15 @@ app.post(
                     existingUser.name;
 
                 req.session.wardID =
-                    Number(wardID);
+                    Number(
+                        wardID
+                    );
 
 
                 existingUser.wardID =
-                    Number(wardID);
+                    Number(
+                        wardID
+                    );
 
 
                 await existingUser.save();
@@ -612,22 +682,30 @@ app.post(
                 new User({
 
                     name:
-                        String(name).trim(),
+                        String(
+                            name
+                        ).trim(),
 
                     location:
-                        String(location).trim(),
+                        String(
+                            location
+                        ).trim(),
 
                     password:
                         hashedPassword,
 
                     wardID:
-                        Number(wardID),
+                        Number(
+                            wardID
+                        ),
 
                     age:
                         numericAge,
 
                     phoneNumber:
-                        String(phoneNumber).trim()
+                        String(
+                            phoneNumber
+                        ).trim()
 
                 });
 
@@ -646,7 +724,9 @@ app.post(
                 newUser.name;
 
             req.session.wardID =
-                Number(wardID);
+                Number(
+                    wardID
+                );
 
 
             console.log(
@@ -655,7 +735,9 @@ app.post(
             );
 
 
-            res.redirect("/");
+            res.redirect(
+                "/"
+            );
 
 
         } catch (error) {
@@ -728,18 +810,20 @@ app.post(
         try {
 
             const {
-                userPrompt,
-                phoneNumber
+                userPrompt
             } = req.body;
 
 
-            if (!userPrompt) {
+            if (
+                !userPrompt
+            ) {
 
                 return res
                     .status(400)
                     .json({
 
-                        success: false,
+                        success:
+                            false,
 
                         message:
                             "userPrompt is required."
@@ -767,7 +851,8 @@ app.post(
 
             res.json({
 
-                success: true,
+                success:
+                    true,
 
                 feedback:
                     modelResponse
@@ -787,7 +872,8 @@ app.post(
                 .status(500)
                 .json({
 
-                    success: false,
+                    success:
+                        false,
 
                     message:
                         "Failed to generate feedback via Gemini API."
@@ -804,10 +890,20 @@ app.post(
 // WHATSAPP STATUS
 //
 // VERCEL:
-//     Vercel -> Render WhatsApp server
+//
+// Vercel
+//    ↓
+// Render /api/whatsapp-status
+//    ↓
+// whatsappHelper.js
 //
 // RENDER:
-//     Render -> local whatsappHelper
+//
+// Render
+//    ↓
+// whatsappHelper.js
+//    ↓
+// whatsapp-web.js
 // ============================================================
 
 app.get(
@@ -816,21 +912,20 @@ app.get(
 
         try {
 
-            /*
-            ====================================================
-            VERCEL
-            ====================================================
-            */
+            // ==================================================
+            // VERCEL
+            // ==================================================
 
-            if (isVercel) {
+            if (
+                isVercel
+            ) {
 
                 console.log(
-                    "☁️ Vercel WhatsApp status request."
+                    "☁️ Vercel WhatsApp status request"
                 );
 
-
                 console.log(
-                    "➡️ Forwarding status request to:",
+                    "➡️ Forwarding to:",
                     WHATSAPP_SERVER_URL
                 );
 
@@ -839,12 +934,17 @@ app.get(
                     await fetch(
                         `${WHATSAPP_SERVER_URL}/api/whatsapp-status`,
                         {
-                            method: "GET",
+
+                            method:
+                                "GET",
 
                             headers: {
-                                "Accept":
+
+                                Accept:
                                     "application/json"
+
                             }
+
                         }
                     );
 
@@ -859,23 +959,36 @@ app.get(
                 try {
 
                     data =
-                        JSON.parse(text);
+                        JSON.parse(
+                            text
+                        );
 
                 } catch {
 
                     data = {
-                        success: false,
 
-                        enabled: false,
+                        success:
+                            false,
 
-                        ready: false,
+                        enabled:
+                            false,
 
-                        state: "INVALID_RESPONSE",
+                        ready:
+                            false,
 
-                        qr: null,
+                        state:
+                            "INVALID_RESPONSE",
+
+                        qr:
+                            null,
+
+                        hasQR:
+                            false,
 
                         error:
-                            "WhatsApp server returned an invalid response."
+                            text ||
+                            "Render returned an invalid response."
+
                     };
 
                 }
@@ -884,6 +997,7 @@ app.get(
                 console.log(
                     "📡 Render WhatsApp status:",
                     {
+
                         status:
                             response.status,
 
@@ -897,10 +1011,14 @@ app.get(
                             data?.state,
 
                         hasQR:
-                            Boolean(data?.qr),
+                            Boolean(
+                                data?.qr
+                            ),
 
                         error:
-                            data?.error || null
+                            data?.error ||
+                            null
+
                     }
                 );
 
@@ -911,24 +1029,27 @@ app.get(
                             ? 200
                             : 503
                     )
-                    .json(data);
+                    .json(
+                        data
+                    );
 
             }
 
 
-            /*
-            ====================================================
-            RENDER / LOCAL
-            ====================================================
-            */
+            // ==================================================
+            // RENDER / LOCAL
+            // ==================================================
 
             const status =
-                getWhatsAppStatus();
+                await Promise.resolve(
+                    getWhatsAppStatus()
+                );
 
 
             console.log(
-                "📡 Local WhatsApp status request:",
+                "📱 Local WhatsApp status:",
                 {
+
                     enabled:
                         status?.enabled,
 
@@ -939,43 +1060,51 @@ app.get(
                         status?.state,
 
                     hasQR:
-                        Boolean(status?.qr),
-
-                    error:
-                        status?.error || null
-                }
-            );
-
-
-            return res
-                .status(200)
-                .json({
-
-                    success: true,
-
-                    enabled:
                         Boolean(
-                            status?.enabled
+                            status?.qr
                         ),
-
-                    ready:
-                        Boolean(
-                            status?.ready
-                        ),
-
-                    state:
-                        status?.state ||
-                        "UNKNOWN",
-
-                    qr:
-                        status?.qr ||
-                        null,
 
                     error:
                         status?.error ||
                         null
 
-                });
+                }
+            );
+
+
+            return res.json({
+
+                success:
+                    true,
+
+                enabled:
+                    Boolean(
+                        status?.enabled
+                    ),
+
+                ready:
+                    Boolean(
+                        status?.ready
+                    ),
+
+                state:
+                    status?.state ||
+                    "UNKNOWN",
+
+                qr:
+                    status?.qr ||
+                    null,
+
+                hasQR:
+                    Boolean(
+                        status?.qr
+                    ),
+
+                error:
+                    status?.error ||
+                    null
+
+            });
 
 
         } catch (error) {
@@ -987,19 +1116,147 @@ app.get(
 
 
             return res
-                .status(200)
+                .status(503)
                 .json({
 
-                    success: false,
+                    success:
+                        false,
 
-                    enabled: false,
+                    enabled:
+                        false,
 
-                    ready: false,
+                    ready:
+                        false,
 
                     state:
                         "ERROR",
 
-                    qr: null,
+                    qr:
+                        null,
+
+                    hasQR:
+                        false,
+
+                    error:
+                        error?.message ||
+                        String(error)
+
+                });
+
+        }
+
+    }
+);
+
+
+// ============================================================
+// DIRECT WHATSAPP STATUS
+//
+// This route is mainly for testing:
+//
+// https://taapsurakshak-app.onrender.com/whatsapp-status
+//
+// It runs only on the persistent Render server.
+// ============================================================
+
+app.get(
+    "/whatsapp-status",
+    async (req, res) => {
+
+        try {
+
+            const status =
+                await Promise.resolve(
+                    getWhatsAppStatus()
+                );
+
+
+            console.log(
+                "📱 Direct WhatsApp status:",
+                {
+
+                    enabled:
+                        status?.enabled,
+
+                    ready:
+                        status?.ready,
+
+                    state:
+                        status?.state,
+
+                    hasQR:
+                        Boolean(
+                            status?.qr
+                        )
+
+                }
+            );
+
+
+            return res.json({
+
+                success:
+                    true,
+
+                enabled:
+                    Boolean(
+                        status?.enabled
+                    ),
+
+                ready:
+                    Boolean(
+                        status?.ready
+                    ),
+
+                state:
+                    status?.state ||
+                    "UNKNOWN",
+
+                qr:
+                    status?.qr ||
+                    null,
+
+                hasQR:
+                    Boolean(
+                        status?.qr
+                    ),
+
+                error:
+                    status?.error ||
+                    null
+
+            });
+
+
+        } catch (error) {
+
+            console.error(
+                "❌ Direct WhatsApp status error:",
+                error
+            );
+
+
+            return res
+                .status(503)
+                .json({
+
+                    success:
+                        false,
+
+                    enabled:
+                        false,
+
+                    ready:
+                        false,
+
+                    state:
+                        "ERROR",
+
+                    qr:
+                        null,
+
+                    hasQR:
+                        false,
 
                     error:
                         error?.message ||
@@ -1073,8 +1330,6 @@ app.get(
             );
 
 
-            // Today's peak temperature
-
             const peakTemperature =
                 Number(
                     weatherData
@@ -1114,7 +1369,7 @@ app.get(
                             "Content-Type":
                                 "application/json",
 
-                            "Accept":
+                            Accept:
                                 "application/json"
 
                         },
@@ -1191,7 +1446,9 @@ app.get(
                 result["3d"];
 
 
-            if (!prediction) {
+            if (
+                !prediction
+            ) {
 
                 throw new Error(
                     "3d prediction not found in FastAPI response."
@@ -1261,10 +1518,20 @@ app.get(
 // PERSONALIZED WHATSAPP ALERT
 //
 // VERCEL:
-//     Forward request to Render.
+//
+// Vercel
+//    ↓
+// Render /api/generate-personalized-whatsapp
+//    ↓
+// Actual WhatsApp helper
 //
 // RENDER:
-//     Generate suggestion + use whatsappHelper.
+//
+// Render
+//    ↓
+// FastAPI
+//    ↓
+// WhatsApp
 // ============================================================
 
 app.post(
@@ -1273,25 +1540,13 @@ app.post(
 
         try {
 
-            /*
-            ====================================================
-            VERCEL
-            ====================================================
+            // ==================================================
+            // VERCEL
+            // ==================================================
 
-            Do NOT call sendWhatsAppFeedback() here.
-
-            Instead:
-
-            Vercel
-               ↓
-            Render
-               ↓
-            whatsapp-web.js
-               ↓
-            WhatsApp
-            */
-
-            if (isVercel) {
+            if (
+                isVercel
+            ) {
 
                 console.log("");
                 console.log(
@@ -1306,7 +1561,7 @@ app.post(
 
 
                 console.log(
-                    "➡️ Forwarding WhatsApp request to:",
+                    "➡️ Forwarding to:",
                     WHATSAPP_SERVER_URL
                 );
 
@@ -1324,7 +1579,7 @@ app.post(
                                 "Content-Type":
                                     "application/json",
 
-                                "Accept":
+                                Accept:
                                     "application/json"
 
                             },
@@ -1348,7 +1603,9 @@ app.post(
                 try {
 
                     data =
-                        JSON.parse(text);
+                        JSON.parse(
+                            text
+                        );
 
                 } catch {
 
@@ -1359,7 +1616,7 @@ app.post(
 
                         message:
                             text ||
-                            "Invalid response from WhatsApp server."
+                            "Invalid response from Render WhatsApp server."
 
                     };
 
@@ -1367,8 +1624,9 @@ app.post(
 
 
                 console.log(
-                    "⬅️ WhatsApp server response:",
+                    "⬅️ Render WhatsApp response:",
                     {
+
                         status:
                             response.status,
 
@@ -1388,21 +1646,19 @@ app.post(
                             ? 200
                             : response.status
                     )
-                    .json(data);
+                    .json(
+                        data
+                    );
 
             }
 
 
-            /*
-            ====================================================
-            RENDER / LOCAL WHATSAPP SERVER
-            ====================================================
-
-            This section runs only on the persistent
-            Render server.
-            */
+            // ==================================================
+            // RENDER / LOCAL
+            // ==================================================
 
             const {
+
                 name,
                 age,
                 phoneNumber,
@@ -1420,22 +1676,28 @@ app.post(
 
             const cleanName =
                 String(
-                    name || ""
+                    name ||
+                    ""
                 ).trim();
 
 
             const cleanPhone =
                 String(
-                    phoneNumber || ""
+                    phoneNumber ||
+                    ""
                 ).trim();
 
 
             const numericAge =
-                Number(age);
+                Number(
+                    age
+                );
 
 
             const numericTemperature =
-                Number(temperature);
+                Number(
+                    temperature
+                );
 
 
             if (
@@ -1506,9 +1768,21 @@ app.post(
             // Check WhatsApp connection
             // --------------------------------------------
 
+            const whatsappReady =
+                await Promise.resolve(
+                    isWhatsAppReady()
+                );
+
+
             if (
-                !isWhatsAppReady()
+                !whatsappReady
             ) {
+
+                const status =
+                    await Promise.resolve(
+                        getWhatsAppStatus()
+                    );
+
 
                 return res
                     .status(503)
@@ -1518,7 +1792,16 @@ app.post(
                             false,
 
                         message:
-                            "WhatsApp is not ready. Scan the QR code first and wait until WhatsApp successfully connects."
+                            "WhatsApp is not ready. Scan the QR code first and wait until WhatsApp successfully connects.",
+
+                        state:
+                            status?.state ||
+                            "NOT_READY",
+
+                        hasQR:
+                            Boolean(
+                                status?.qr
+                            )
 
                     });
 
@@ -1542,7 +1825,7 @@ app.post(
                             "Content-Type":
                                 "application/json",
 
-                            "Accept":
+                            Accept:
                                 "application/json"
 
                         },
@@ -1603,7 +1886,9 @@ app.post(
                 heatResult["3d"];
 
 
-            if (!prediction) {
+            if (
+                !prediction
+            ) {
 
                 throw new Error(
                     "3d prediction not found in FastAPI response."
@@ -1655,7 +1940,8 @@ app.post(
             // Generate safety suggestion
             // --------------------------------------------
 
-            let suggestion = "";
+            let suggestion =
+                "";
 
 
             const normalizedRisk =
@@ -1884,4 +2170,4 @@ if (
 }
 
 
-module.exports = app;   
+module.exports = app;
