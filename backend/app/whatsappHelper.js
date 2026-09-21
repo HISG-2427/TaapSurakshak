@@ -97,29 +97,6 @@ let whatsappState =
 
 let whatsappError = null;
 
-
-/*
-============================================================
-WHATSAPP CLIENT
-============================================================
-
-CRITICAL:
-
-Do NOT create LocalAuth on Vercel.
-
-The require() and Client creation are inside the
-whatsappEnabled condition.
-
-Therefore Vercel will never execute:
-
-new LocalAuth(...)
-
-and will never try to create:
-
-/var/task/.wwebjs_auth/
-============================================================
-*/
-
 let whatsappClient = null;
 
 let qrcode = null;
