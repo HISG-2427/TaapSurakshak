@@ -1086,6 +1086,130 @@ app.post(
     }
 );
 
+// ============================================================
+// WARD PREDICTION PROXY
+//
+// Browser
+//    ↓
+// /api/predict/wards
+//    ↓
+// FastAPI /predict/wards
+// ============================================================
+
+app.post(
+    "/api/predict/wards",
+    async (req, res) => {
+
+        try {
+
+            console.log(
+                "📥 Ward prediction request received:"
+            );
+
+            console.log(
+                req.body
+            );
+
+
+            const response =
+                await fetch(
+                    `${FASTAPI_URL}/predict/wards`,
+                    {
+
+                        method:
+                            "POST",
+
+                        headers: {
+
+                            "Content-Type":
+                                "application/json",
+
+                            "Accept":
+                                "application/json"
+
+                        },
+
+                        body:
+                            JSON.stringify(
+                                req.body
+                            )
+
+                    }
+                );
+
+
+            const text =
+                await response.text();
+
+
+            console.log(
+                "📤 FastAPI ward prediction status:",
+                response.status
+            );
+
+
+            console.log(
+                "📤 FastAPI ward prediction response:",
+                text
+            );
+
+
+            let data;
+
+
+            try {
+
+                data =
+                    JSON.parse(
+                        text
+                    );
+
+            } catch {
+
+                data = {
+
+                    detail:
+                        text
+
+                };
+
+            }
+
+
+            return res
+                .status(
+                    response.status
+                )
+                .json(
+                    data
+                );
+
+
+        } catch (error) {
+
+            console.error(
+                "❌ /api/predict/wards proxy error:",
+                error
+            );
+
+
+            return res
+                .status(500)
+                .json({
+
+                    success:
+                        false,
+
+                    error:
+                        error?.message ||
+                        String(error)
+
+                });
+
+        }
+
+    }
+);
 
 // ============================================================
 // WHATSAPP STATUS

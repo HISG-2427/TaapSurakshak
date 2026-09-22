@@ -323,29 +323,22 @@
         // Get predictions for ALL wards
 
         const response = await fetch(
-          "https://taapsurakshak.onrender.com/predict/wards",
+          "/api/predict/wards",
           {
             method: "POST",
 
             headers: {
-              "Content-Type":
-                "application/json"
+              "Content-Type": "application/json",
+              "Accept": "application/json"
             },
 
             body: JSON.stringify({
-
               temp_mean_c: 35,
-
               temp_max_c: 40,
-
               temp_min_c: 30,
-
               humidity_pct: 60,
-
               wind_speed_ms: 2,
-
               solar_radiation_kwh_m2: 5
-
             })
           }
         );
