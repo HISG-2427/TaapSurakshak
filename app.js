@@ -2547,6 +2547,53 @@ app.post(
     }
 );
 
+app.get("/api/wards", async (req, res) => {
+    try {
+        console.log("📍 /api/wards request received");
+
+        const response = await fetch(
+            `${FASTAPI_URL}/wards`,
+            {
+                method: "GET",
+                headers: {
+                    "Accept": "application/json"
+                }
+            }
+        );
+
+        const text = await response.text();
+
+        console.log(
+            "📍 FastAPI /wards status:",
+            response.status
+        );
+
+        let data;
+
+        try {
+            data = JSON.parse(text);
+        } catch {
+            data = {
+                detail: text
+            };
+        }
+
+        return res
+            .status(response.status)
+            .json(data);
+
+    } catch (error) {
+        console.error(
+            "❌ /api/wards proxy error:",
+            error
+        );
+
+        return res.status(500).json({
+            success: false,
+            error: error?.message || String(error)
+        });
+    }
+});
 
 // ============================================================
 // HEALTH CHECK
