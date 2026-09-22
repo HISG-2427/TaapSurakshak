@@ -456,30 +456,26 @@ if (whatsappEnabled) {
             "🚀 Initializing WhatsApp Web..."
         );
 
+        whatsappClient.on("change_state", (state) => {
+            console.log("📱 WhatsApp state changed:", state);
+        });
 
-        whatsappClient
-            .initialize()
-            .catch(
-                (error) => {
-
-                    console.error(
-                        "❌ WhatsApp initialization error:",
-                        error
-                    );
-
-
-                    whatsappReady =
-                        false;
-
-                    whatsappState =
-                        "ERROR";
-
-                    whatsappError =
-                        error?.message ||
-                        String(error);
-
-                }
+        whatsappClient.on("loading_screen", (percent, message) => {
+            console.log(
+                `📱 WhatsApp loading: ${percent}% - ${message}`
             );
+        });
+
+        whatsappClient.initialize()
+            .then(() => {
+                console.log("✅ WhatsApp client.initialize() completed");
+            })
+            .catch((error) => {
+                console.error("❌ WhatsApp initialization error:", error);
+                console.error("❌ Error name:", error?.name);
+                console.error("❌ Error message:", error?.message);
+                console.error("❌ Error stack:", error?.stack);
+            });
 
 
     } catch (error) {
