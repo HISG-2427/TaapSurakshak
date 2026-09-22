@@ -90,7 +90,7 @@ if (whatsappEnabled) {
 
         /*
         ----------------------------------------------------
-        Persistent WhatsApp authentication directory
+        WhatsApp authentication directory
         ----------------------------------------------------
         */
 
@@ -100,7 +100,6 @@ if (whatsappEnabled) {
                 "whatsapp-session"
             );
 
-
         console.log(
             "📁 WhatsApp session path:",
             sessionPath
@@ -109,7 +108,7 @@ if (whatsappEnabled) {
 
         /*
         ----------------------------------------------------
-        Create WhatsApp client
+        CREATE CLIENT
         ----------------------------------------------------
         */
 
@@ -127,10 +126,8 @@ if (whatsappEnabled) {
 
                     }),
 
-
                 authTimeoutMs:
                     0,
-
 
                 qrMaxRetries:
                     10,
@@ -212,7 +209,6 @@ if (whatsappEnabled) {
                             qr
                         );
 
-
                     whatsappState =
                         "QR_READY";
 
@@ -222,11 +218,9 @@ if (whatsappEnabled) {
                     whatsappError =
                         null;
 
-
                     console.log(
                         "✅ QR code converted to Data URL"
                     );
-
 
                 } catch (error) {
 
@@ -235,7 +229,6 @@ if (whatsappEnabled) {
                         error
                     );
 
-
                     currentQRCode =
                         null;
 
@@ -243,7 +236,8 @@ if (whatsappEnabled) {
                         "ERROR";
 
                     whatsappError =
-                        error.message;
+                        error?.message ||
+                        String(error);
 
                 }
 
@@ -330,7 +324,6 @@ if (whatsappEnabled) {
                     message
                 );
 
-
                 whatsappReady =
                     false;
 
@@ -362,7 +355,6 @@ if (whatsappEnabled) {
                     reason
                 );
 
-
                 whatsappReady =
                     false;
 
@@ -393,7 +385,6 @@ if (whatsappEnabled) {
                     `📱 WhatsApp loading: ${percent}% - ${message}`
                 );
 
-
                 if (
                     !whatsappReady
                 ) {
@@ -402,6 +393,25 @@ if (whatsappEnabled) {
                         "LOADING";
 
                 }
+
+            }
+        );
+
+
+        /*
+        ====================================================
+        CHANGE STATE
+        ====================================================
+        */
+
+        whatsappClient.on(
+            "change_state",
+            (state) => {
+
+                console.log(
+                    "📱 WhatsApp state changed:",
+                    state
+                );
 
             }
         );
@@ -456,32 +466,157 @@ if (whatsappEnabled) {
             "🚀 Initializing WhatsApp Web..."
         );
 
-        whatsappClient.on("change_state", (state) => {
-            console.log("📱 WhatsApp state changed:", state);
-        });
 
-        whatsappClient.on("loading_screen", (percent, message) => {
-            console.log(
-                `📱 WhatsApp loading: ${percent}% - ${message}`
+        /*
+        ----------------------------------------------------
+        90 SECOND INITIALIZATION TIMEOUT
+        ----------------------------------------------------
+        */
+
+        const initializationTimeout =
+            setTimeout(
+                () => {
+
+                    console.error("");
+                    console.error(
+                        "======================================"
+                    );
+
+                    console.error(
+                        "❌ WHATSAPP INITIALIZATION TIMEOUT"
+                    );
+
+                    console.error(
+                        "======================================"
+                    );
+
+                    console.error(
+                        "WhatsApp client.initialize() did not complete within 90 seconds."
+                    );
+
+                    console.error(
+                        "Current state:",
+                        whatsappState
+                    );
+
+                    console.error(
+                        "Current error:",
+                        whatsappError
+                    );
+
+                    console.error(
+                        "Client exists:",
+                        Boolean(whatsappClient)
+                    );
+
+                },
+                90000
             );
-        });
 
-        whatsappClient.initialize()
-            .then(() => {
-                console.log("✅ WhatsApp client.initialize() completed");
-            })
-            .catch((error) => {
-                console.error("❌ WhatsApp initialization error:", error);
-                console.error("❌ Error name:", error?.name);
-                console.error("❌ Error message:", error?.message);
-                console.error("❌ Error stack:", error?.stack);
-            });
+
+        /*
+        ----------------------------------------------------
+        INITIALIZE
+        ----------------------------------------------------
+        */
+
+        whatsappClient
+            .initialize()
+
+            .then(
+                () => {
+
+                    clearTimeout(
+                        initializationTimeout
+                    );
+
+                    console.log("");
+                    console.log(
+                        "======================================"
+                    );
+
+                    console.log(
+                        "✅ WhatsApp client.initialize() completed"
+                    );
+
+                    console.log(
+                        "======================================"
+                    );
+
+                }
+            )
+
+            .catch(
+                (error) => {
+
+                    clearTimeout(
+                        initializationTimeout
+                    );
+
+                    console.error("");
+                    console.error(
+                        "======================================"
+                    );
+
+                    console.error(
+                        "❌ WHATSAPP INITIALIZATION ERROR"
+                    );
+
+                    console.error(
+                        "======================================"
+                    );
+
+                    console.error(
+                        "Error:",
+                        error
+                    );
+
+                    console.error(
+                        "Error name:",
+                        error?.name
+                    );
+
+                    console.error(
+                        "Error message:",
+                        error?.message
+                    );
+
+                    console.error(
+                        "Error stack:",
+                        error?.stack
+                    );
+
+
+                    whatsappReady =
+                        false;
+
+                    whatsappState =
+                        "ERROR";
+
+                    whatsappError =
+                        error?.message ||
+                        String(error);
+
+                }
+            );
 
 
     } catch (error) {
 
+        console.error("");
         console.error(
-            "❌ Failed to create WhatsApp client:",
+            "======================================"
+        );
+
+        console.error(
+            "❌ FAILED TO CREATE WHATSAPP CLIENT"
+        );
+
+        console.error(
+            "======================================"
+        );
+
+        console.error(
             error
         );
 
@@ -497,6 +632,7 @@ if (whatsappEnabled) {
             String(error);
 
     }
+
 
 } else {
 
@@ -619,20 +755,9 @@ function formatWhatsAppNumber(
 
     /*
     --------------------------------------------------------
-    Remove leading + if supplied indirectly
+    Validate number
     --------------------------------------------------------
     */
-
-    if (
-        number.startsWith(
-            "91"
-        )
-    ) {
-
-        // Already has India country code.
-
-    }
-
 
     if (
         number.length < 10
@@ -675,7 +800,7 @@ async function sendWhatsAppFeedback(
 
     /*
     --------------------------------------------------------
-    Check client
+    Check WhatsApp enabled
     --------------------------------------------------------
     */
 
@@ -690,6 +815,12 @@ async function sendWhatsAppFeedback(
     }
 
 
+    /*
+    --------------------------------------------------------
+    Check client
+    --------------------------------------------------------
+    */
+
     if (
         !whatsappClient
     ) {
@@ -700,6 +831,12 @@ async function sendWhatsAppFeedback(
 
     }
 
+
+    /*
+    --------------------------------------------------------
+    Check ready
+    --------------------------------------------------------
+    */
 
     if (
         !whatsappReady
@@ -818,7 +955,6 @@ async function sendWhatsAppFeedback(
             "❌ WhatsApp send error:",
             error
         );
-
 
         throw error;
 
