@@ -816,7 +816,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const response =
       await fetch(
-        `${FASTAPI_URL}/wards`
+        `api/wards`
       );
 
 
@@ -872,7 +872,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const response =
       await fetch(
-        `${FASTAPI_URL}/predict/wards`,
+        `api/predict/wards`,
         {
 
           method: "POST",
