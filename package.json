@@ -3,6 +3,9 @@
     "start": "node app.js",
     "dev": "nodemon app.js"
   },
+  "engines": {
+    "node": "20.x"
+  },
   "dependencies": {
     "@google/genai": "^2.21.0",
     "bcrypt": "^6.0.0",
