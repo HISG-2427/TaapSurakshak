@@ -655,6 +655,37 @@ if (whatsappEnabled) {
 
 }
 
+async function loadWhatsAppStatus() {
+    try {
+        const response = await fetch("/api/whatsapp-status");
+
+        if (!response.ok) {
+            console.warn(
+                "WhatsApp status temporarily unavailable:",
+                response.status
+            );
+            return;
+        }
+
+        const data = await response.json();
+
+        console.log("WhatsApp status:", data);
+
+        if (data.ready === true && data.state === "READY") {
+            showWhatsAppSuccess();
+        }
+
+        if (data.hasQR && data.qr) {
+            showWhatsAppQR(data.qr);
+        }
+
+    } catch (error) {
+        console.warn(
+            "WhatsApp status temporarily unavailable:",
+            error
+        );
+    }
+}
 
 /*
 ============================================================
